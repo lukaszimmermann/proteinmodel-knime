@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?eclipse version="3.0"?><plugin>
+
+    This is an example for providing an own category 
+      <extension point="org.knime.workbench.repository.categories">
+      <category description="Category containing nodes from the Proteinevolution department" level-id="protevo" name="Proteinevolution" path="/"/>
+      
+      <category description="Nodes for Data input" level-id="input" name="Input" path="/protevo"/>
+      <category description="Nodes for reading PDB files in various ways" level-id="pdb" name="PDB" path="/protevo/input"/>
+      
+      <category description="Nodes for visualization" level-id="viz" name="Visualization" path="/protevo"/>
+      <category description="Nodes for indexing against databases" level-id="idx" name="Indexing" path="/protevo"/>
+   	</extension>
+ 
+   
+   <extension point="org.knime.workbench.repository.nodes">
+      <node category-path="/protevo/input" factory-class="org.proteinevolution.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
+<node category-path="protevo/idx" factory-class="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
+<node category-path="protevo/viz" factory-class="org.proteinevolution.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
+<node category-path="protevo/input/pdb" factory-class="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
+<node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory" id="org.proteinevolution.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory"/>
+</extension>
+   
+</plugin>
