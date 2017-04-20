@@ -14,13 +14,13 @@
  
    
    <extension point="org.knime.workbench.repository.nodes">
-      <node category-path="/protevo/input" factory-class="org.proteinevolution.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
-<node category-path="protevo/idx" factory-class="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
-<node category-path="protevo/viz" factory-class="org.proteinevolution.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
-<node category-path="protevo/input/pdb" factory-class="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
-<node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory" id="org.proteinevolution.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory"/>
+      <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
+<node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
+<node category-path="/protevo/viz" factory-class="org.proteinevolution.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
+<node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.nodes.input.pdb.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
+<node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.nodes.input.pdb.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
+<node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.nodes.input.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory" id="org.proteinevolution.pdb.theoreticalcrosslinks.TheoreticalCrossLinksNodeFactory"/>
 </extension>
    
 </plugin>

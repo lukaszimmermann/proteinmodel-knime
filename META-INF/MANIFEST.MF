@@ -8,7 +8,7 @@ Bundle-ClassPath: proteinevolution.jar,
  lib/biojava-structure-4.2.0.jar,
  lib/biojava-alignment-4.2.0.jar,
  lib/jmol-14.13.1.jar
-Bundle-Activator: org.proteinevolution.ProteinevolutionNodePlugin
+Bundle-Activator: org.proteinevolution.nodes.ProteinevolutionNodePlugin
 Bundle-Vendor: Lukas Zimmermann
 Require-Bundle: org.eclipse.core.runtime,
  org.knime.workbench.core,
@@ -289,10 +289,9 @@ Export-Package: chemcomp,
  org.openscience.jmol.app.surfacetool,
  org.openscience.jmol.app.webexport,
  org.openscience.jmol.app.webexport.html,
- org.proteinevolution,
- org.proteinevolution.fastaindexer,
- org.proteinevolution.pdb.pdbatomreader,
- org.proteinevolution.structureviewer,
- org.proteinevolution.structureviewer.components,
- org.proteinevolution.xquestreader
+ org.proteinevolution.nodes.index.fastaindexer,
+ org.proteinevolution.nodes.input.pdb.pdbatomreader,
+ org.proteinevolution.nodes.input.xquestreader,
+ org.proteinevolution.nodes.visualization.structureviewer,
+ org.proteinevolution.nodes.visualization.structureviewer.components
 
