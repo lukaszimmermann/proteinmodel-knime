@@ -4,12 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
@@ -17,8 +15,8 @@ import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.IntCell.IntCellFactory;
-import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -68,7 +66,7 @@ public class PDBATOMReaderNodeModel extends NodeModel {
    private static final int FIELD_RESIDUE_NAME_END = 20;
 
    private static final int FIELD_CHAIN_IDENTIFIER_START = 21;
-   private static final int FIELD_CHAIN_IDENTIFIER_END = 21;
+   private static final int FIELD_CHAIN_IDENTIFIER_END = 22;
 
    private static final int FIELD_RESIDUE_SEQ_NUMBER_START = 22;
    private static final int FIELD_RESIDUE_SEQ_NUMBER_END = 26;

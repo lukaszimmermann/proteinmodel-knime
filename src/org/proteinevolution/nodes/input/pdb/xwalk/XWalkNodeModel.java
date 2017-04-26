@@ -20,6 +20,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.pdb.Residue;
 
 
 /**
@@ -44,7 +45,74 @@ public class XWalkNodeModel extends NodeModel {
     public static final String INPUT_HISTORY = "INPUT_HISTORY";
     
     // Whether side chain atoms of cross-linkes residues should be removed from the calculation
-    public static final String 
+    public static final String XSC_CFGKEY = "XSC_CFGKEY";
+    public static final boolean XSC_DEFAULT = false;
+    public static final String XSC_LABEL = "Remove side-chain atoms";
+    
+ 	//  Reads in only backbone and beta carbon atom coordinates from the input file and increases -radius to 2.0.
+    public static final String BB_CFGKEY = "BB_CFGKEY";
+    public static final boolean BB_DEFAULT = false;
+    public static final String BB_LABEL = "Read only backbone";
+   
+    /*
+     * RESIDUE/ATOM SELECTION:
+     */
+    // AA1
+    public static final String AA1_CFGKEY = "AA1_CFGKEY";
+    public static final Residue AA1_DEFAULT = Residue.LYS;
+    public static final String AA1_LABEL = "First amino acid to cross-link";
+    
+    // AA2
+    public static final String AA2_CFGKEY = "AA2_CFGKEY";
+    public static final Residue AA2_DEFAULT = Residue.LYS;
+    public static final String AA2_LABEL = "Second amino acid to cross-link";
+    
+    // c1
+    public static final String C1_CFGKEY = "C1_CFGKEY";
+    public static final String[] C1_DEFAULT = new String[0];
+    public static final String C1_LABEL = "First list of chains";
+    
+    // Whether all chains should be used for c1
+    public static final String C1ALL_CFGKEY = "C1ALL_CFGKEY";
+    public static final boolean C1ALL_DEFAULT = true;
+    public static final String C1ALL_LABEL = "Use all chains for residue 1";
+    
+    // c2
+    public static final String C2_CFGKEY = "C2_CFGKEY";
+    public static final String[] C2_DEFAULT = new String[0];
+    public static final String C2_LABEL = "Second list of chains";
+    
+    // Whether all chains should be used for c2
+    public static final String C2ALL_CFGKEY = "C2ALL_CFGKEY";
+    public static final boolean C2ALL_DEFAULT = true;
+    public static final String C2ALL_LABEL = "Use all chains for residue 2";
+    
+    
+    /*
+     
+     
+     RESIDUE/ATOM SELECTION:
+        -aa1    [String]        Three letter code of 1st amino acid. To specify more than one amino acid use '#' as a delimeter [required, if -r1 is not set].
+        -aa2    [String]        Three letter code of 2nd amino acid. To specify more than one amino acid use '#' as a delimeter [required, if -r2 is not set].
+        -r1     [String]        Amino acid residue number. To specify more than one residue number use '#' as a delimeter. [required, if -aa1 is not set].
+        -r2     [String]        Amino acid residue number. To specify more than one residue number use '#' as a delimeter. [required, if -aa2 is not set].
+        -c1     [String]        Chain ids for -aa1 or -r1. For blank chain Id use '_'. To specify more than one chain Id, append chain ids to a single string, e.g. ABC [optional](default: all chain Ids).
+        -c2     [String]        Chain ids for -aa2 or -r2. For blank chain Id use '_'. To specify more than one chain Id, append chain ids to a single string, e.g. ABC [optional](default: all chain Ids).
+        -a1     [String]        Atom type for -aa1 or -r1. To specify more than one atom type use '#' as a delimeter. [optional].
+        -a2     [String]        Atom type for -aa2 or -r2. To specify more than one atom type use '#' as a delimeter. [optional].
+        -l1     [String]        Alternative location id for -aa1 or -r1. To specify more than one alternative location, append alternative location ids to a single string, e.g. AB [optional].
+        -l2     [String]        Alternative location id for -aa2 or -r1. To specify more than one alternative location, append alternative location ids to a single string, e.g. AB [optional].
+        -intra  [switch]        Outputs only "intra-molecular" distances [optional].
+        -inter  [switch]        Outputs only "inter-molecular" distances [optional].
+        -homo   [double]        Outputs only shortest distance of potential cross-links between equally numbered residues. Reduces redundancy if PDB file is a homomeric protein complex. [optional].
+     
+     
+     */
+    
+    
+    
+    
+    
    
     // Settings models
     private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);

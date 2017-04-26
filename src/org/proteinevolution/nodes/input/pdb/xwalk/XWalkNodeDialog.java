@@ -1,8 +1,17 @@
 package org.proteinevolution.nodes.input.pdb.xwalk;
 
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.proteinevolution.models.knime.LineParserChangeListener;
+import org.proteinevolution.models.knime.PDBChainStringSelection;
+import org.proteinevolution.models.spec.pdb.Residue;
 
 /**
  * <code>NodeDialog</code> for the "XWalk" Node.
@@ -17,6 +26,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class XWalkNodeDialog extends DefaultNodeSettingsPane {
 
+
+    // the logger instance
+    private static final NodeLogger logger = NodeLogger
+            .getLogger(XWalkNodeDialog.class);
+	
     /**
      * New pane for configuring XWalk node dialog.
      * This is just a suggestion to demonstrate possible default dialog
@@ -24,12 +38,81 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
      */
     protected XWalkNodeDialog() {
         super();
+       
+        this.createNewTab("INPUT/OUTPUT");
         
-        this.addDialogComponent(new DialogComponentFileChooser(
+        this.createNewGroup("Input PDB File");
+        
+        
+       // File Chooser for the PDB MODEL
+        DialogComponentFileChooser fileChooser = new DialogComponentFileChooser(
         		new SettingsModelString(
         				XWalkNodeModel.INPUT_CFGKEY,
         				XWalkNodeModel.INPUT_DEFAULT),
         		XWalkNodeModel.INPUT_HISTORY,
-        		"pdb"));
+        		"pdb");
+        
+        // chain Selection C1
+        DialogComponentStringListSelection chain1Selection = new DialogComponentStringListSelection(
+        		new SettingsModelStringArray(
+        				XWalkNodeModel.C1_CFGKEY,
+        				XWalkNodeModel.C1_DEFAULT),
+        		XWalkNodeModel.C1_LABEL, 
+        		new String[]{"X"});
+        chain1Selection.setVisibleRowCount(8);
+        
+        
+
+        // Make changeListener in case a different PDB file is selected
+        LineParserChangeListener changeListener = new LineParserChangeListener();
+        changeListener.addParser(new PDBChainStringSelection(chain1Selection));
+        
+        
+        
+        fileChooser.getModel().addChangeListener(changeListener);
+        
+        
+        this.addDialogComponent(fileChooser);
+        
+        
+        // END GROUP INPUT FILE
+    
+        this.addDialogComponent(chain1Selection);
+        
+        this.addDialogComponent(new DialogComponentBoolean(
+        		new SettingsModelBoolean(
+        				XWalkNodeModel.XSC_CFGKEY,
+        				XWalkNodeModel.XSC_DEFAULT),
+        		XWalkNodeModel.XSC_LABEL));
+        this.addDialogComponent(new DialogComponentBoolean(
+        		new SettingsModelBoolean(
+        				XWalkNodeModel.BB_CFGKEY,
+        				XWalkNodeModel.BB_DEFAULT),
+        		XWalkNodeModel.BB_LABEL));
+        
+        this.createNewTab("RESIDUE/ATOM SELECTION");
+        
+      
+        
+      
+      
+        this.addDialogComponent( new DialogComponentStringSelection(
+        		new SettingsModelString(
+        				XWalkNodeModel.AA1_CFGKEY,
+        				XWalkNodeModel.AA1_DEFAULT.toString()),
+        		XWalkNodeModel.AA1_LABEL, 
+        		Residue.values()));
+        
+        
+        this.addDialogComponent(new DialogComponentStringSelection(
+        		new SettingsModelString(
+        				XWalkNodeModel.AA2_CFGKEY,
+        				XWalkNodeModel.AA2_DEFAULT.toString()),
+        		XWalkNodeModel.AA2_LABEL, 
+        		Residue.values()));
+        
+        
+        
+               
     }
 }
