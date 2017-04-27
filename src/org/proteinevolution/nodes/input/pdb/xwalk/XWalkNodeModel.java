@@ -59,12 +59,12 @@ public class XWalkNodeModel extends NodeModel {
      */
     // AA1
     public static final String AA1_CFGKEY = "AA1_CFGKEY";
-    public static final Residue AA1_DEFAULT = Residue.LYS;
+    public static final String[] AA1_DEFAULT = new String[] {Residue.LYS.toString()};
     public static final String AA1_LABEL = "First amino acid to cross-link";
     
     // AA2
     public static final String AA2_CFGKEY = "AA2_CFGKEY";
-    public static final Residue AA2_DEFAULT = Residue.LYS;
+    public static final String[] AA2_DEFAULT = new String[] {Residue.LYS.toString()};
     public static final String AA2_LABEL = "Second amino acid to cross-link";
     
     // c1
@@ -88,32 +88,66 @@ public class XWalkNodeModel extends NodeModel {
     public static final String C2ALL_LABEL = "Use all chains for residue 2";
     
     
-    /*
-     
-     
-     RESIDUE/ATOM SELECTION:
-        -aa1    [String]        Three letter code of 1st amino acid. To specify more than one amino acid use '#' as a delimeter [required, if -r1 is not set].
-        -aa2    [String]        Three letter code of 2nd amino acid. To specify more than one amino acid use '#' as a delimeter [required, if -r2 is not set].
-        -r1     [String]        Amino acid residue number. To specify more than one residue number use '#' as a delimeter. [required, if -aa1 is not set].
-        -r2     [String]        Amino acid residue number. To specify more than one residue number use '#' as a delimeter. [required, if -aa2 is not set].
-        -c1     [String]        Chain ids for -aa1 or -r1. For blank chain Id use '_'. To specify more than one chain Id, append chain ids to a single string, e.g. ABC [optional](default: all chain Ids).
-        -c2     [String]        Chain ids for -aa2 or -r2. For blank chain Id use '_'. To specify more than one chain Id, append chain ids to a single string, e.g. ABC [optional](default: all chain Ids).
-        -a1     [String]        Atom type for -aa1 or -r1. To specify more than one atom type use '#' as a delimeter. [optional].
-        -a2     [String]        Atom type for -aa2 or -r2. To specify more than one atom type use '#' as a delimeter. [optional].
-        -l1     [String]        Alternative location id for -aa1 or -r1. To specify more than one alternative location, append alternative location ids to a single string, e.g. AB [optional].
-        -l2     [String]        Alternative location id for -aa2 or -r1. To specify more than one alternative location, append alternative location ids to a single string, e.g. AB [optional].
-        -intra  [switch]        Outputs only "intra-molecular" distances [optional].
-        -inter  [switch]        Outputs only "inter-molecular" distances [optional].
-        -homo   [double]        Outputs only shortest distance of potential cross-links between equally numbered residues. Reduces redundancy if PDB file is a homomeric protein complex. [optional].
-     
-     
-     */
+    // intra, inter, homo
+    public static final String INTRA_CFGKEY = "INTRA_CFGKEY";
+    public static final boolean INTRA_DEFAULT = false;
+    public static final String INTRA_LABEL = "Output only intra molecular distances";
     
+    public static final String INTER_CFGKEY = "INTER_CFGKEY";
+    public static final boolean INTER_DEFAULT = false;
+    public static final String INTER_LABEL = "Output only inter molecular distances";    
     
-    
-    
-    
+    public static final String HOMO_CFGKEY = "HOMO_CFGKEY";
+    public static final boolean HOMO_DEFAULT = false;
+    public static final String HOMO_LABEL = "Shortest distance only";
    
+        
+    // DIGESTION
+    public static final String TRYPSIN_CFGKEY = "TRYPSIN_CFGKEY";
+    public static final boolean TRYPSIN_DEFAULT = false;
+    public static final String TRYPSIN_LABEL = "Digest with Trypsin";
+    
+    
+    // DISTANCE
+    // Maxdist
+    public static final String MAXDIST_CFGKEY = "MAXDIST_CFGKEY";
+    public static final int MAXDIST_DEFAULT = 34;
+    public static final String MAXDIST_LABEL = "Max. distance to calculate";
+    public static final int MAXDIST_MIN = 0;
+    public static final int MAXDIST_MAX = 100;
+    
+    // Only Euclidean
+    public static final String EUCLIDEAN_CFGKEY = "EUCLIDEAN_CFGKEY";
+    public static final boolean EUCLIDEAN_DEFAULT = false;
+    public static final String EUCLIDEAN_LABEL = "Euclidean Only";
+    
+    // Probability
+    public static final String PROB_CFGKEY = "PROB_CFGKEY";
+    public static final boolean PROB_DEFAULT = false;
+    public static final String PROB_LABEL = "Prob. for DSS and BS3";
+    
+    // Bfactor
+    public static final String BFACTOR_CFGKEY = "BFACTOR_CFGKEY";
+    public static final boolean BFACTOR_DEFAULT = false;
+    public static final String BFACTOR_LABEL = "Add BFactor uncertainty";
+    
+    
+    //  SOLVENT-PATH-DISTANCE GRID RELATED
+    public static final String RADIUS_CFGKEY = "RADIUS_CFGKEY";
+    public static final double RADIUS_DEFAULT = 1.4;
+    public static final String RADIUS_LABEL = "Solvent radius for SAS calculation [A]";
+    public static final int RADIUS_MIN = 0;
+    public static final int RADIUS_MAX = 3;
+    
+    public static final String SPACE_CFGKEY = "SPACE_CFGKEY";
+    public static final double SPACE_DEFAULT = 1.0;
+    public static final String SPACE_LABEL = "Grid cell spacing [A]";
+    public static final int SPACE_MIN = 0;
+    public static final int SPACE_MAX = 3;
+    
+    
+    
+    
     // Settings models
     private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
     
