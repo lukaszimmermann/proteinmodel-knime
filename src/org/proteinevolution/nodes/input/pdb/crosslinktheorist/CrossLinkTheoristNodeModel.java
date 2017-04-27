@@ -1,7 +1,16 @@
-package org.proteinevolution.nodes.input.pdb.xwalk;
+package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -20,6 +29,8 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 
@@ -29,11 +40,34 @@ import org.proteinevolution.models.spec.pdb.Residue;
  *
  * @author Lukas Zimmermann
  */
-public class XWalkNodeModel extends NodeModel {
+public class CrossLinkTheoristNodeModel extends NodeModel {
     
+	
+	// Class for keeping track of residues within this node
+	
+	private final class LocalAtom {
+		
+		public final int resid;
+		public final String resname;
+		public final String chain;
+		public final double x;
+		public final double y;
+		public final double z;
+		
+		public LocalAtom(int resid, String resname, String chain, double x, double y, double z) {
+			this.resid = resid;
+			this.resname = resname;
+			this.chain = chain;
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
+	
+
     // the logger instance
     private static final NodeLogger logger = NodeLogger
-            .getLogger(XWalkNodeModel.class);
+            .getLogger(CrossLinkTheoristNodeModel.class);
         
     /*
      * Input/Output options
@@ -43,6 +77,8 @@ public class XWalkNodeModel extends NodeModel {
     public static final String INPUT_CFGKEY = "INPUT_CFGKEY";
     public static final String INPUT_DEFAULT = "";
     public static final String INPUT_HISTORY = "INPUT_HISTORY";
+    private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
+    
     
     // Whether side chain atoms of cross-linkes residues should be removed from the calculation
     public static final String XSC_CFGKEY = "XSC_CFGKEY";
@@ -61,11 +97,13 @@ public class XWalkNodeModel extends NodeModel {
     public static final String AA1_CFGKEY = "AA1_CFGKEY";
     public static final String[] AA1_DEFAULT = new String[] {Residue.LYS.toString()};
     public static final String AA1_LABEL = "First amino acid to cross-link";
+    private SettingsModelStringArray aa1 = new SettingsModelStringArray(AA1_CFGKEY, AA1_DEFAULT);
     
     // AA2
     public static final String AA2_CFGKEY = "AA2_CFGKEY";
     public static final String[] AA2_DEFAULT = new String[] {Residue.LYS.toString()};
     public static final String AA2_LABEL = "Second amino acid to cross-link";
+    private SettingsModelStringArray aa2 = new SettingsModelStringArray(AA2_CFGKEY, AA2_DEFAULT);
     
     // c1
     public static final String C1_CFGKEY = "C1_CFGKEY";
@@ -145,16 +183,11 @@ public class XWalkNodeModel extends NodeModel {
     public static final int SPACE_MIN = 0;
     public static final int SPACE_MAX = 3;
     
-    
-    
-    
-    // Settings models
-    private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
-    
+   
     /**
      * Constructor for the node model.
      */
-    protected XWalkNodeModel() {
+    protected CrossLinkTheoristNodeModel() {
     
         super(0, 1);
     }
@@ -166,24 +199,85 @@ public class XWalkNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-        // TODO do something here
-        logger.info("Node Model Stub... this is not yet implemented !");
+    	// Which residues we want to cross-links
+    	Set<String> aa1_value = new HashSet<String>(Arrays.asList(this.aa1.getStringArrayValue()));
+    	Set<String> aa2_value = new HashSet<String>(Arrays.asList(this.aa2.getStringArrayValue()));
+    	
+    	List<LocalAtom> donors = new ArrayList<LocalAtom>();
+    	List<LocalAtom> acceptors = new ArrayList<LocalAtom>();
+    	//TODO Continue here
+    	List<>
+    	
+    	
+    	// Go through the PDB file
+    	try(BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()))) {
+    	    		
+    		String line;
+    		while( ( line = br.readLine()) != null  ) {
+    				
+    			line = line.trim();
+    			
+    			// We only care about ATOM records here
+    			if (Atom.isRecord(line)) {
 
-        
+    				int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+    				String atomname = line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim();
+    				String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
+    				String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+    				
+    				// See if we care about this atom (Currently only CB)
+    				if (atomname.equals(Atom.CB.toString())) {
+    					
+    					boolean isDonor = aa1_value.contains(resname);
+    					boolean isAcceptor = aa2_value.contains(resname);
+    					boolean isBoth = isDonor && isAcceptor;
+    					
+    					if (isDonor || isAcceptor) {
+    						
+    						// Get all the required attributes of the CB atom
+        					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+        					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+        					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
+    					
+        					LocalAtom atom = new LocalAtom(resid, resname, chain, x, y, z);
+        					
+        					// Calculate crosslinks with this atom being the donor
+        					if (isDonor) {
+        						
+        						for(LocalAtom  acceptor : acceptors) {
+        							
+        							if (acc)
+        							
+        							
+        						}
+        						
+        					}
+        					
+        					
+        					
+        					
+        					// Remember that atom for future crosslinks
+        					donors.add( isDonor ? atom : null);
+        					acceptors.add( isAcceptor ? atom : null);	
+    					}
+    				}
+    			}
+    		}    		
+    	}
+    	
+    	
+    	//XWalk.getVirtualCrossLinks();
+    	
+    	
+    	// Put the crossLinks into a data table
+    	
         // the data table spec of the single output table, 
         // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[3];
-        allColSpecs[0] = 
-            new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
-        allColSpecs[1] = 
-            new DataColumnSpecCreator("Column 1", DoubleCell.TYPE).createSpec();
-        allColSpecs[2] = 
-            new DataColumnSpecCreator("Column 2", IntCell.TYPE).createSpec();
+        DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
+        allColSpecs[0] = new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        // the execution context will provide us with storage capacity, in this
-        // case a data container to which we will add rows sequentially
-        // Note, this container can also handle arbitrary big data tables, it
-        // will buffer to disc if necessary.
+        
+       
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
         // let's add m_count rows to it
    
@@ -229,6 +323,8 @@ public class XWalkNodeModel extends NodeModel {
 
         // TODO save user settings to the config object.
     	this.input.saveSettingsTo(settings);
+    	this.aa1.saveSettingsTo(settings);
+    	this.aa2.saveSettingsTo(settings);
     }
 
     /**
@@ -243,6 +339,8 @@ public class XWalkNodeModel extends NodeModel {
         // method below.
         
     	this.input.loadSettingsFrom(settings);
+    	this.aa1.loadSettingsFrom(settings);
+    	this.aa2.loadSettingsFrom(settings);
     }
 
     /**
@@ -258,6 +356,8 @@ public class XWalkNodeModel extends NodeModel {
         // Do not actually set any values of any member variables.
 
     	this.input.validateSettings(settings);
+    	this.aa1.validateSettings(settings);
+    	this.aa2.validateSettings(settings);
     }
     
     /**

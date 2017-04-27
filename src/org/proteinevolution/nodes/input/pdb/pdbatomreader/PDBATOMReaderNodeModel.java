@@ -23,11 +23,11 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.pdb.Atom;
 
 
 /**
@@ -38,10 +38,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class PDBATOMReaderNodeModel extends NodeModel {
     
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(PDBATOMReaderNodeModel.class);
-        
   
    public static final String INPUT_CFGKEY = "INPUT_CFGKEY";
    public static final String INPUT_DEFAULT = "";
@@ -50,51 +46,7 @@ public class PDBATOMReaderNodeModel extends NodeModel {
    
    private static final int N_COLUMNS = 14;
    
-   private static final String REC_ATOM = "ATOM";
-   
-   // Fields ( 0-based)
-   private static final int FIELD_ATOM_SERIAL_NUMBER_START = 6;
-   private static final int FIELD_ATOM_SERIAL_NUMBER_END = 11;
-   
-   private static final int FIELD_ATOM_NAME_START = 12;
-   private static final int FIELD_ATOM_NAME_END = 16;
-
-   private static final int FIELD_ATOM_ALTLOC_START = 16;
-   private static final int FIELD_ATOM_ALTLOC_END = 17;
-
-   private static final int FIELD_RESIDUE_NAME_START = 17;
-   private static final int FIELD_RESIDUE_NAME_END = 20;
-
-   private static final int FIELD_CHAIN_IDENTIFIER_START = 21;
-   private static final int FIELD_CHAIN_IDENTIFIER_END = 22;
-
-   private static final int FIELD_RESIDUE_SEQ_NUMBER_START = 22;
-   private static final int FIELD_RESIDUE_SEQ_NUMBER_END = 26;
-
-   private static final int FIELD_CODE_RESIDUE_INSERTION_START = 26;
-   private static final int FIELD_CODE_RESIDUE_INSERTION_END = 26;
-
-   private static final int FIELD_X_START = 30;
-   private static final int FIELD_X_END = 38;
-
-   private static final int FIELD_Y_START = 38;
-   private static final int FIELD_Y_END = 46;
-
-   private static final int FIELD_Z_START = 46;
-   private static final int FIELD_Z_END = 54;
-
-   private static final int FIELD_OCCUPANCY_START = 54;
-   private static final int FIELD_OCCUPANCY_END = 60;
-
-   private static final int FIELD_TEMPERATURE_FACTOR_START = 60;
-   private static final int FIELD_TEMPERATURE_FACTOR_END = 66;
-
-   private static final int FIELD_SEGMENT_IDENTIFIER_START = 72;
-   private static final int FIELD_SEGMENT_IDENTIFIER_END = 76;
-
-   private static final int FIELD_ELEMENT_SYMBOL_START = 76;
-   private static final int FIELD_ELEMENT_SYMBOL_END = 78;
-   
+  
    
    private final SettingsModelString input = new SettingsModelString(
 		   INPUT_CFGKEY,
@@ -156,23 +108,23 @@ public class PDBATOMReaderNodeModel extends NodeModel {
         	}
         	
         	// Only consider "ATOM" lines
-        	if (line.startsWith(REC_ATOM)) {
+        	if (Atom.isRecord(line)) {
         		
         		// ATOM      1  N   LYS A   5      28.463-179.347 -37.294  1.00 24.83           N
-        		cells[0] = IntCellFactory.create(line.substring(FIELD_ATOM_SERIAL_NUMBER_START, FIELD_ATOM_SERIAL_NUMBER_END).trim());
-        		cells[1] = StringCellFactory.create(line.substring(FIELD_ATOM_NAME_START, FIELD_ATOM_NAME_END).trim());
-        		cells[2] = StringCellFactory.create(line.substring(FIELD_ATOM_ALTLOC_START, FIELD_ATOM_ALTLOC_END).trim());
-        		cells[3] = StringCellFactory.create(line.substring(FIELD_RESIDUE_NAME_START, FIELD_RESIDUE_NAME_END).trim());
-        		cells[4] = StringCellFactory.create(line.substring(FIELD_CHAIN_IDENTIFIER_START, FIELD_CHAIN_IDENTIFIER_END).trim());
-        		cells[5] = IntCellFactory.create(line.substring(FIELD_RESIDUE_SEQ_NUMBER_START, FIELD_RESIDUE_SEQ_NUMBER_END).trim());
-        		cells[6] = StringCellFactory.create(line.substring(FIELD_CODE_RESIDUE_INSERTION_START, FIELD_CODE_RESIDUE_INSERTION_END).trim());
-        		cells[7] = DoubleCellFactory.create(line.substring(FIELD_X_START, FIELD_X_END).trim());
-        		cells[8] = DoubleCellFactory.create(line.substring(FIELD_Y_START, FIELD_Y_END).trim());
-        		cells[9] = DoubleCellFactory.create(line.substring(FIELD_Z_START, FIELD_Z_END).trim());
-        		cells[10] = DoubleCellFactory.create(line.substring(FIELD_OCCUPANCY_START, FIELD_OCCUPANCY_END).trim());
-        		cells[11] = DoubleCellFactory.create(line.substring(FIELD_TEMPERATURE_FACTOR_START, FIELD_TEMPERATURE_FACTOR_END).trim());
-        		cells[12] = StringCellFactory.create(line.substring(FIELD_SEGMENT_IDENTIFIER_START, FIELD_SEGMENT_IDENTIFIER_END).trim());
-        		cells[13] = StringCellFactory.create(line.substring(FIELD_ELEMENT_SYMBOL_START, FIELD_ELEMENT_SYMBOL_END).trim());
+        		cells[0] = IntCellFactory.create(line.substring(Atom.FIELD_ATOM_SERIAL_NUMBER_START, Atom.FIELD_ATOM_SERIAL_NUMBER_END).trim());
+        		cells[1] = StringCellFactory.create(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
+        		cells[2] = StringCellFactory.create(line.substring(Atom.FIELD_ATOM_ALTLOC_START, Atom.FIELD_ATOM_ALTLOC_END).trim());
+        		cells[3] = StringCellFactory.create(line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim());
+        		cells[4] = StringCellFactory.create(line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END).trim());
+        		cells[5] = IntCellFactory.create(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+        		cells[6] = StringCellFactory.create(line.substring(Atom.FIELD_CODE_RESIDUE_INSERTION_START, Atom.FIELD_CODE_RESIDUE_INSERTION_END).trim());
+        		cells[7] = DoubleCellFactory.create(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END).trim());
+        		cells[8] = DoubleCellFactory.create(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END).trim());
+        		cells[9] = DoubleCellFactory.create(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END).trim());
+        		cells[10] = DoubleCellFactory.create(line.substring(Atom.FIELD_OCCUPANCY_START, Atom.FIELD_OCCUPANCY_END).trim());
+        		cells[11] = DoubleCellFactory.create(line.substring(Atom.FIELD_TEMPERATURE_FACTOR_START, Atom.FIELD_TEMPERATURE_FACTOR_END).trim());
+        		cells[12] = StringCellFactory.create(line.substring(Atom.FIELD_SEGMENT_IDENTIFIER_START, Atom.FIELD_SEGMENT_IDENTIFIER_END).trim());
+        		cells[13] = StringCellFactory.create(line.substring(Atom.FIELD_ELEMENT_SYMBOL_START, Atom.FIELD_ELEMENT_SYMBOL_END).trim());
         		
         		container.addRowToTable(new DefaultRow(new RowKey("Row" + row_counter++), cells));
         	}

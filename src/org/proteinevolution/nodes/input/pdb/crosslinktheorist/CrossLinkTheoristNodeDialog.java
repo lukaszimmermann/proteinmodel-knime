@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.xwalk;
+package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
 
 import javax.swing.ListSelectionModel;
 
@@ -28,19 +28,19 @@ import org.proteinevolution.models.spec.pdb.Residue;
  * 
  * @author Lukas Zimmermann
  */
-public class XWalkNodeDialog extends DefaultNodeSettingsPane {
+public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
 
 
     // the logger instance
     private static final NodeLogger logger = NodeLogger
-            .getLogger(XWalkNodeDialog.class);
+            .getLogger(CrossLinkTheoristNodeDialog.class);
 	
     /**
      * New pane for configuring XWalk node dialog.
      * This is just a suggestion to demonstrate possible default dialog
      * components.
      */
-    protected XWalkNodeDialog() {
+    protected CrossLinkTheoristNodeDialog() {
         super();
         
         int visibleRowCount = 8;
@@ -55,26 +55,26 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
        // File Chooser for the PDB MODEL
         DialogComponentFileChooser fileChooser = new DialogComponentFileChooser(
         		new SettingsModelString(
-        				XWalkNodeModel.INPUT_CFGKEY,
-        				XWalkNodeModel.INPUT_DEFAULT),
-        		XWalkNodeModel.INPUT_HISTORY,
+        				CrossLinkTheoristNodeModel.INPUT_CFGKEY,
+        				CrossLinkTheoristNodeModel.INPUT_DEFAULT),
+        		CrossLinkTheoristNodeModel.INPUT_HISTORY,
         		"pdb");
         
         // chain Selection C1
         DialogComponentStringListSelection chain1Selection = new DialogComponentStringListSelection(
         		new SettingsModelStringArray(
-        				XWalkNodeModel.C1_CFGKEY,
-        				XWalkNodeModel.C1_DEFAULT),
-        		XWalkNodeModel.C1_LABEL, 
+        				CrossLinkTheoristNodeModel.C1_CFGKEY,
+        				CrossLinkTheoristNodeModel.C1_DEFAULT),
+        		CrossLinkTheoristNodeModel.C1_LABEL, 
         		new String[]{"X"});
         chain1Selection.setVisibleRowCount(8);
         
         // chain Selection C1
         DialogComponentStringListSelection chain2Selection = new DialogComponentStringListSelection(
         		new SettingsModelStringArray(
-        				XWalkNodeModel.C2_CFGKEY,
-        				XWalkNodeModel.C2_DEFAULT),
-        		XWalkNodeModel.C2_LABEL, 
+        				CrossLinkTheoristNodeModel.C2_CFGKEY,
+        				CrossLinkTheoristNodeModel.C2_DEFAULT),
+        		CrossLinkTheoristNodeModel.C2_LABEL, 
         		new String[]{"X"});
         chain2Selection.setVisibleRowCount(8);
         
@@ -91,14 +91,14 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
         
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.XSC_CFGKEY,
-        				XWalkNodeModel.XSC_DEFAULT),
-        		XWalkNodeModel.XSC_LABEL));
+        				CrossLinkTheoristNodeModel.XSC_CFGKEY,
+        				CrossLinkTheoristNodeModel.XSC_DEFAULT),
+        		CrossLinkTheoristNodeModel.XSC_LABEL));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.BB_CFGKEY,
-        				XWalkNodeModel.BB_DEFAULT),
-        		XWalkNodeModel.BB_LABEL));
+        				CrossLinkTheoristNodeModel.BB_CFGKEY,
+        				CrossLinkTheoristNodeModel.BB_DEFAULT),
+        		CrossLinkTheoristNodeModel.BB_LABEL));
         
         
         /*
@@ -114,9 +114,9 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
         
         this.addDialogComponent(new DialogComponentStringListSelection(
         		new SettingsModelStringArray(
-        				XWalkNodeModel.AA1_CFGKEY,
-        				XWalkNodeModel.AA1_DEFAULT),
-        		XWalkNodeModel.AA1_LABEL,
+        				CrossLinkTheoristNodeModel.AA1_CFGKEY,
+        				CrossLinkTheoristNodeModel.AA1_DEFAULT),
+        		CrossLinkTheoristNodeModel.AA1_LABEL,
         		Residue.values(), 
         		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, 
         		true, 
@@ -124,9 +124,9 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
         
         this.addDialogComponent(new DialogComponentStringListSelection(
         		new SettingsModelStringArray(
-        				XWalkNodeModel.AA2_CFGKEY,
-        				XWalkNodeModel.AA2_DEFAULT),
-        		XWalkNodeModel.AA2_LABEL,
+        				CrossLinkTheoristNodeModel.AA2_CFGKEY,
+        				CrossLinkTheoristNodeModel.AA2_DEFAULT),
+        		CrossLinkTheoristNodeModel.AA2_LABEL,
         		Residue.values(), 
         		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, 
         		true, 
@@ -139,26 +139,26 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
         this.createNewGroup("Further Options");
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.INTRA_CFGKEY,
-        				XWalkNodeModel.INTRA_DEFAULT),
-        		XWalkNodeModel.INTRA_LABEL));
+        				CrossLinkTheoristNodeModel.INTRA_CFGKEY,
+        				CrossLinkTheoristNodeModel.INTRA_DEFAULT),
+        		CrossLinkTheoristNodeModel.INTRA_LABEL));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.INTER_CFGKEY,
-        				XWalkNodeModel.INTER_DEFAULT),
-        		XWalkNodeModel.INTER_LABEL));
+        				CrossLinkTheoristNodeModel.INTER_CFGKEY,
+        				CrossLinkTheoristNodeModel.INTER_DEFAULT),
+        		CrossLinkTheoristNodeModel.INTER_LABEL));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.HOMO_CFGKEY,
-        				XWalkNodeModel.HOMO_DEFAULT),
-        		XWalkNodeModel.HOMO_LABEL));
+        				CrossLinkTheoristNodeModel.HOMO_CFGKEY,
+        				CrossLinkTheoristNodeModel.HOMO_DEFAULT),
+        		CrossLinkTheoristNodeModel.HOMO_LABEL));
         
         this.createNewTab("DIGESTION");
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.TRYPSIN_CFGKEY,
-        				XWalkNodeModel.TRYPSIN_DEFAULT),
-        		XWalkNodeModel.TRYPSIN_LABEL));
+        				CrossLinkTheoristNodeModel.TRYPSIN_CFGKEY,
+        				CrossLinkTheoristNodeModel.TRYPSIN_DEFAULT),
+        		CrossLinkTheoristNodeModel.TRYPSIN_LABEL));
         
         this.createNewTab("DISTANCE");
         
@@ -166,46 +166,46 @@ public class XWalkNodeDialog extends DefaultNodeSettingsPane {
         
         this.addDialogComponent(new DialogComponentNumber(
         		new SettingsModelDoubleBounded(
-        				XWalkNodeModel.MAXDIST_CFGKEY,
-        				XWalkNodeModel.MAXDIST_DEFAULT,
-        				XWalkNodeModel.MAXDIST_MIN,
-        				XWalkNodeModel.MAXDIST_MAX),
-        		XWalkNodeModel.MAXDIST_LABEL,1));
+        				CrossLinkTheoristNodeModel.MAXDIST_CFGKEY,
+        				CrossLinkTheoristNodeModel.MAXDIST_DEFAULT,
+        				CrossLinkTheoristNodeModel.MAXDIST_MIN,
+        				CrossLinkTheoristNodeModel.MAXDIST_MAX),
+        		CrossLinkTheoristNodeModel.MAXDIST_LABEL,1));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.EUCLIDEAN_CFGKEY,
-        				XWalkNodeModel.EUCLIDEAN_DEFAULT),
-        		XWalkNodeModel.EUCLIDEAN_LABEL));
+        				CrossLinkTheoristNodeModel.EUCLIDEAN_CFGKEY,
+        				CrossLinkTheoristNodeModel.EUCLIDEAN_DEFAULT),
+        		CrossLinkTheoristNodeModel.EUCLIDEAN_LABEL));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.PROB_CFGKEY,
-        				XWalkNodeModel.PROB_DEFAULT),
-        		XWalkNodeModel.PROB_LABEL));      
+        				CrossLinkTheoristNodeModel.PROB_CFGKEY,
+        				CrossLinkTheoristNodeModel.PROB_DEFAULT),
+        		CrossLinkTheoristNodeModel.PROB_LABEL));      
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
-        				XWalkNodeModel.BFACTOR_CFGKEY,
-        				XWalkNodeModel.BFACTOR_DEFAULT),
-        		XWalkNodeModel.BFACTOR_LABEL));            
+        				CrossLinkTheoristNodeModel.BFACTOR_CFGKEY,
+        				CrossLinkTheoristNodeModel.BFACTOR_DEFAULT),
+        		CrossLinkTheoristNodeModel.BFACTOR_LABEL));            
                
        this.createNewTab("SOLVENT-PATH-DISTANCE");
        
        // Radius
        this.addDialogComponent(new DialogComponentNumber(
        		new SettingsModelDoubleBounded(
-       				XWalkNodeModel.RADIUS_CFGKEY,
-       				XWalkNodeModel.RADIUS_DEFAULT,
-       				XWalkNodeModel.RADIUS_MIN,
-       				XWalkNodeModel.RADIUS_MAX),
-       		XWalkNodeModel.RADIUS_LABEL,1));
+       				CrossLinkTheoristNodeModel.RADIUS_CFGKEY,
+       				CrossLinkTheoristNodeModel.RADIUS_DEFAULT,
+       				CrossLinkTheoristNodeModel.RADIUS_MIN,
+       				CrossLinkTheoristNodeModel.RADIUS_MAX),
+       		CrossLinkTheoristNodeModel.RADIUS_LABEL,1));
        
        // Space
        this.addDialogComponent(new DialogComponentNumber(
           		new SettingsModelDoubleBounded(
-          				XWalkNodeModel.SPACE_CFGKEY,
-          				XWalkNodeModel.SPACE_DEFAULT,
-          				XWalkNodeModel.SPACE_MIN,
-          				XWalkNodeModel.SPACE_MAX),
-          		XWalkNodeModel.SPACE_LABEL,1));
+          				CrossLinkTheoristNodeModel.SPACE_CFGKEY,
+          				CrossLinkTheoristNodeModel.SPACE_DEFAULT,
+          				CrossLinkTheoristNodeModel.SPACE_MIN,
+          				CrossLinkTheoristNodeModel.SPACE_MAX),
+          		CrossLinkTheoristNodeModel.SPACE_LABEL,1));
           
        
     

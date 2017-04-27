@@ -20,7 +20,7 @@
 <node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.nodes.input.pdb.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
 <node category-path="/protevo/input/pdb" factory-class="org.proteinevolution.nodes.input.pdb.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.input.pdb.xwalk.XWalkNodeFactory" id="org.proteinevolution.nodes.input.pdb.xwalk.XWalkNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.input.pdb.crosslinktheorist.CrossLinkTheoristNodeFactory" id="org.proteinevolution.nodes.input.pdb.crosslinktheorist.CrossLinkTheoristNodeFactory"/>
 </extension>
    
 </plugin>

@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.xwalk;
+package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
 
 import org.knime.core.node.NodeView;
 
@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class XWalkNodeView extends NodeView<XWalkNodeModel> {
+public class CrossLinkTheoristNodeView extends NodeView<CrossLinkTheoristNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link XWalkNodeModel})
+     * @param nodeModel The model (class: {@link CrossLinkTheoristNodeModel})
      */
-    protected XWalkNodeView(final XWalkNodeModel nodeModel) {
+    protected CrossLinkTheoristNodeView(final CrossLinkTheoristNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class XWalkNodeView extends NodeView<XWalkNodeModel> {
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        XWalkNodeModel nodeModel = 
-            (XWalkNodeModel)getNodeModel();
+        CrossLinkTheoristNodeModel nodeModel = 
+            (CrossLinkTheoristNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve
