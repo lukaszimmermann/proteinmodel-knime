@@ -6,18 +6,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.RowKey;
+import org.knime.core.data.container.DataContainer;
+import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.IntCell.IntCellFactory;
+import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -35,15 +40,10 @@ import org.proteinevolution.models.spec.pdb.Residue;
 
 
 /**
- * This is the model implementation of XWalk.
- * This node represents an adaption of the XWalk program originally developed by Kahraman et al. [1]. * n * n[1] Abdullah Kahraman, Lars Malmström, Ruedi Aebersold; Xwalk: computing and visualizing distances in cross-linking experiments. Bioinformatics 2011; 27 (15): 2163-2164. doi: 10.1093/bioinformatics/btr348
- *
  * @author Lukas Zimmermann
  */
 public class CrossLinkTheoristNodeModel extends NodeModel {
     
-	
-	// Class for keeping track of residues within this node
 	
 	private final class LocalAtom {
 		
@@ -66,8 +66,8 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 	
 
     // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(CrossLinkTheoristNodeModel.class);
+	@SuppressWarnings("unused")
+    private static final NodeLogger logger = NodeLogger.getLogger(CrossLinkTheoristNodeModel.class);
         
     /*
      * Input/Output options
@@ -96,13 +96,13 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     // AA1
     public static final String AA1_CFGKEY = "AA1_CFGKEY";
     public static final String[] AA1_DEFAULT = new String[] {Residue.LYS.toString()};
-    public static final String AA1_LABEL = "First amino acid to cross-link";
+    public static final String AA1_LABEL = "Donor amino acid residue to cross link";
     private SettingsModelStringArray aa1 = new SettingsModelStringArray(AA1_CFGKEY, AA1_DEFAULT);
     
     // AA2
     public static final String AA2_CFGKEY = "AA2_CFGKEY";
     public static final String[] AA2_DEFAULT = new String[] {Residue.LYS.toString()};
-    public static final String AA2_LABEL = "Second amino acid to cross-link";
+    public static final String AA2_LABEL = "Acceptor amino acid residue to cross link";
     private SettingsModelStringArray aa2 = new SettingsModelStringArray(AA2_CFGKEY, AA2_DEFAULT);
     
     // c1
@@ -183,6 +183,48 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     public static final int SPACE_MIN = 0;
     public static final int SPACE_MAX = 3;
     
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Returns the distances between the atoms a and b. The distance metrics currently supported are:
+     * 	* Euclidean
+     * 
+     * @param a First atom of the distance pair between the distances should be computed
+     * @param b Second atom of the distance pair between the distances should be computed
+     * @return New row number that can be used
+     */
+    private static int assembleRow(LocalAtom current_atom,
+    		                 List<LocalAtom> previous_atoms,
+    		                 DataContainer container,
+    		                 int row_number) {
+    	
+    	for (LocalAtom previous_atom : previous_atoms) {
+			
+        	double diff1 = current_atom.x - previous_atom.x;
+        	double diff2 = current_atom.y - previous_atom.y;
+        	double diff3 = current_atom.z - previous_atom.z;
+    		
+			// Assemble the data cell for this cross-link		
+			container.addRowToTable(
+					new DefaultRow(
+							new RowKey("Row" + row_number++),
+							new DataCell[] {
+    								
+    								StringCellFactory.create(current_atom.resname),
+    								IntCellFactory.create(current_atom.resid),
+    								StringCellFactory.create(Atom.CB.toString()),
+    								StringCellFactory.create(current_atom.chain),
+    								StringCellFactory.create(previous_atom.resname),
+    								IntCellFactory.create(previous_atom.resid),
+    								StringCellFactory.create(Atom.CB.toString()),   // Because we still assume CB here
+    								StringCellFactory.create(previous_atom.chain),
+    								DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3))
+    						}));
+		}
+    	return row_number;
+    }
+    
    
     /**
      * Constructor for the node model.
@@ -198,95 +240,98 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+    	
+        DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
+        		
+        		new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("resid1", IntCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("atomname1", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("chain1", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("resname2", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("resid2", IntCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("atomname2", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("chain2", StringCell.TYPE).createSpec(),
+                new DataColumnSpecCreator("Euclidean_distance", DoubleCell.TYPE).createSpec()
+        };
+        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
+        BufferedDataContainer container = exec.createDataContainer(outputSpec);
+   
 
     	// Which residues we want to cross-links
     	Set<String> aa1_value = new HashSet<String>(Arrays.asList(this.aa1.getStringArrayValue()));
     	Set<String> aa2_value = new HashSet<String>(Arrays.asList(this.aa2.getStringArrayValue()));
     	
+    	// List keeping track of the acceptor residues
     	List<LocalAtom> donors = new ArrayList<LocalAtom>();
-    	List<LocalAtom> acceptors = new ArrayList<LocalAtom>();
-    	//TODO Continue here
-    	List<>
     	
+    	// List keeping track of acceptor residues
+    	List<LocalAtom> acceptors = new ArrayList<LocalAtom>();
+    	
+    	// List keeping track of residues that are both acceptors and donors
+    	List<LocalAtom> both = new ArrayList<LocalAtom>();
+    	
+    	int row_counter = 0;
     	
     	// Go through the PDB file
     	try(BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()))) {
     	    		
     		String line;
     		while( ( line = br.readLine()) != null  ) {
-    				
-    			line = line.trim();
-    			
+   				
     			// We only care about ATOM records here
     			if (Atom.isRecord(line)) {
 
-    				int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
     				String atomname = line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim();
-    				String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
-    				String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
     				
     				// See if we care about this atom (Currently only CB)
-    				if (atomname.equals(Atom.CB.toString())) {
+    				if (atomname.equals(Atom.CB.toString())) {    					
+    			
+        				String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
     					
     					boolean isDonor = aa1_value.contains(resname);
     					boolean isAcceptor = aa2_value.contains(resname);
-    					boolean isBoth = isDonor && isAcceptor;
     					
+    					// Only continue if the current residue is either a donor or acceptor or both 
     					if (isDonor || isAcceptor) {
     						
     						// Get all the required attributes of the CB atom
         					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
         					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
         					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
-    					
-        					LocalAtom atom = new LocalAtom(resid, resname, chain, x, y, z);
         					
-        					// Calculate crosslinks with this atom being the donor
+        					// Fetch the remaining required attributes
+        					String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+        					int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+    					
+        					LocalAtom current_atom = new LocalAtom(resid, resname, chain, x, y, z);
+        					
+        					// We always have to calculate the distances to all boths in any case
+        					row_counter = assembleRow(current_atom, both, container, row_counter);
+        			
+        					List<LocalAtom> to_append = null;
+        					
         					if (isDonor) {
         						
-        						for(LocalAtom  acceptor : acceptors) {
-        							
-        							if (acc)
-        							
-        							
-        						}
+        						// Calculate the distances to all acceptors and append data row
+        						row_counter = assembleRow(current_atom, acceptors, container, row_counter);
+        						to_append = isAcceptor ? both : donors;
+        				
+        					// Must be acceptor
+        					} else {
         						
+        						// We have to calculate the distance to all donors
+        						row_counter = assembleRow(current_atom, donors, container, row_counter);
+        						to_append = acceptors;
         					}
-        					
-        					
-        					
-        					
-        					// Remember that atom for future crosslinks
-        					donors.add( isDonor ? atom : null);
-        					acceptors.add( isAcceptor ? atom : null);	
+        					to_append.add(current_atom);
     					}
     				}
     			}
     		}    		
     	}
-    	
-    	
-    	//XWalk.getVirtualCrossLinks();
-    	
-    	
-    	// Put the crossLinks into a data table
-    	
-        // the data table spec of the single output table, 
-        // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
-        allColSpecs[0] = new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        
-       
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
-        // let's add m_count rows to it
-   
-        logger.warn(this.input.getStringValue());
-        
         // once we are done, we close the container and return its table
         container.close();
-        BufferedDataTable out = container.getTable();
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{container.getTable()};
     }
 
     /**

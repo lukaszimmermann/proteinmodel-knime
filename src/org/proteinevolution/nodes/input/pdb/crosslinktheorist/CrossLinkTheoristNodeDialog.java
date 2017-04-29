@@ -4,17 +4,11 @@ import javax.swing.ListSelectionModel;
 
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.knime.LineParserChangeListener;
-import org.proteinevolution.models.knime.PDBChainStringSelection;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /**
@@ -32,6 +26,7 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
 
 
     // the logger instance
+	@SuppressWarnings("unused")
     private static final NodeLogger logger = NodeLogger
             .getLogger(CrossLinkTheoristNodeDialog.class);
 	
@@ -61,6 +56,7 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         		"pdb");
         
         // chain Selection C1
+        /*
         DialogComponentStringListSelection chain1Selection = new DialogComponentStringListSelection(
         		new SettingsModelStringArray(
         				CrossLinkTheoristNodeModel.C1_CFGKEY,
@@ -77,29 +73,31 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         		CrossLinkTheoristNodeModel.C2_LABEL, 
         		new String[]{"X"});
         chain2Selection.setVisibleRowCount(8);
-        
+        */
         
         // Make changeListener in case a different PDB file is selected
         LineParserChangeListener changeListener = new LineParserChangeListener();
-        changeListener.addParser(new PDBChainStringSelection(chain1Selection));
-        changeListener.addParser(new PDBChainStringSelection(chain2Selection));
+        //changeListener.addParser(new PDBChainStringSelection(chain1Selection));
+        //changeListener.addParser(new PDBChainStringSelection(chain2Selection));
         fileChooser.getModel().addChangeListener(changeListener);
         this.addDialogComponent(fileChooser);
         
         
-        this.createNewGroup("Further Options");
+        //this.createNewGroup("Further Options");
         
+        /*
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
         				CrossLinkTheoristNodeModel.XSC_CFGKEY,
         				CrossLinkTheoristNodeModel.XSC_DEFAULT),
         		CrossLinkTheoristNodeModel.XSC_LABEL));
+       
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
         				CrossLinkTheoristNodeModel.BB_CFGKEY,
         				CrossLinkTheoristNodeModel.BB_DEFAULT),
         		CrossLinkTheoristNodeModel.BB_LABEL));
-        
+        */
         
         /*
          * RESIDUE/ATOM Selection
@@ -132,10 +130,11 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         		true, 
         		visibleRowCount));
         
-        this.createNewGroup("Chain Selection");
-        this.addDialogComponent(chain1Selection);
-        this.addDialogComponent(chain2Selection);
+        //this.createNewGroup("Chain Selection");
+        //this.addDialogComponent(chain1Selection);
+        //this.addDialogComponent(chain2Selection);
         
+        /*
         this.createNewGroup("Further Options");
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
@@ -152,7 +151,9 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         				CrossLinkTheoristNodeModel.HOMO_CFGKEY,
         				CrossLinkTheoristNodeModel.HOMO_DEFAULT),
         		CrossLinkTheoristNodeModel.HOMO_LABEL));
+        */
         
+        /*
         this.createNewTab("DIGESTION");
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
@@ -206,7 +207,7 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
           				CrossLinkTheoristNodeModel.SPACE_MIN,
           				CrossLinkTheoristNodeModel.SPACE_MAX),
           		CrossLinkTheoristNodeModel.SPACE_LABEL,1));
-          
+          */
        
     
         
