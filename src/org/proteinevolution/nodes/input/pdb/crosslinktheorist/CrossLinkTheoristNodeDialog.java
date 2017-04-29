@@ -9,6 +9,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelectio
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.knime.LineParserChangeListener;
+import org.proteinevolution.models.spec.metrics.Distance;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /**
@@ -160,9 +161,22 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         				CrossLinkTheoristNodeModel.TRYPSIN_CFGKEY,
         				CrossLinkTheoristNodeModel.TRYPSIN_DEFAULT),
         		CrossLinkTheoristNodeModel.TRYPSIN_LABEL));
-        
+        */
         this.createNewTab("DISTANCE");
+        this.addDialogComponent(new DialogComponentStringListSelection(
+        		new SettingsModelStringArray(
+        				CrossLinkTheoristNodeModel.DISTANCE_SELECTION_CFGKEY,
+        				CrossLinkTheoristNodeModel.DISTANCE_SELECTION_DEFAULT),
+        		CrossLinkTheoristNodeModel.DISTANCE_SELECTION_LABEL,
+        		Distance.values(),
+        		ListSelectionModel.MULTIPLE_INTERVAL_SELECTION,
+        		true,
+        		visibleRowCount));
         
+        
+        
+        
+        /*
         this.setHorizontalPlacement(false);
         
         this.addDialogComponent(new DialogComponentNumber(
@@ -172,11 +186,6 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         				CrossLinkTheoristNodeModel.MAXDIST_MIN,
         				CrossLinkTheoristNodeModel.MAXDIST_MAX),
         		CrossLinkTheoristNodeModel.MAXDIST_LABEL,1));
-        this.addDialogComponent(new DialogComponentBoolean(
-        		new SettingsModelBoolean(
-        				CrossLinkTheoristNodeModel.EUCLIDEAN_CFGKEY,
-        				CrossLinkTheoristNodeModel.EUCLIDEAN_DEFAULT),
-        		CrossLinkTheoristNodeModel.EUCLIDEAN_LABEL));
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
         				CrossLinkTheoristNodeModel.PROB_CFGKEY,

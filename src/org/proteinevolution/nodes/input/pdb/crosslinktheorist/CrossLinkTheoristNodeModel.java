@@ -20,8 +20,8 @@ import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
 import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.data.def.IntCell.IntCellFactory;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -35,6 +35,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.proteinevolution.models.spec.metrics.Distance;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
 
@@ -147,17 +148,13 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     
     
     // DISTANCE
-    // Maxdist
-    public static final String MAXDIST_CFGKEY = "MAXDIST_CFGKEY";
-    public static final int MAXDIST_DEFAULT = 34;
-    public static final String MAXDIST_LABEL = "Max. distance to calculate";
-    public static final int MAXDIST_MIN = 0;
-    public static final int MAXDIST_MAX = 100;
     
-    // Only Euclidean
-    public static final String EUCLIDEAN_CFGKEY = "EUCLIDEAN_CFGKEY";
-    public static final boolean EUCLIDEAN_DEFAULT = false;
-    public static final String EUCLIDEAN_LABEL = "Euclidean Only";
+    // Distance metrics to calculate
+    public static final String DISTANCE_SELECTION_CFGKEY = "DISTANCE_SELECTION_CFGKEY";
+    public static final String[] DISTANCE_SELECTION_DEFAULT = new String[] {Distance.EUCLIDEAN.toString()};
+    public static final String  DISTANCE_SELECTION_LABEL = "Select distances to calculate";
+    private final SettingsModelStringArray distance = new SettingsModelStringArray(DISTANCE_SELECTION_CFGKEY, DISTANCE_SELECTION_DEFAULT);
+    
     
     // Probability
     public static final String PROB_CFGKEY = "PROB_CFGKEY";
@@ -241,6 +238,13 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	// Determine which distances to calculate
+    	//Set<String> distance_arg = new HashSet<String>(Arrays.asList(this.distance.getStringArrayValue()));
+    	
+    	//boolean calcEuclidean = distance_arg.contains(Distance.EUCLIDEAN.toString());
+    	//boolean calcSASD = distance_arg.contains(Distance.SASD.toString());
+    	
+       
         DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
         		
         		new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
@@ -256,10 +260,9 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
    
-
     	// Which residues we want to cross-links
-    	Set<String> aa1_value = new HashSet<String>(Arrays.asList(this.aa1.getStringArrayValue()));
-    	Set<String> aa2_value = new HashSet<String>(Arrays.asList(this.aa2.getStringArrayValue()));
+    	Set<String> aa1_arg = new HashSet<String>(Arrays.asList(this.aa1.getStringArrayValue()));
+    	Set<String> aa2_arg = new HashSet<String>(Arrays.asList(this.aa2.getStringArrayValue()));
     	
     	// List keeping track of the acceptor residues
     	List<LocalAtom> donors = new ArrayList<LocalAtom>();
@@ -271,16 +274,22 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     	List<LocalAtom> both = new ArrayList<LocalAtom>();
     	
     	int row_counter = 0;
-    	
+   
     	// Go through the PDB file
     	try(BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()))) {
-    	    		
+    	
     		String line;
     		while( ( line = br.readLine()) != null  ) {
    				
     			// We only care about ATOM records here
     			if (Atom.isRecord(line)) {
 
+    				// Atom coordinates
+    				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    			
+    				
+		
     				String atomname = line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim();
     				
     				// See if we care about this atom (Currently only CB)
@@ -288,17 +297,13 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     			
         				String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
     					
-    					boolean isDonor = aa1_value.contains(resname);
-    					boolean isAcceptor = aa2_value.contains(resname);
+    					boolean isDonor = aa1_arg.contains(resname);
+    					boolean isAcceptor = aa2_arg.contains(resname);
     					
     					// Only continue if the current residue is either a donor or acceptor or both 
     					if (isDonor || isAcceptor) {
     						
-    						// Get all the required attributes of the CB atom
-        					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-        					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-        					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
-        					
+		
         					// Fetch the remaining required attributes
         					String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
         					int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
@@ -370,6 +375,7 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     	this.input.saveSettingsTo(settings);
     	this.aa1.saveSettingsTo(settings);
     	this.aa2.saveSettingsTo(settings);
+    	this.distance.saveSettingsTo(settings);
     }
 
     /**
@@ -386,6 +392,7 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     	this.input.loadSettingsFrom(settings);
     	this.aa1.loadSettingsFrom(settings);
     	this.aa2.loadSettingsFrom(settings);
+    	this.distance.loadSettingsFrom(settings);
     }
 
     /**
@@ -403,6 +410,7 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
     	this.input.validateSettings(settings);
     	this.aa1.validateSettings(settings);
     	this.aa2.validateSettings(settings);
+    	this.distance.validateSettings(settings);
     }
     
     /**

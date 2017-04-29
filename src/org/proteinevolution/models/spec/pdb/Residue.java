@@ -2,7 +2,6 @@ package org.proteinevolution.models.spec.pdb;
 
 
 import javax.swing.Icon;
-
 import org.knime.core.node.util.StringIconOption;
 
 /**
