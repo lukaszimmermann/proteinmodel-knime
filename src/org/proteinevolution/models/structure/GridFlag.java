@@ -1,6 +1,9 @@
 package org.proteinevolution.models.structure;
 
-public enum GridFlag {
+public final class GridFlag {
 	
-	SASD_Calculation  // Whether the grid can be used for SASD calculation
+	// Prevent instantiation
+	private GridFlag() {}
+	
+	public static final int SASD_CALCULATION = 1;
 }

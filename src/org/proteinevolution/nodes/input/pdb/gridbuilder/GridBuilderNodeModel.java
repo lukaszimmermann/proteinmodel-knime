@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -28,6 +32,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.Grid;
 
 
@@ -80,12 +85,31 @@ public class GridBuilderNodeModel extends NodeModel {
 				new DataColumnSpecCreator("Grid", BinaryObjectDataCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("x_dim", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("y_dim", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("z_dim", IntCell.TYPE).createSpec()	
+				new DataColumnSpecCreator("z_dim", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("size", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("n_solvent", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("n_donor", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("n_acceptor", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("n_donor_acceptor", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("n_occupied", IntCell.TYPE).createSpec()
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 
 		Grid grid = null;
-
+		
+		// TODO Donor and acceptor residues (should be parameterized)
+		///// TODO -BLOCK
+		Map<Residue, Set<Atom>> donors = new HashMap<Residue, Set<Atom>>();
+		Map<Residue, Set<Atom>> acceptors = new HashMap<Residue, Set<Atom>>();
+		
+		Set<Atom> lys_atoms = new HashSet<Atom>();
+		lys_atoms.add(Atom.CB);
+		
+		donors.put(Residue.LYS, lys_atoms);
+		acceptors.put(Residue.LYS, lys_atoms);
+		// END- TODO Block
+		
+		
 		// Read the input file in two passes.
 		// First: Determine the dimensions of the grid
 		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
@@ -117,7 +141,7 @@ public class GridBuilderNodeModel extends NodeModel {
 				upper_z = z > upper_z ? z : upper_z;        			
 			}
 		}
-		grid = new Grid(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z);
+		grid = new Grid(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z, donors, acceptors);
 
 		br = null;
 		br = new BufferedReader(new FileReader(this.input.getStringValue()));
@@ -127,10 +151,13 @@ public class GridBuilderNodeModel extends NodeModel {
 			// Only care about atom records
 			if (Atom.isRecord(line)) {
 
-				grid.addAtom( Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
+				grid.addAtom(
+						Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
 						Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
 						Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
-						Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim()).element);
+						Residue.valueOf(line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim()),
+						Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim())
+				);
 			}
 		}
 
@@ -148,7 +175,13 @@ public class GridBuilderNodeModel extends NodeModel {
 						factory.create(bos.toByteArray()),
 						IntCellFactory.create(grid.getXDim()),
 						IntCellFactory.create(grid.getYDim()),
-						IntCellFactory.create(grid.getZDim())
+						IntCellFactory.create(grid.getZDim()),
+						IntCellFactory.create(grid.getSize()),
+						IntCellFactory.create(grid.getCellCounts(Grid.SOLVENT)),
+						IntCellFactory.create(grid.getCellCounts(Grid.DONOR)),
+						IntCellFactory.create(grid.getCellCounts(Grid.ACCEPTOR)),
+						IntCellFactory.create(grid.getCellCounts(Grid.DONOR_ACCEPTOR)),
+						IntCellFactory.create(grid.getCellCounts(Grid.OCCUPIED))
 		}));
 
 		br.close();

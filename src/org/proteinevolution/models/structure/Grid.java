@@ -1,15 +1,15 @@
 package org.proteinevolution.models.structure;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.knime.core.node.NodeLogger;
-import org.proteinevolution.models.spec.pdb.Element;
+import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.Residue;
 
 /*
  *  Class which is used to calculate an orthogonal grid of a 3D structure by adding atoms successively
@@ -17,50 +17,90 @@ import org.proteinevolution.models.spec.pdb.Element;
  *  @author: lzimmermann
  */
 public class Grid implements Serializable {
-	
-	// the logger instance
-	private static final NodeLogger logger = NodeLogger
-	.getLogger(Grid.class);
 
-	private static final long serialVersionUID = 6931511384915737370L;
-
-	//  Flag-like attribute of the grid
-	private Set<GridFlag> flags;
-
-	// Lower left corner of the grid
-	private final double x_min;
-	private final double y_min;
-	private final double z_min;
 
 	// TODO Might be parameterized
 	private static final double solvent_buffer = 0.7;
 	private static final int margin = 2; // No. of columns of solvent at the edge of the grid
 
+
+	// Possible values that grid cell can assume (the behavior of the grid for all other values is undefined)
+
+	// Grid cell is part of the solvent
+	public static final byte SOLVENT = 0;
+
+	// Grid is blocked by at least another atom which is no donor or acceptor atom
+	public static final byte OCCUPIED = 1;
+
+	// Grid is occupied by only one acceptor atom (which means the atom is reachable)
+	public static final byte DONOR = 2;
+
+	// Grid is occupied by only one donor atom (which means the atom is reachable)
+	public static final byte ACCEPTOR = 3;
+
+	// Grid occupied by only one atom, which is either donor or acceptor (which means the atom is reachable)
+	public static final byte DONOR_ACCEPTOR = 4;
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final long serialVersionUID = 6931511384915737370L;
+
+	// End of STATIC //////////////////////////////////////////////////////////////////////////////////////////
+	
+	// Counts the number of cells belonging to each type
+	private Map<Byte, Integer> cell_counts;
+	
+	//  Flag-like attribute of the grid
+	private Set<Integer> flags;
+
 	// the actual grid
 	private byte[][][] grid;
-	
-	// stores the chain of the residue for each gridcell
-	private List<List<Character>> chains; 
 
-	// stores the resid of the residue
-	private List<List<Integer>> resid;
-
-	
+	// donor and acceptor residues (we are only allowed to set this during construction)
+	private Map<Residue, Set<Atom>> donors;
+	private Map<Residue, Set<Atom>> acceptors;
 
 	// Number of cells of the grid in each dimension (triclinic)
 	private final int x_dim;
 	private final int y_dim;
 	private final int z_dim;
 
-	public Grid(final double lower_x, 
+	// Lower left corner of the grid
+	private final double x_min;
+	private final double y_min;
+	private final double z_min;
+	
+	// size of the grid
+	private final int size;
+
+	public Grid(
+			final double lower_x, 
+			final double lower_y, 
+			final double lower_z, 
+			final double upper_x, 
+			final double upper_y, 
+			final double upper_z,
+			final Map<Residue, Set<Atom>> donors,
+			final Map<Residue, Set<Atom>> acceptors) {
+
+		this(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z);
+
+		// Must be set after the above constructor call
+		this.donors = donors;
+		this.acceptors = acceptors;
+		this.flags.add(GridFlag.SASD_CALCULATION);
+	}
+
+	public Grid(
+			final double lower_x, 
 			final double lower_y, 
 			final double lower_z, 
 			final double upper_x, 
 			final double upper_y, 
 			final double upper_z) {
 
-		this.flags = new HashSet<GridFlag>();
-
+		this.flags = new HashSet<Integer>();
+		
 		this.x_dim = (int) (Math.ceil(upper_x - lower_x) + 2 * margin);
 		this.y_dim = (int) (Math.ceil(upper_y - lower_y) + 2 * margin);
 		this.z_dim = (int) (Math.ceil(upper_z - lower_z) + 2 * margin);
@@ -68,17 +108,34 @@ public class Grid implements Serializable {
 		this.y_min = lower_y;
 		this.z_min = lower_z;
 		
-		this.grid = new byte[x_dim][y_dim][z_dim];
+		this.size = x_dim * y_dim * z_dim;
 		
-		// Keeps track of the residues that are associated with each grid cell
-		this.chains = new ArrayList<List<Character>>(x_dim * y_dim * z_dim);
-		this.resid = new ArrayList<List<Integer>>(x_dim * y_dim * z_dim);
+		// Initialize cell counts
+		this.cell_counts = new HashMap<Byte, Integer>();
+		this.cell_counts.put(SOLVENT, x_dim * y_dim * z_dim);
+		this.cell_counts.put(DONOR, 0);
+		this.cell_counts.put(ACCEPTOR, 0);
+		this.cell_counts.put(DONOR_ACCEPTOR, 0);
+		this.cell_counts.put(OCCUPIED, 0);
+		
+		this.grid = new byte[x_dim][y_dim][z_dim];
+		this.donors = null;
+		this.acceptors = null;
 	}
- 
+
 	private int translate(final double value, final double min) {
 		return (int) Math.floor(value - min) + margin;
 	}
 
+	
+	public int getCellCounts(byte cell_type) {
+		
+		if ( ! this.cell_counts.containsKey(cell_type)) {
+			
+			return -1;
+		}
+		return this.cell_counts.get(cell_type);
+	}
 
 	/**
 	 * Sets the cell in the grid having the provided coordinates to true
@@ -87,29 +144,35 @@ public class Grid implements Serializable {
 	 * @param y y-coordinate
 	 * @param z z-coordinate
 	 */
-	private void flagCell(final double x, final double y, final double z) {
+	private void flagCell(final double x, final double y, final double z, byte value_to_set) {
 
 		// Increase the value in the grid
 		int index_x = this.translate(x, x_min);
 		int index_y = this.translate(y, y_min);
 		int index_z = this.translate(z, z_min);
-		
-		this.grid[index_x][index_y][index_z]++;
-		
-		
-		// make the nested index flat for the list
-		int large_index = index_z * x_dim * y_dim + x_dim * index_y + index_x;
-				
-		List<Character> current_chains = this.chains.get(large_index);
-		if(current_chains == null) {
+
+		byte current_value = this.grid[index_x][index_y][index_z];
+
+		// Once occupied, always occupied, we ignore value_to_set.
+		// Also, setting SOLVENT does not make sense
+		if (current_value == OCCUPIED || value_to_set == SOLVENT) {
+			return;
+		}
+		byte final_value = value_to_set;
+
+		if (    (current_value == DONOR && value_to_set == ACCEPTOR)
+			 ||	(current_value == ACCEPTOR && value_to_set == DONOR)
+			 || (current_value == DONOR_ACCEPTOR && (   value_to_set == DONOR 
+			 										 || value_to_set == ACCEPTOR))){
 			
-			this.chains.set(large_index, new ArrayList<Character>());
+			final_value = DONOR_ACCEPTOR;
 		}
 		
+		// Update cell counts
+		this.cell_counts.put(current_value, this.cell_counts.get(current_value) - 1 );
+		this.cell_counts.put(final_value,   this.cell_counts.get(final_value) + 1 );
 		
-		List<Integer> current_resids = this.resid.get(large_index);
-		
-			
+		this.grid[index_x][index_y][index_z] = final_value;
 	}
 
 	/**
@@ -141,16 +204,28 @@ public class Grid implements Serializable {
 
 		return this.z_dim;
 	}
-
+	
+	public int getSize() {
+		
+		return this.size;
+	}
 
 	public void addAtom(
 			final double x,
 			final double y,
 			final double z,
-			final Element element) {
+			final Residue residue,
+			final Atom atom) {
+
+		// See whether the atom is donor or acceptor
+		boolean isDonor = this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
+		boolean isAcceptor = this.acceptors.containsKey(residue) && this.acceptors.get(residue).contains(atom);
+
+		// Decide which grid value needs to be set (flagCell will then ultimately decide how to set)
+		byte value_to_set = (isDonor && isAcceptor) ? DONOR_ACCEPTOR : (isDonor ? DONOR : (isAcceptor ? ACCEPTOR : OCCUPIED));
 
 		// Set grid cells occupied by that atom to true
-		double radius = element.vdWRadius + solvent_buffer;
+		double radius = atom.element.vdWRadius + solvent_buffer;
 
 		for (double x_iter = 0; x_iter <= radius; x_iter += 1) {
 
@@ -171,14 +246,14 @@ public class Grid implements Serializable {
 					double coord_z_1 = z + z_iter;
 					double coord_z_2 = z - z_iter;
 
-					this.flagCell(coord_x_1, coord_y_1, coord_z_1);
-					this.flagCell(coord_x_1, coord_y_1, coord_z_2);
-					this.flagCell(coord_x_1, coord_y_2, coord_z_1);
-					this.flagCell(coord_x_1, coord_y_2, coord_z_2);
-					this.flagCell(coord_x_2, coord_y_1, coord_z_1);
-					this.flagCell(coord_x_2, coord_y_1, coord_z_2);
-					this.flagCell(coord_x_2, coord_y_2, coord_z_1);
-					this.flagCell(coord_x_2, coord_y_2, coord_z_2);
+					this.flagCell(coord_x_1, coord_y_1, coord_z_1, value_to_set);
+					this.flagCell(coord_x_1, coord_y_1, coord_z_2, value_to_set);
+					this.flagCell(coord_x_1, coord_y_2, coord_z_1, value_to_set);
+					this.flagCell(coord_x_1, coord_y_2, coord_z_2, value_to_set);
+					this.flagCell(coord_x_2, coord_y_1, coord_z_1, value_to_set);
+					this.flagCell(coord_x_2, coord_y_1, coord_z_2, value_to_set);
+					this.flagCell(coord_x_2, coord_y_2, coord_z_1, value_to_set);
+					this.flagCell(coord_x_2, coord_y_2, coord_z_2, value_to_set);
 				}
 			}	
 		}
@@ -189,7 +264,7 @@ public class Grid implements Serializable {
 	 * 
 	 * @param flag Which flag to set.
 	 */
-	public void setFlag(GridFlag flag) {
+	public void setFlag(final int flag) {
 
 		this.flags.add(flag);
 	}
@@ -199,7 +274,7 @@ public class Grid implements Serializable {
 	 * 
 	 * @param flag Removes flag from the set
 	 */
-	public void unsetFlag(GridFlag flag) {
+	public void unsetFlag(final int flag) {
 
 		this.flags.remove(flag);
 	}
@@ -210,7 +285,7 @@ public class Grid implements Serializable {
 	 * @param flag Which flag to check
 	 * @return Whether the flag is set
 	 */
-	public boolean isFlagSet(GridFlag flag) {
+	public boolean isFlagSet(final int flag) {
 
 		return this.flags.contains(flag);
 	}
