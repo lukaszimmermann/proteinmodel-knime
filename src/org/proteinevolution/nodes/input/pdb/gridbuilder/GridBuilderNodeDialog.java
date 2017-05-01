@@ -1,7 +1,9 @@
 package org.proteinevolution.nodes.input.pdb.gridbuilder;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.proteinevolution.models.spec.pdb.PDB;
 
@@ -32,5 +34,11 @@ public class GridBuilderNodeDialog extends DefaultNodeSettingsPane {
         				GridBuilderNodeModel.INPUT_DEFAULT),
         		GridBuilderNodeModel.INPUT_HISTORY,
         		PDB.extensions));            
+        
+        this.addDialogComponent(new DialogComponentBoolean(
+        		new SettingsModelBoolean(
+        				GridBuilderNodeModel.SASD_CFGKEY,
+        				GridBuilderNodeModel.SASD_DEFAULT),
+        		GridBuilderNodeModel.SASD_LABEL));
     }
 }

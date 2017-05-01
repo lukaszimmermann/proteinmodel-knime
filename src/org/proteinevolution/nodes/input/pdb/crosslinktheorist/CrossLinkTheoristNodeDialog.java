@@ -2,8 +2,11 @@ package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
 
 import javax.swing.ListSelectionModel;
 
+import org.knime.core.data.blob.BinaryObjectDataCell;
+import org.knime.core.data.blob.BinaryObjectDataValue;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -36,7 +39,8 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
      * This is just a suggestion to demonstrate possible default dialog
      * components.
      */
-    protected CrossLinkTheoristNodeDialog() {
+    @SuppressWarnings("unchecked")
+	protected CrossLinkTheoristNodeDialog() {
         super();
         
         int visibleRowCount = 8;
@@ -173,6 +177,15 @@ public class CrossLinkTheoristNodeDialog extends DefaultNodeSettingsPane {
         		true,
         		visibleRowCount));
         
+        this.addDialogComponent(new DialogComponentColumnNameSelection(
+        		new SettingsModelString(
+        				CrossLinkTheoristNodeModel.GRID_SELECTION_CFGKEY,
+        				CrossLinkTheoristNodeModel.GRID_SELECTION_DEFAULT), 
+        		CrossLinkTheoristNodeModel.GRID_SELECTION_LABEL, 
+        		0,
+        		true, 
+        		false,
+        		BinaryObjectDataValue.class));
         
         
         

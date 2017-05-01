@@ -39,10 +39,69 @@ public enum Atom {
 	OH(Element.O),
 	OXT(Element.O),
 	SD(Element.S),
-	SG(Element.S);
-	
+	SG(Element.S),
+	_1H(Element.H),
+	_2H(Element.H),
+	_3H(Element.H),
+	HA(Element.H),
+	HB(Element.H),
+	_1HG1(Element.H),
+	_2HG1(Element.H),
+	_3HG1(Element.H),
+	_1HG2(Element.H),
+	_2HG2(Element.H),
+	_3HG2(Element.H),
+	_1HB(Element.H),
+	_2HB(Element.H),
+	_1HG(Element.H),
+	_2HG(Element.H),
+	_1HD(Element.H),
+	_2HD(Element.H),
+	H(Element.H),
+	HG(Element.H),
+	_1HD1(Element.H),
+	_2HD1(Element.H),
+	_3HD1(Element.H),
+	_1HD2(Element.H),
+	_2HD2(Element.H),
+	_3HD2(Element.H),
+	HD1(Element.H),
+	HD2(Element.H),
+	HE1(Element.H),
+	HE2(Element.H),
+	HH(Element.H),
+	_1HE(Element.H),
+	_2HE(Element.H),
+	_3HE(Element.H),
+	HE(Element.H),
+	_1HH1(Element.H),
+	_2HH1(Element.H),
+	_1HH2(Element.H),
+	_2HH2(Element.H),
+	_3HB(Element.H),
+	_1HE2(Element.H),
+	_2HE2(Element.H),
+	_1HA(Element.H),
+	_2HA(Element.H),
+	_1HE3(Element.H),
+	HE3(Element.H),
+	HZ2(Element.H),
+	HZ3(Element.H),
+	HH2(Element.H),
+	_1HZ(Element.H),
+	_2HZ(Element.H),
+	_3HZ(Element.H),
+	HG1(Element.H),
+	HZ(Element.H);
 	
 	public final Element element;
+	
+	
+	public static Atom toAtom(final String value) {
+		
+		return Character.isDigit(value.charAt(0)) ? Atom.valueOf("_" + value) : Atom.valueOf(value);
+	}
+	
 	
 	private Atom(final Element element) {
 	

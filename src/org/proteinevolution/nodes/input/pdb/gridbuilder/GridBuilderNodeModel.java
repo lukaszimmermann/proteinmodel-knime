@@ -3,7 +3,6 @@ package org.proteinevolution.nodes.input.pdb.gridbuilder;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -15,6 +14,8 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.blob.BinaryObjectCellFactory;
 import org.knime.core.data.blob.BinaryObjectDataCell;
 import org.knime.core.data.def.DefaultRow;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.IntCell.IntCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -44,13 +45,17 @@ public class GridBuilderNodeModel extends NodeModel {
 	private static final NodeLogger logger = NodeLogger
 	.getLogger(GridBuilderNodeModel.class);
 
-
+	// INPUT
 	public static String INPUT_CFGKEY = "INPUT_CFGKEY";
 	public static String INPUT_DEFAULT = "";
 	public static String INPUT_HISTORY = "INPUT_HISTORY";
-
 	private SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT); 
 
+	// SAS SASD compatibility
+	public static String SASD_CFGKEY = "SASD_CFGKEY";
+	public static boolean SASD_DEFAULT = true;
+	public static String SASD_LABEL = "SASD Compatibility";
+	
 
 	/**
 	 * Constructor for the node model.
@@ -71,78 +76,64 @@ public class GridBuilderNodeModel extends NodeModel {
 		// the data table spec of the single output table, 
 		// the table will have three columns:
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-			
-				new DataColumnSpecCreator("Grid", BinaryObjectDataCell.TYPE).createSpec()
+
+				new DataColumnSpecCreator("Grid", BinaryObjectDataCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("x_dim", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("y_dim", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("z_dim", IntCell.TYPE).createSpec()	
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-		
+
 		Grid grid = null;
 
 		// Read the input file in two passes.
 		// First: Determine the dimensions of the grid
-		try(BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()))) {
+		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
 
-			double lower_x = 0;
-			double lower_y = 0;
-			double lower_z = 0;
-			double upper_x = 0;
-			double upper_y = 0;
-			double upper_z = 0;
+		double lower_x = 0;
+		double lower_y = 0;
+		double lower_z = 0;
+		double upper_x = 0;
+		double upper_y = 0;
+		double upper_z = 0;
 
-			String line;
-			while ( (line = br.readLine()) != null ) {
+		String line;
+		while ( (line = br.readLine()) != null ) {
 
-				// Only care about atom records
-				if (Atom.isRecord(line)) {
+			// Only care about atom records
+			if (Atom.isRecord(line)) {
 
-					// Atom coordinates
-					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    			
+				// Atom coordinates
+				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+				double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+				double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    			
 
-					lower_x = x < lower_x ? x : lower_x;
-					lower_y = y < lower_y ? y : lower_y;
-					lower_z = z < lower_z ? z : lower_z;
+				lower_x = x < lower_x ? x : lower_x;
+				lower_y = y < lower_y ? y : lower_y;
+				lower_z = z < lower_z ? z : lower_z;
 
-					upper_x = x > upper_x ? x : upper_x;
-					upper_y = y > upper_y ? y : upper_y;
-					upper_z = z > upper_z ? z : upper_z;        			
-				}
+				upper_x = x > upper_x ? x : upper_x;
+				upper_y = y > upper_y ? y : upper_y;
+				upper_z = z > upper_z ? z : upper_z;        			
 			}
-			grid = new Grid(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z);
-			
-		} catch(FileNotFoundException ex) {
+		}
+		grid = new Grid(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z);
 
-			ex.printStackTrace();
+		br = null;
+		br = new BufferedReader(new FileReader(this.input.getStringValue()));
 
-		} catch(IOException ex) {
+		while ( (line = br.readLine()) != null ) {
 
-			ex.printStackTrace();
+			// Only care about atom records
+			if (Atom.isRecord(line)) {
+
+				grid.addAtom( Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
+						Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
+						Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
+						Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim()).element);
+			}
 		}
 
-		try(BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()))) {
-
-
-			String line;
-			while ( (line = br.readLine()) != null ) {
-
-				// Only care about atom records
-				if (Atom.isRecord(line)) {
-
-					grid.addAtom( Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
-							Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
-							Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
-							Atom.valueOf(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim()).element);
-				}
-			}
-		} catch(FileNotFoundException ex) {
-
-			ex.printStackTrace();
-
-		} catch(IOException ex) {
-
-			ex.printStackTrace();
-		}
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -150,22 +141,25 @@ public class GridBuilderNodeModel extends NodeModel {
 		out.flush();
 		BinaryObjectCellFactory factory = new BinaryObjectCellFactory(exec);
 
-
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);	
 		container.addRowToTable(new DefaultRow("Row0",
-
 				new DataCell[] {
 
-						factory.create(bos.toByteArray())
+						factory.create(bos.toByteArray()),
+						IntCellFactory.create(grid.getXDim()),
+						IntCellFactory.create(grid.getYDim()),
+						IntCellFactory.create(grid.getZDim())
 		}));
 
+		br.close();
 		bos.close();
 		out.close();
 		container.close();
-		
+
 		// Better safe than sorry
 		bos = null;
 		out = null;
+		br  = null;
 		factory = null;
 
 		return new BufferedDataTable[]{container.getTable()};
