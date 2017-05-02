@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
+package org.proteinevolution.nodes.input.pdb.crosslinkpredictor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,16 +38,16 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.proteinevolution.models.spec.metrics.Distance;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.Grid;
+import org.proteinevolution.models.structure.GridFlag;
 
 
 /**
  * @author Lukas Zimmermann
  */
-public class CrossLinkTheoristNodeModel extends NodeModel {
+public class CrossLinkPredictorNodeModel extends NodeModel {
 
 
 	private final class LocalAtom {
@@ -69,14 +69,9 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 		}
 	}
 
-
 	// the logger instance
 	@SuppressWarnings("unused")
-	private static final NodeLogger logger = NodeLogger.getLogger(CrossLinkTheoristNodeModel.class);
-
-	/*
-	 * Input/Output options
-	 */
+	private static final NodeLogger logger = NodeLogger.getLogger(CrossLinkPredictorNodeModel.class);
 
 	// Input PDB file
 	public static final String INPUT_CFGKEY = "INPUT_CFGKEY";
@@ -85,36 +80,25 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 	private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
 
 
-	// RESIDUE/ATOM SELECTION:
+	// EUCLIDEAN
+	// Donor
+	public static final String EUC_DONORS_CFGKEY = "EUC_DONORS_CFGKEY";
+	public static final String[] EUC_DONORS_DEFAULT = new String[] {Residue.LYS.toString()};
+	public static final String EUC_DONORS_LABEL = "Donor amino acid residue to cross link";
+	private SettingsModelStringArray euc_donors = new SettingsModelStringArray(EUC_DONORS_CFGKEY, EUC_DONORS_DEFAULT);
 
-	// AA1
-	public static final String AA1_CFGKEY = "AA1_CFGEY";
-	public static final String[] AA1_DEFAULT = new String[] {Residue.LYS.toString()};
-	public static final String AA1_LABEL = "Donor amino acid residue to cross link";
-	private SettingsModelStringArray aa1 = new SettingsModelStringArray(AA1_CFGKEY, AA1_DEFAULT);
+	// Acceptor
+	public static final String EUC_ACCEPTORS_CFGKEY = "AA2_CFGKEY";
+	public static final String[] EUC_ACCEPTORS_DEFAULT = new String[] {Residue.LYS.toString()};
+	public static final String EUC_ACCEPTORS_LABEL = "Acceptor amino acid residue to cross link";
+	private SettingsModelStringArray euc_acceptors = new SettingsModelStringArray(EUC_ACCEPTORS_CFGKEY, EUC_ACCEPTORS_DEFAULT);
 
-	// AA2
-	public static final String AA2_CFGKEY = "AA2_CFGKEY";
-	public static final String[] AA2_DEFAULT = new String[] {Residue.LYS.toString()};
-	public static final String AA2_LABEL = "Acceptor amino acid residue to cross link";
-	private SettingsModelStringArray aa2 = new SettingsModelStringArray(AA2_CFGKEY, AA2_DEFAULT);
-
-
-
-
-	// Distance metrics to calculate
-	public static final String DISTANCE_SELECTION_CFGKEY = "DISTANCE_SELECTION_CFGKEY";
-	public static final String[] DISTANCE_SELECTION_DEFAULT = new String[] {Distance.EUCLIDEAN.toString()};
-	public static final String  DISTANCE_SELECTION_LABEL = "Select distances to calculate";
-	private final SettingsModelStringArray distance = new SettingsModelStringArray(DISTANCE_SELECTION_CFGKEY, DISTANCE_SELECTION_DEFAULT);
 
 	// Column selection for the Grid for SASD calculation
 	public static final String GRID_SELECTION_CFGKEY = "GRID_SELECTION_CFGKEY";
 	public static final String GRID_SELECTION_DEFAULT = "";
 	public static final String GRID_SELECTION_LABEL = "Select column with protein grid";
 	private final SettingsModelString grid = new SettingsModelString(GRID_SELECTION_CFGKEY, GRID_SELECTION_DEFAULT);
-
-
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +136,8 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 									IntCellFactory.create(previous_atom.resid),
 									StringCellFactory.create(Atom.CB.toString()),   // Because we still assume CB here
 									StringCellFactory.create(previous_atom.chain),
-									DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3))
+									DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3)),
+									DoubleCellFactory.create(0)
 							}));
 		}
 		return row_number;
@@ -162,7 +147,7 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 	/**
 	 * Constructor for the node model.
 	 */
-	protected CrossLinkTheoristNodeModel() {
+	protected CrossLinkPredictorNodeModel() {
 
 		super(1, 1);
 	}
@@ -174,36 +159,33 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
 			final ExecutionContext exec) throws Exception {
 
-		// Determine which distances to calculate
-		Set<String> distance_arg = new HashSet<String>(Arrays.asList(this.distance.getStringArrayValue()));
-
-		boolean calcEuclidean = distance_arg.contains(Distance.EUCLIDEAN.toString());
-
-		// Settings related to the SASD
-		boolean calcSASD = distance_arg.contains(Distance.SASD.toString());
+		// Euclidean Init (Use String here, because we cannot easily convert to Residue here
+		Set<String> euc_donors_arg = new HashSet<String>(Arrays.asList(this.euc_donors.getStringArrayValue()));
+		Set<String> euc_acceptors_arg = new HashSet<String>(Arrays.asList(this.euc_acceptors.getStringArrayValue()));
+				
+		// SASD Init
 		Grid grid = null;
+		BufferedDataTable intable = inData[0];
+		int grid_index = intable.getSpec().findColumnIndex(this.grid.getStringValue());
 
-		// If we want to calculate the SASD, try to find the grid at the input port:
-		if (calcSASD) {
+		if (intable.size() != 1) {
 
-			BufferedDataTable intable = inData[0];
-			int grid_index = intable.getSpec().findColumnIndex(this.grid.getStringValue());
+			throw new IllegalArgumentException("Only one input row allowed for CrossLinkPredictor");
+		}
 
-			if (intable.size() != 1) {
+		// Only one row here
+		for (DataRow row : intable) {
 
-				throw new IllegalArgumentException("Only one input row allowed for CrossLinkTheorist");
-			}
+			// Set the grid
+			BinaryObjectFileStoreDataCell cell = (BinaryObjectFileStoreDataCell) row.getCell(grid_index);
 
-			// Only one row here
-			for (DataRow row : intable) {
-
-				// Set the grid
-				BinaryObjectFileStoreDataCell cell = (BinaryObjectFileStoreDataCell) row.getCell(grid_index);
-
-				ObjectInputStream ois = new ObjectInputStream(cell.openInputStream());
-				grid = (Grid) ois.readObject();
-				ois.close();   			
-			}
+			ObjectInputStream ois = new ObjectInputStream(cell.openInputStream());
+			grid = (Grid) ois.readObject();
+			ois.close();   			
+		}
+		if ( ! grid.isFlagSet(GridFlag.SASD_CALCULATION)) {
+			
+			throw new IllegalArgumentException("This Grid cannot be used for SASD calculation. Check GridBuilder settings.");
 		}
 
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
@@ -216,82 +198,90 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 				new DataColumnSpecCreator("resid2", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("atomname2", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("chain2", StringCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("Euclidean_distance", DoubleCell.TYPE).createSpec()
+				new DataColumnSpecCreator("Euclidean_distance", DoubleCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("SASD_distance", DoubleCell.TYPE).createSpec()
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-		// Which residues we want to cross-links
-		Set<String> aa1_arg = new HashSet<String>(Arrays.asList(this.aa1.getStringArrayValue()));
-		Set<String> aa2_arg = new HashSet<String>(Arrays.asList(this.aa2.getStringArrayValue()));
+		// List keeping track of the acceptor residues (for Euclidean distance)
+		List<LocalAtom> euc_donors = new ArrayList<LocalAtom>();
+		List<LocalAtom> euc_acceptors = new ArrayList<LocalAtom>();
+		List<LocalAtom> euc_donors_acceptors = new ArrayList<LocalAtom>();
 
-		// List keeping track of the acceptor residues
-		List<LocalAtom> donors = new ArrayList<LocalAtom>();
-
-		// List keeping track of acceptor residues
-		List<LocalAtom> acceptors = new ArrayList<LocalAtom>();
-
-		// List keeping track of residues that are both acceptors and donors
-		List<LocalAtom> both = new ArrayList<LocalAtom>();
-
+		
 		int row_counter = 0;
 
 		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
-
 		String line;
 		while( ( line = br.readLine()) != null  ) {
 
 			// We only care about ATOM records here
 			if (Atom.isRecord(line)) {
 
-				// Atom coordinates
-				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-				double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-				double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    			
-
-
-				String atomname = line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim();
-
+				// Figure out which atom we are looking at
+				Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
+				
 				// See if we care about this atom (Currently only CB) (TODO Needs to be changed in the future)			
-				if (atomname.equals(Atom.CB.toString())) {
-
+				if (atom.equals(Atom.CB)) {
+					
+					// Atom coordinates
+					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    	
 					String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
 
-					boolean isDonor = aa1_arg.contains(resname);
-					boolean isAcceptor = aa2_arg.contains(resname);
+					// Atom and residue
+					String residue = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
 
-					// Only continue if the current residue is either a donor or acceptor or both 
-					if (isDonor || isAcceptor) {
-
-						// Fetch the remaining required attributes
-						String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
-						int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
-
-						LocalAtom current_atom = new LocalAtom(resid, resname, chain, x, y, z);
+					// Determine for which distance this residue might be used
+					boolean isEucDonor =  euc_donors_arg.contains(residue);
+					boolean isEucAcceptor = euc_acceptors_arg.contains(residue);
+					
+					boolean isSASDDonor = grid.isDonor(Residue.valueOf(residue), atom);
+					boolean isSASDAcceptor = grid.isAcceptor(Residue.valueOf(residue), atom);
+					
+					// Only continue if we care about this atom at all
+					if (isEucDonor || isEucAcceptor || isSASDDonor || isSASDAcceptor) {
 						
-						
-						
-						
-						
-						// We always have to calculate the distances to all boths in any case
-						row_counter = assembleRow(current_atom, both, container, row_counter);
+						// HANDLE EUCLIDEAN
+						if (isEucDonor || isEucAcceptor) {
 
-						List<LocalAtom> to_append = null;
+							// Fetch the remaining required attributes
+							String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+							int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
 
-						if (isDonor) {
+							LocalAtom current_atom = new LocalAtom(resid, resname, chain, x, y, z);
 
-							// Calculate the distances to all acceptors and append data row
-							row_counter = assembleRow(current_atom, acceptors, container, row_counter);
-							to_append = isAcceptor ? both : donors;
+							// We always have to calculate the distances to all boths in any case
+							row_counter = assembleRow(current_atom, euc_donors_acceptors, container, row_counter);
 
-							// Must be acceptor
-						} else {
+							List<LocalAtom> to_append = null;
 
-							// We have to calculate the distance to all donors
-							row_counter = assembleRow(current_atom, donors, container, row_counter);
-							to_append = acceptors;
+							if (isEucDonor) {
+
+								// Calculate the distances to all acceptors and append data row
+								row_counter = assembleRow(current_atom, euc_acceptors, container, row_counter);
+								to_append = isEucAcceptor ? euc_donors_acceptors : euc_donors;
+
+								// Must be acceptor
+							} else {
+
+								// We have to calculate the distance to all donors
+								row_counter = assembleRow(current_atom, euc_donors, container, row_counter);
+								to_append = euc_acceptors;
+							}
+							to_append.add(current_atom);
 						}
-						to_append.add(current_atom);
+						
+						// Handle SASD
+						if (isSASDDonor || isSASDAcceptor) {
+							
+							// Figure out if the atom is accessible (TODO)
+							//grid.isAccessible()
+							
+							
+						}
 					}
 				}
 			}
@@ -299,6 +289,7 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 
 		// once we are done, we close the container and return its table
 		br.close();
+		br = null;
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}
@@ -337,9 +328,8 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 
 		// TODO save user settings to the config object.
 		this.input.saveSettingsTo(settings);
-		this.aa1.saveSettingsTo(settings);
-		this.aa2.saveSettingsTo(settings);
-		this.distance.saveSettingsTo(settings);
+		this.euc_donors.saveSettingsTo(settings);
+		this.euc_acceptors.saveSettingsTo(settings);
 		this.grid.saveSettingsTo(settings);
 	}
 
@@ -355,9 +345,8 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 		// method below.
 
 		this.input.loadSettingsFrom(settings);
-		this.aa1.loadSettingsFrom(settings);
-		this.aa2.loadSettingsFrom(settings);
-		this.distance.loadSettingsFrom(settings);
+		this.euc_donors.loadSettingsFrom(settings);
+		this.euc_acceptors.loadSettingsFrom(settings);
 		this.grid.loadSettingsFrom(settings);
 	}
 
@@ -374,9 +363,8 @@ public class CrossLinkTheoristNodeModel extends NodeModel {
 		// Do not actually set any values of any member variables.
 
 		this.input.validateSettings(settings);
-		this.aa1.validateSettings(settings);
-		this.aa2.validateSettings(settings);
-		this.distance.validateSettings(settings);
+		this.euc_donors.validateSettings(settings);
+		this.euc_acceptors.validateSettings(settings);
 		this.grid.validateSettings(settings);
 	}
 

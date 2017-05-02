@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
+package org.proteinevolution.nodes.input.pdb.crosslinkpredictor;
 
 import org.knime.core.node.NodeView;
 
@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class CrossLinkTheoristNodeView extends NodeView<CrossLinkTheoristNodeModel> {
+public class CrossLinkPredictorNodeView extends NodeView<CrossLinkPredictorNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link CrossLinkTheoristNodeModel})
+     * @param nodeModel The model (class: {@link CrossLinkPredictorNodeModel})
      */
-    protected CrossLinkTheoristNodeView(final CrossLinkTheoristNodeModel nodeModel) {
+    protected CrossLinkPredictorNodeView(final CrossLinkPredictorNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class CrossLinkTheoristNodeView extends NodeView<CrossLinkTheoristNodeMod
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        CrossLinkTheoristNodeModel nodeModel = 
-            (CrossLinkTheoristNodeModel)getNodeModel();
+        CrossLinkPredictorNodeModel nodeModel = 
+            (CrossLinkPredictorNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve

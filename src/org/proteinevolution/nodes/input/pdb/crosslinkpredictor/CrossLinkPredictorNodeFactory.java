@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.crosslinktheorist;
+package org.proteinevolution.nodes.input.pdb.crosslinkpredictor;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class CrossLinkTheoristNodeFactory 
-        extends NodeFactory<CrossLinkTheoristNodeModel> {
+public class CrossLinkPredictorNodeFactory 
+        extends NodeFactory<CrossLinkPredictorNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public CrossLinkTheoristNodeModel createNodeModel() {
-        return new CrossLinkTheoristNodeModel();
+    public CrossLinkPredictorNodeModel createNodeModel() {
+        return new CrossLinkPredictorNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class CrossLinkTheoristNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<CrossLinkTheoristNodeModel> createNodeView(final int viewIndex,
-            final CrossLinkTheoristNodeModel nodeModel) {
-        return new CrossLinkTheoristNodeView(nodeModel);
+    public NodeView<CrossLinkPredictorNodeModel> createNodeView(final int viewIndex,
+            final CrossLinkPredictorNodeModel nodeModel) {
+        return new CrossLinkPredictorNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class CrossLinkTheoristNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new CrossLinkTheoristNodeDialog();
+        return new CrossLinkPredictorNodeDialog();
     }
 
 }
