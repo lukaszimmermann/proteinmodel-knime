@@ -103,7 +103,7 @@ public class GridBuilderNodeModel extends NodeModel {
 		Map<Residue, Set<Atom>> acceptors = new HashMap<Residue, Set<Atom>>();
 		
 		Set<Atom> lys_atoms = new HashSet<Atom>();
-		lys_atoms.add(Atom.CB);
+		lys_atoms.add(Atom.NZ);
 		
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
@@ -114,12 +114,13 @@ public class GridBuilderNodeModel extends NodeModel {
 		// First: Determine the dimensions of the grid
 		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
 
-		double lower_x = 0;
-		double lower_y = 0;
-		double lower_z = 0;
-		double upper_x = 0;
-		double upper_y = 0;
-		double upper_z = 0;
+		double lower_x = Double.MAX_VALUE;
+		double lower_y = Double.MAX_VALUE;
+		double lower_z = Double.MAX_VALUE;
+		
+		double upper_x = Double.MIN_VALUE;
+		double upper_y = Double.MIN_VALUE;
+		double upper_z = Double.MIN_VALUE;
 
 		String line;
 		while ( (line = br.readLine()) != null ) {

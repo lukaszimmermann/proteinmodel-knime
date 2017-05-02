@@ -10,36 +10,44 @@ import org.knime.core.node.util.StringIconOption;
  *
  */
 public enum Residue implements StringIconOption {
-
-		ALA,
-		ARG,
-		ASN,
-		ASP,
-		CYS,
-		GLN,
-		GLU,
-		GLY,
-		HIS,
-		ILE,
-		LEU,
-		LYS,
-		MET,
-		PHE,
-		PRO,
-		SER,
-		THR,
-		TRP,
-		TYR,
-		VAL;
 	
-		@Override
-		public String getText() {
-			return this.toString();
-		}
-		@Override
-		public Icon getIcon() {
-			
-			// No icons for the residues
-			return null;
-		}
+	// Amino acids
+	ALA,
+	ARG,
+	ASN,
+	ASP,
+	CYS,
+	GLN,
+	GLU,
+	GLY,
+	HIS,
+	ILE,
+	LEU,
+	LYS,
+	MET,
+	PHE,
+	PRO,
+	SER,
+	THR,
+	TRP,
+	TYR,
+	VAL,
+
+	// Nucleotides
+	U,
+	G,
+	C,
+	A;
+
+
+	@Override
+	public String getText() {
+		return this.toString();
+	}
+	@Override
+	public Icon getIcon() {
+
+		// No icons for the residues
+		return null;
+	}
 }

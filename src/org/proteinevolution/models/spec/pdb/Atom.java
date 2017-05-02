@@ -34,6 +34,7 @@ public enum Atom {
 	OD2(Element.O),
 	OE1(Element.O),
 	OE2(Element.O),
+	O5(Element.O),
 	OG(Element.O),
 	OG1(Element.O),
 	OH(Element.O),
@@ -92,14 +93,73 @@ public enum Atom {
 	_2HZ(Element.H),
 	_3HZ(Element.H),
 	HG1(Element.H),
-	HZ(Element.H);
+	HZ(Element.H),
+	H1(Element.H),
+	HB2(Element.H),
+	HB3(Element.H),
+	HG2(Element.H),
+	HG3(Element.H),
+	HD3(Element.H),
+	HH11(Element.H),
+	HH12(Element.H),
+	HH21(Element.H),
+	HH22(Element.H),
+	HZ1(Element.H),
+	HG12(Element.H),
+	HG13(Element.H),
+	HG21(Element.H),
+	HG22(Element.H),
+	HG23(Element.H),
+	HD11(Element.H),
+	HD12(Element.H),
+	HD13(Element.H),
+	HD21(Element.H),
+	HD22(Element.H),
+	HE22(Element.H),
+	HB1(Element.H),
+	HD23(Element.H),
+	HE21(Element.H),
+	HA2(Element.H),
+	HA3(Element.H),
+	HG11(Element.H),
+	H2(Element.H),
+	H3(Element.H),
+	P(Element.P),
+	O5_(Element.O),
+	C5_(Element.C),
+	C4_(Element.C),
+	O4_(Element.O),
+	C3_(Element.C),
+	O3_(Element.O),
+	O6(Element.O),
+	O2_(Element.O),
+	C2_(Element.C),
+	C1_(Element.C),
+	C8(Element.C),
+	C5(Element.C),
+	C6(Element.C),
+	C2(Element.C),
+	N9(Element.N),
+	N7(Element.N),
+	N3(Element.N),
+	N6(Element.N),
+	N1(Element.N),
+	N2(Element.N),
+	N4(Element.N),
+	C9(Element.C),
+	C4(Element.C),
+	OP1(Element.O),
+	O2(Element.O),
+	O4(Element.O),
+	OP2(Element.O);
 	
 	public final Element element;
-	
+
 	
 	public static Atom toAtom(final String value) {
 		
-		return Character.isDigit(value.charAt(0)) ? Atom.valueOf("_" + value) : Atom.valueOf(value);
+		return Character.isDigit(value.charAt(0)) ? Atom.valueOf("_" + value) 
+			: (value.charAt(value.length() - 1) == '\'' ? Atom.valueOf(value.replace('\'', '_')) :  Atom.valueOf(value));
 	}
 	
 	

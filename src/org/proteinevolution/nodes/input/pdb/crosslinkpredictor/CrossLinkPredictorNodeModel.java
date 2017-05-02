@@ -162,12 +162,23 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		// Euclidean Init (Use String here, because we cannot easily convert to Residue here
 		Set<String> euc_donors_arg = new HashSet<String>(Arrays.asList(this.euc_donors.getStringArrayValue()));
 		Set<String> euc_acceptors_arg = new HashSet<String>(Arrays.asList(this.euc_acceptors.getStringArrayValue()));
-				
+
 		// SASD Init
 		Grid grid = null;
 		BufferedDataTable intable = inData[0];
 		int grid_index = intable.getSpec().findColumnIndex(this.grid.getStringValue());
 
+		// Grid values for the SASD residues
+		Set<Byte> grid_values_donor = new HashSet<Byte>();
+		grid_values_donor.add(Grid.DONOR);
+
+		Set<Byte> grid_values_acceptor = new HashSet<Byte>();
+		grid_values_donor.add(Grid.ACCEPTOR);
+
+		Set<Byte> grid_values_boths = new HashSet<Byte>();
+		grid_values_boths.add(Grid.DONOR_ACCEPTOR);
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if (intable.size() != 1) {
 
 			throw new IllegalArgumentException("Only one input row allowed for CrossLinkPredictor");
@@ -184,10 +195,11 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			ois.close();   			
 		}
 		if ( ! grid.isFlagSet(GridFlag.SASD_CALCULATION)) {
-			
+
 			throw new IllegalArgumentException("This Grid cannot be used for SASD calculation. Check GridBuilder settings.");
 		}
 
+		/*
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
 
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
@@ -203,88 +215,155 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
+		*/
 
 		// List keeping track of the acceptor residues (for Euclidean distance)
 		List<LocalAtom> euc_donors = new ArrayList<LocalAtom>();
 		List<LocalAtom> euc_acceptors = new ArrayList<LocalAtom>();
 		List<LocalAtom> euc_donors_acceptors = new ArrayList<LocalAtom>();
 
-		
+
+		// Figure out which atoms we care about
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		Set<Atom> atoms_sasd = new HashSet<Atom>();
+		for (Set<Atom> atoms : grid.copyDonors().values()) {
+
+			atoms_sasd.addAll(atoms);
+		}
+		for (Set<Atom> atoms : grid.copyAcceptors().values()) {
+
+			atoms_sasd.addAll(atoms);
+		}
+
+		// CB atom currently hard coded (TODO)
+		Set<Atom> atoms_euclidean = new HashSet<Atom>();
+		atoms_euclidean.add(Atom.CB);
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		int row_counter = 0;
 
-		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
+		
+		
+		/// Temporary stuff
+		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
+
+				new DataColumnSpecCreator("path", StringCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("resname", StringCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("chain", StringCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("resid", IntCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("percentage", DoubleCell.TYPE).createSpec(),
+		};
+		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
+		BufferedDataContainer container = exec.createDataContainer(outputSpec);
+		
+		
+		
+		////////
+		
+		String input_filename = this.input.getStringValue();
+		BufferedReader br = new BufferedReader(new FileReader(input_filename));
 		String line;
 		while( ( line = br.readLine()) != null  ) {
 
-			// We only care about ATOM records here
-			if (Atom.isRecord(line)) {
+			// Skip non-ATOM line
+			if ( ! Atom.isRecord(line)) {
 
-				// Figure out which atom we are looking at
-				Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
-				
-				// See if we care about this atom (Currently only CB) (TODO Needs to be changed in the future)			
-				if (atom.equals(Atom.CB)) {
-					
-					// Atom coordinates
-					double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-					double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-					double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    	
-					String resname =  line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END);
+				continue;
+			}
 
-					// Atom and residue
-					String residue = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
+			// Figure out which atom we are looking at
+			Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
+			boolean isAtomForEuclidean = atoms_euclidean.contains(atom);
+			boolean isAtomForSASD = atoms_sasd.contains(atom);
 
-					// Determine for which distance this residue might be used
-					boolean isEucDonor =  euc_donors_arg.contains(residue);
-					boolean isEucAcceptor = euc_acceptors_arg.contains(residue);
-					
-					boolean isSASDDonor = grid.isDonor(Residue.valueOf(residue), atom);
-					boolean isSASDAcceptor = grid.isAcceptor(Residue.valueOf(residue), atom);
-					
-					// Only continue if we care about this atom at all
-					if (isEucDonor || isEucAcceptor || isSASDDonor || isSASDAcceptor) {
-						
-						// HANDLE EUCLIDEAN
-						if (isEucDonor || isEucAcceptor) {
+			// Continue if we do not care about this atom at all
+			if (! (isAtomForEuclidean || isAtomForSASD)) {
+				continue;
+			}
+			
+			// Get required attributes of the atom
+			double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+			double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+			double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    	
+			String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
+			Residue residue = Residue.valueOf(residueName);
+			int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+			String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+			
+			// Determine CB distance in Euclidean space
+			/*
+			if (isAtomForEuclidean) {
 
-							// Fetch the remaining required attributes
-							String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
-							int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+				boolean isEucDonor =  euc_donors_arg.contains(residueName);
+				boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
 
-							LocalAtom current_atom = new LocalAtom(resid, resname, chain, x, y, z);
+				// Only continue if we care about this atom at all
+				if (isEucDonor || isEucAcceptor) {
 
-							// We always have to calculate the distances to all boths in any case
-							row_counter = assembleRow(current_atom, euc_donors_acceptors, container, row_counter);
+					// HANDLE EUCLIDEAN
+					if (isEucDonor || isEucAcceptor) {
 
-							List<LocalAtom> to_append = null;
+						LocalAtom current_atom = new LocalAtom(resid, residueName, chain, x, y, z);
 
-							if (isEucDonor) {
+						// We always have to calculate the distances to all boths in any case
+						row_counter = assembleRow(current_atom, euc_donors_acceptors, container, row_counter);
 
-								// Calculate the distances to all acceptors and append data row
-								row_counter = assembleRow(current_atom, euc_acceptors, container, row_counter);
-								to_append = isEucAcceptor ? euc_donors_acceptors : euc_donors;
+						List<LocalAtom> to_append = null;
 
-								// Must be acceptor
-							} else {
+						if (isEucDonor) {
 
-								// We have to calculate the distance to all donors
-								row_counter = assembleRow(current_atom, euc_donors, container, row_counter);
-								to_append = euc_acceptors;
-							}
-							to_append.add(current_atom);
+							// Calculate the distances to all acceptors and append data row
+							row_counter = assembleRow(current_atom, euc_acceptors, container, row_counter);
+							to_append = isEucAcceptor ? euc_donors_acceptors : euc_donors;
+
+							// Must be acceptor
+						} else {
+
+							// We have to calculate the distance to all donors
+							row_counter = assembleRow(current_atom, euc_donors, container, row_counter);
+							to_append = euc_acceptors;
 						}
-						
-						// Handle SASD
-						if (isSASDDonor || isSASDAcceptor) {
-							
-							// Figure out if the atom is accessible (TODO)
-							//grid.isAccessible()
-							
-							
-						}
+						to_append.add(current_atom);
 					}
+				}	
+			}
+			*/
+
+		
+			if (isAtomForSASD) {
+				
+				boolean isSASDDonor = grid.isDonor(residue, atom);
+				boolean isSASDAcceptor = grid.isAcceptor(residue, atom);
+
+				// Residue is xl donor as well as xl acceptor
+				if (isSASDDonor && isSASDAcceptor) {
+
+					//List<int[]> accessible_points = grid.queryAtom(x, y, z, residue, atom, grid_values_boths);
+
+					double percentage = grid.queryAtomPercentage(x, y, z, residue, atom, grid_values_boths);
+							
+					// assemble the data row
+					DataCell[] cells = new DataCell[] {
+							
+						StringCellFactory.create(input_filename),
+						StringCellFactory.create(residue.toString()),
+						StringCellFactory.create(chain),
+						IntCellFactory.create(resid),
+						DoubleCellFactory.create(grid.queryAtomPercentage(x, y, z, residue, atom, grid_values_boths))
+					};
+					container.addRowToTable(
+							new DefaultRow(
+									"Row" + row_counter++,
+									cells));
+					
+
+				} else if (isSASDDonor) {
+
+
+				} else if (isSASDAcceptor) {
+
 				}
 			}
+
 		}    		
 
 		// once we are done, we close the container and return its table
