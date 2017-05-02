@@ -37,8 +37,17 @@ public enum Residue implements StringIconOption {
 	U,
 	G,
 	C,
-	A;
-
+	A,
+	
+	// Misc
+	DT,
+	DA,
+	DG,
+	DC,
+	DU,
+	
+	// Unknown
+	UNK;
 
 	@Override
 	public String getText() {

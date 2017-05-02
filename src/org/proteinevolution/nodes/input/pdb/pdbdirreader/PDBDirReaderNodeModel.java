@@ -22,7 +22,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.pdb.Atom;
 
 
 /**
@@ -35,15 +37,19 @@ public class PDBDirReaderNodeModel extends NodeModel {
     
 
     
+	// Input Directory
     public static final String INPUT_CFGKEY = "INPUT_CFGKEY";
     public static final String INPUT_DEFAULT = "";
     public static final String INPUT_HISTORY = "INPUT_HISTORY";
-    
     private static final int HEADER_TITLE_START = 10;
-    
-    
     private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY,INPUT_DEFAULT);
 
+    // Whether ATOM records are required in the PDB file to be listed
+    public static final String ATOM_CFGKEY = "ATOM_CFGKEY";
+    public static final boolean ATOM_DEFAULT = true;
+    public static final String ATOM_LABEL = "Don't list PDB files without ATOM records";
+    private final SettingsModelBoolean atom = new SettingsModelBoolean(ATOM_CFGKEY, ATOM_DEFAULT);
+    
     /**
      * Constructor for the node model.
      */
@@ -75,9 +81,14 @@ public class PDBDirReaderNodeModel extends NodeModel {
 			
 			@Override
 			public boolean accept(File pathname) {
-				return pathname.getName().endsWith("pdb");
+				
+				String path = pathname.getName();
+				return path.endsWith("pdb") || path.endsWith("ent");
 			}
 		});
+        
+        // Whether the PDB Dir reader required that the PDB files contain ATOM records
+        boolean requireAtoms = this.atom.getBooleanValue();
         
         int rowCounter = 0;
         for(File currentFile : content) {
@@ -85,6 +96,8 @@ public class PDBDirReaderNodeModel extends NodeModel {
         	DataCell[] cells = new DataCell[4];
         	cells[0] = StringCellFactory.create(currentFile.getName());
         	cells[1] = StringCellFactory.create(currentFile.getAbsolutePath());
+        	
+        	boolean atomSeen = false;
         	
         	// Open File and figure out HEADER and TITLE (need to be first two rows)
         	BufferedReader br = new BufferedReader(new FileReader(currentFile.getAbsolutePath()));
@@ -98,6 +111,14 @@ public class PDBDirReaderNodeModel extends NodeModel {
         		} else if (line.startsWith("TITLE")) {
         			
         			title =  line.substring(HEADER_TITLE_START);
+        			
+        		} else if(requireAtoms) {
+        		
+        			if (Atom.isRecord(line)) {
+        				
+        				atomSeen = true;
+        				break;
+        			}
         		} else {
         			
         			break;
@@ -109,7 +130,11 @@ public class PDBDirReaderNodeModel extends NodeModel {
         	cells[2] = StringCellFactory.create(header);
         	cells[3] = StringCellFactory.create(title); 
        
-        	container.addRowToTable(new DefaultRow("Row" + rowCounter++, cells));
+        	
+        	// Only add PDB entry if it contains at least one ATOM Record
+        	if (! requireAtoms || (requireAtoms && atomSeen)) {
+        		container.addRowToTable(new DefaultRow("Row" + rowCounter++, cells));
+        	}
         }
       
         // once we are done, we close the container and return its table
@@ -151,6 +176,7 @@ public class PDBDirReaderNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
         this.input.saveSettingsTo(settings);
+        this.atom.saveSettingsTo(settings);
     }
 
     /**
@@ -161,6 +187,7 @@ public class PDBDirReaderNodeModel extends NodeModel {
             throws InvalidSettingsException {
 
     	this.input.loadSettingsFrom(settings);
+    	this.atom.loadSettingsFrom(settings);
     }
 
     /**
@@ -171,6 +198,7 @@ public class PDBDirReaderNodeModel extends NodeModel {
             throws InvalidSettingsException {
             
     	this.input.validateSettings(settings);
+    	this.atom.validateSettings(settings);
     }
     
     /**
