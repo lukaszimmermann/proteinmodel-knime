@@ -4,7 +4,7 @@
  */
 package org.proteinevolution.nodes;
 
-import org.eclipse.core.runtime.Plugin;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
  *
  * @author Lukas Zimmermann
  */
-public class ProteinevolutionNodePlugin extends Plugin {
+public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
     // The shared instance.
     private static ProteinevolutionNodePlugin plugin;
 

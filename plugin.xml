@@ -11,8 +11,7 @@
       <category description="Nodes for visualization" level-id="viz" name="Visualization" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="idx" name="Indexing" path="/protevo"/>
    	</extension>
- 
-   
+    
    <extension point="org.knime.workbench.repository.nodes">
       <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
@@ -23,5 +22,18 @@
 <node category-path="/" factory-class="org.proteinevolution.nodes.input.pdb.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.input.pdb.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
 </extension>
+   
+   
+<!-- Preference Page for setting the HH-suite build directory -->
+
+ <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.proteinevolution.preferences.hhsuite.HHSuitePreferencePage"
+            id="org.proteinevolution.preferences.hhsuite.preferencespage"
+            name="HH-Suite">
+      </page>
+   </extension>
+   
    
 </plugin>
