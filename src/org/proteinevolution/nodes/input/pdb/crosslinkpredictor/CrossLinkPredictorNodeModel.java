@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.knime.core.data.DataCell;
@@ -39,6 +40,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.Grid;
 import org.proteinevolution.models.structure.GridFlag;
@@ -60,37 +62,71 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	 */
 	private final class LocalAtom implements Point3D {
 
+		public static final byte DONOR = 1;
+		public static final byte ACCEPTOR = 2;
+		public static final byte DONOR_ACCEPTOR = 3;
+
 		private final int resid;
 		private final String resname;
 		private final String chain;
 		private final double x;
 		private final double y;
 		private final double z;
+		private final byte type;
+		private final Element element;
 
-		public LocalAtom(int resid, String resname, String chain, double x, double y, double z) {
+		public LocalAtom(final int resid, final String resname, 
+				final String chain, final double x, final double y, final double z, final byte type, final Element element) {
 			this.resid = resid;
 			this.resname = resname;
 			this.chain = chain;
 			this.x = x;
 			this.y = y;
 			this.z = z;
+			this.type = type;
+			this.element = element;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (o == null || ! (o instanceof LocalAtom)) {
+
+				return false;
+			}
+			LocalAtom other = (LocalAtom) o;
+
+			return     other.resid == this.resid
+					&& other.resname.equals(this.resname)
+					&& other.chain.equals(this.chain)
+					&& other.x == this.x 
+					&& other.y == this.y 
+					&& other.z == this.z
+					&& other.type == this.type
+					&& other.element == this.element;
+		}
+
+		@Override
+		public int hashCode() {
+
+			return Objects.hash(this.resid, this.resname, this.chain, this.x, this.y, this.z, this.type, this.element);
 		}
 
 		@Override
 		public double getX() {
-			
+
 			return this.x;
 		}
 
 		@Override
 		public double getY() {
-	
+
 			return this.y;
 		}
 
 		@Override
 		public double getZ() {
-			
+
 			return this.z;
 		}
 	}
@@ -243,10 +279,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		List<LocalAtom> sasd_donors = new ArrayList<LocalAtom>();
 		List<LocalAtom> sasd_acceptors = new ArrayList<LocalAtom>();
 		List<LocalAtom> sasd_donors_acceptors = new ArrayList<LocalAtom>();
-		List<int[]> sasd_donors_start = new ArrayList<int[]>();
-		List<int[]> sasd_acceptors_start = new ArrayList<int[]>();
-		List<int[]> sasd_donors_acceptors_start = new ArrayList<int[]>();
-
+		
 		// Figure out which atoms we care about
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		Set<Atom> atoms_sasd = new HashSet<Atom>();
@@ -291,98 +324,132 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 				continue;
 			}
-
-			// Figure out which atom we are looking at
+			// Determine current Atom and residue name
 			Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
-			boolean isAtomForEuclidean = atoms_euclidean.contains(atom);
-			boolean isAtomForSASD = atoms_sasd.contains(atom);
-
+			
+			// Skip hydrogen
+			if (atom.element == Element.H) {
+		
+				continue;
+			}
+			
 			// Continue if we do not care about this atom at all
-			if (! (isAtomForEuclidean || isAtomForSASD)) {
+			if ( ! atoms_euclidean.contains(atom) && ! atoms_sasd.contains(atom)) {
 				continue;
 			}
 
 			// Get required attributes of the atom
 			double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
 			double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-			double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    	
-			String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
-			Residue residue = Residue.valueOf(residueName);
+			double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
 			int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
 			String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+			String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
+			Residue residue = Residue.valueOf(residueName);	
+			
 
-			// Determine CB distance in Euclidean space
+			//  Type (Donor/Acceptor) for Euclidean
+			boolean isEucDonor = euc_donors_arg.contains(residueName);
+			boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
 
-			if (isAtomForEuclidean) {
+			// handle case for euclidean
+			if (isEucDonor || isEucAcceptor) {
 
-				boolean isEucDonor =  euc_donors_arg.contains(residueName);
-				boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
+				byte eucType =  isEucDonor && isEucAcceptor ? LocalAtom.DONOR_ACCEPTOR : (isEucDonor ? LocalAtom.DONOR : LocalAtom.ACCEPTOR);
+				LocalAtom currentAtom = new LocalAtom(resid, residueName, chain, x, y, z, eucType, atom.element);
 
-				// Only continue if we care about this atom at all
-				if (isEucDonor || isEucAcceptor) {
+				// Independent of Euc Type, we have to calculate the distance to all donor_accepto
+				row_counter = assembleRow(currentAtom, euc_donors_acceptors, container, row_counter);
 
-					// HANDLE EUCLIDEAN
-					if (isEucDonor || isEucAcceptor) {
+				switch (eucType) {
 
-						LocalAtom current_atom = new LocalAtom(resid, residueName, chain, x, y, z);
+				case LocalAtom.DONOR_ACCEPTOR:
 
-						// We always have to calculate the distances to all boths in any case
-						row_counter = assembleRow(current_atom, euc_donors_acceptors, container, row_counter);
+					row_counter = assembleRow(currentAtom, euc_donors, container, row_counter);
+					row_counter = assembleRow(currentAtom, euc_acceptors, container, row_counter);
+					euc_donors_acceptors.add(currentAtom);			
+					break;
+				case LocalAtom.DONOR:
+					row_counter = assembleRow(currentAtom, euc_acceptors, container, row_counter);
+					euc_donors.add(currentAtom);
+					break;
 
-						List<LocalAtom> to_append = null;
-
-						if (isEucDonor) {
-
-							// Calculate the distances to all acceptors and append data row
-							row_counter = assembleRow(current_atom, euc_acceptors, container, row_counter);
-							to_append = isEucAcceptor ? euc_donors_acceptors : euc_donors;
-
-							// Must be acceptor
-						} else {
-
-							// We have to calculate the distance to all donors
-							row_counter = assembleRow(current_atom, euc_donors, container, row_counter);
-							to_append = euc_acceptors;
-						}
-						to_append.add(current_atom);
-					}
-				}	
+				case LocalAtom.ACCEPTOR:
+					row_counter = assembleRow(currentAtom, euc_donors, container, row_counter);
+					euc_acceptors.add(currentAtom);
+					break;
+				}
 			}
 
+			//  Type (Donor/Acceptor) for SASD
+			boolean isSASDDonor = grid.isDonor(residue, atom);
+			boolean isSASDAcceptor = grid.isAcceptor(residue, atom);
 
-			// Consider case that we have an atom for SASD calculation
-			if (isAtomForSASD) {
+			if (isSASDDonor || isSASDAcceptor) {
 
-				boolean isSASDDonor = grid.isDonor(residue, atom);
-				boolean isSASDAcceptor = grid.isAcceptor(residue, atom);
-
-				// We only consider this residue if it has a minimum accessability
+				// We only consider this residue if it has a minimum accessibility
 				if (grid.queryAtomAccessibility(x, y, z, residue, atom.element) >= minAccessibility) {
 
-					// Decide which list the atom will be added to
-					(isSASDDonor && isSASDAcceptor ? sasd_donors_acceptors
-							: (isSASDDonor ? sasd_donors : sasd_acceptors)).add(
-									new LocalAtom(resid, residueName, chain, x, y, z));
+					byte sasdType = isSASDDonor && isSASDAcceptor ? LocalAtom.DONOR_ACCEPTOR : (isSASDDonor ? LocalAtom.DONOR : LocalAtom.ACCEPTOR);
+					LocalAtom currentAtom = new LocalAtom(resid, residueName, chain, x, y, z, sasdType, atom.element);
+					
+					switch (sasdType) {
 
-					(isSASDDonor && isSASDAcceptor ? sasd_donors_acceptors_start
-							: (isSASDDonor ? sasd_donors_acceptors_start : sasd_acceptors_start)).add(
-									grid.queryAtom(x, y, z, residue, atom.element));
+					case LocalAtom.DONOR_ACCEPTOR:
+
+						sasd_donors_acceptors.add(currentAtom);
+						break;
+
+					case LocalAtom.DONOR:
+
+						sasd_donors.add(currentAtom);
+						break;
+					case LocalAtom.ACCEPTOR:
+
+						sasd_acceptors.add(currentAtom);
+
+						break;
+					}
 				}
 			}
 		}
+		br.close();
+		br = null;
 
+	
 		// Perform BFS on each recorded residue for SASD
 
 		// TODO TEST
 		LocalAtom atom = sasd_donors_acceptors.get(0);
-		int[] start = sasd_donors_acceptors_start.get(0);
 
-				
-		grid.performBFS(start[0], start[1], start[2], 40);
+		// In any case, we always have to find donors_acceptors
+		Set<Point3D> toFind = new HashSet<Point3D>(sasd_donors_acceptors);
+		
+		switch (atom.type) {
+		
+		case LocalAtom.DONOR_ACCEPTOR:
+			
+			toFind.addAll(sasd_donors);
+			toFind.addAll(sasd_acceptors);
+			break;
+			
+		case LocalAtom.DONOR:
+			
+			toFind.addAll(sasd_acceptors);
+			break;
+			
+		case LocalAtom.ACCEPTOR:
+			
+			toFind.addAll(sasd_donors);
+			break;
+		}
+		
+		
+		
+		grid.performBFS(atom.x, atom.y, atom.z, atom.element, 40, toFind);
 
 
-		br.close();
-		br = null;
+		
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}

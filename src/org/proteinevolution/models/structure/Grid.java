@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
+import org.jmol.util.Logger;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
@@ -29,17 +30,12 @@ public final class Grid implements Serializable {
 		private int y_start;
 		private int z_start;
 		
-		
-		
-		
 	}
 	
 	
-	
-	
-	private static final int margin = 3; // No. of columns of solvent at the edge of the grid
 
-	
+	private static final int margin = 5; // No. of columns of solvent at the edge of the grid
+
 	
 	// Possible values that grid cell can assume (the behavior of the grid for all other values is undefined)
 
@@ -214,8 +210,33 @@ public final class Grid implements Serializable {
 		return this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
 	}
 	
-	public void performBFS(final int x, final int y, final int z, final int max_length) {
+	
+	
+	public void performBFS(
+			final double x,  // The start coordinates
+			final double y,
+			final double z,
+			final Element element,
+			final int max_length, // Allowed maximal length
+			final Set<Point3D> toFind // Coordinates of the points that are to be found
+		) {
 		
+		int[] start = this.queryAtom(x, y, z, element);
+		
+		// Set initial current value of the grid search
+		int current_x = start[0];
+		int current_y = start[1];
+		int current_z = start[2];
+		
+		// See if we start at donor/acceptor/donor_acceptor
+		byte cellType = this.grid[current_x][current_y][current_z];
+		
+		if ( 	   cellType != Grid.ACCEPTOR 
+				&& cellType != Grid.DONOR
+				&& cellType != Grid.DONOR_ACCEPTOR) {
+			
+			throw new IllegalStateException("Grid cell is neither Donor nor Acceptor, so the BFS cannot be started");
+		}
 		// Queue used for Exploring the grid, one for each direction
 		Queue<Integer> x_queue = new LinkedList<Integer>();
 		Queue<Integer> y_queue = new LinkedList<Integer>();
@@ -223,13 +244,7 @@ public final class Grid implements Serializable {
 		Queue<Integer> length = new LinkedList<Integer>();
 		
 		// Initialization
-		
-		// Set initial current value of the grid search
-		int current_x = x;
-		int current_y = y;
-		int current_z = z;
-		this.grid[current_x][current_y][current_z] = this.flag_threshold;
-		
+
 		// Enqueue the first point
 		x_queue.add(current_x);
 		y_queue.add(current_y);
@@ -246,6 +261,7 @@ public final class Grid implements Serializable {
 			if (current_length < max_length) {
 				
 				// Consider all possible directions, but only walk into solvent
+				
 				if (this.grid[current_x-1][current_y][current_z] < this.flag_threshold) {
 
 					x_queue.add(current_x-1);
@@ -502,11 +518,10 @@ public final class Grid implements Serializable {
 		this.setIfNotOccupied(this.translateX(x - radius), coord_y, coord_z, value_to_set);
 	}
 
-	public int[] queryAtom(
+	private int[] queryAtom(
 			final double x,
 			final double y,
 			final double z,
-			final Residue residue,
 			final Element element) {
 
 		double radius = element.vdWRadius + 1;
