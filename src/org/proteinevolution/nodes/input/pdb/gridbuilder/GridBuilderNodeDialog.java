@@ -27,7 +27,8 @@ public class GridBuilderNodeDialog extends DefaultNodeSettingsPane {
      */
     protected GridBuilderNodeDialog() {
         super();
-        
+
+        // Input PDB file
         this.addDialogComponent(new DialogComponentFileChooser(
         		new SettingsModelString(
         				GridBuilderNodeModel.INPUT_CFGKEY,
@@ -35,10 +36,16 @@ public class GridBuilderNodeDialog extends DefaultNodeSettingsPane {
         		GridBuilderNodeModel.INPUT_HISTORY,
         		PDB.extensions));            
         
+        //
+        
+        
+        
+        /* Currently barely useful
         this.addDialogComponent(new DialogComponentBoolean(
         		new SettingsModelBoolean(
         				GridBuilderNodeModel.SASD_CFGKEY,
         				GridBuilderNodeModel.SASD_DEFAULT),
         		GridBuilderNodeModel.SASD_LABEL));
+         */
     }
 }

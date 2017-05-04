@@ -1,17 +1,17 @@
 package org.proteinevolution.models.structure;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
 
-import org.jmol.util.Logger;
 import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /*
@@ -21,38 +21,54 @@ import org.proteinevolution.models.spec.pdb.Residue;
  */
 public final class Grid implements Serializable {
 
-
-	// TODO Might be parameterized
-	private static final double solvent_buffer = 0.7;
+	
+	
+	public final class Trace {
+		
+		private int x_start;
+		private int y_start;
+		private int z_start;
+		
+		
+		
+		
+	}
+	
+	
+	
+	
 	private static final int margin = 3; // No. of columns of solvent at the edge of the grid
 
-
+	
+	
 	// Possible values that grid cell can assume (the behavior of the grid for all other values is undefined)
 
-	// Grid cell is part of the solvent
-	public static final byte SOLVENT = 0;
+	// 1. These values are fixed
 
 	// Grid is blocked by at least another atom which is no donor or acceptor atom
-	public static final byte OCCUPIED = 1;
+	private static final byte OCCUPIED = 120;
 
 	// Grid is occupied by only one acceptor atom (which means the atom is reachable)
-	public static final byte DONOR = 2;
+	private static final byte DONOR = 119;
 
 	// Grid is occupied by only one donor atom (which means the atom is reachable)
-	public static final byte ACCEPTOR = 3;
+	private static final byte ACCEPTOR = 118;
 
 	// Grid occupied by only one atom, which is either donor or acceptor (which means the atom is reachable)
-	public static final byte DONOR_ACCEPTOR = 4;
+	private static final byte DONOR_ACCEPTOR = 117;
+	
+	// Set the cells at the border of the grid to BORDER
+	private static final byte BORDER = 116;
+	
+	// Solvent threshold; everything below this value will be considered as solvent (allows fast resetting of the grid after the BFS has been performed)
+	private byte flag_threshold = 1;
 
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final long serialVersionUID = 6931511384915737370L;
 
 	// End of STATIC //////////////////////////////////////////////////////////////////////////////////////////
-
-	// Counts the number of cells belonging to each type
-	private Map<Byte, Integer> cell_counts;
-
 	//  Flag-like attribute of the grid
 	private Set<Integer> flags;
 
@@ -74,8 +90,9 @@ public final class Grid implements Serializable {
 	private final double z_min;
 
 	// size of the grid
-	private final int size;
-
+	private final int size;	
+	
+	
 	public Grid(
 			final double lower_x, 
 			final double lower_y, 
@@ -87,7 +104,7 @@ public final class Grid implements Serializable {
 			final Map<Residue, Set<Atom>> acceptors) {
 
 		this.flags = new HashSet<Integer>();
-
+		
 		// Set grid dimensions
 		this.x_dim = (int) (Math.ceil(upper_x - lower_x) + 2 * margin);
 		this.y_dim = (int) (Math.ceil(upper_y - lower_y) + 2 * margin);
@@ -100,62 +117,56 @@ public final class Grid implements Serializable {
 
 		this.size = x_dim * y_dim * z_dim;
 
-		// Initialize cell counts
-		this.cell_counts = new HashMap<Byte, Integer>();
-		this.cell_counts.put(SOLVENT, this.size);
-		this.cell_counts.put(DONOR, 0);
-		this.cell_counts.put(ACCEPTOR, 0);
-		this.cell_counts.put(DONOR_ACCEPTOR, 0);
-		this.cell_counts.put(OCCUPIED, 0);
-
 		this.grid = new byte[x_dim][y_dim][z_dim];
 
-		// Must be set after the above constructor call
 		this.donors = donors;
 		this.acceptors = acceptors;
 		this.flags.add(GridFlag.SASD_CALCULATION);
+		
+		
+		// Set the border region of the grid to BORDER, to prevent 'falling off' the grid
+		for (int i = 1; i < this.x_dim - 1 ; ++i) {
+			
+			for (int j = 1; j < this.y_dim -1; ++j) {
+				
+				this.grid[i][j][0] = Grid.BORDER;
+				this.grid[i][j][this.z_dim - 1] = Grid.BORDER;
+			}
+			
+			// j == 0 or j == this_ydim-1
+			for (int k = 0; k < this.z_dim; ++k) {
+				
+				this.grid[i][0][k] = Grid.BORDER; 
+				this.grid[i][this.y_dim - 1][k] = Grid.BORDER;
+			}
+		}
+		
+		// x == 0 or x == x_dim-1
+		
+		for (int j = 0; j <  this.y_dim - 1; ++j) {
+			
+			for (int k = 0; k < this.z_dim - 1; ++k) {
+					
+				this.grid[0][j][k] = Grid.BORDER;
+				this.grid[this.x_dim - 1][j][k] = Grid.BORDER;
+			}
+		}
 	}
-
-
 
 	private int translateX(final double value) {
 
-		int res = (int) Math.floor(value - this.x_min) + margin;
-
-		if (res < 0) {
-
-			Logger.warn("x-value is " + value);
-			Logger.warn("XMin is : " + this.x_min);
-		}
-
-		return res;
+		return (int) Math.floor(value - this.x_min) + margin;
 	}
 
 	private int translateY(final double value) {
 
-		int res = (int) Math.floor(value - this.y_min) + margin;
-
-		if (res < 0) {
-
-			Logger.warn("y-value is " + value);
-			Logger.warn("YMin is : " + this.y_min);
-		}
-		return res;
+		return (int) Math.floor(value - this.y_min) + margin;
 	}
-
 
 	private int translateZ(final double value) {
 
-		int res = (int) Math.floor(value - this.z_min) + margin;
-
-		if (res < 0) {
-
-			Logger.warn("z-value is " + value);
-			Logger.warn("ZMin is : " + this.z_min);
-		}
-		return res;
+		return (int) Math.floor(value - this.z_min) + margin;
 	}
-
 
 	/**
 	 * Returns the donor residues of this grid.
@@ -178,7 +189,6 @@ public final class Grid implements Serializable {
 
 		return new HashMap<Residue, Set<Atom>>(this.acceptors);
 	}
-
 
 	/**
 	 * Determines whether the residue_atom is acceptor in this grid
@@ -203,95 +213,102 @@ public final class Grid implements Serializable {
 
 		return this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
 	}
+	
+	public void performBFS(final int x, final int y, final int z, final int max_length) {
+		
+		// Queue used for Exploring the grid, one for each direction
+		Queue<Integer> x_queue = new LinkedList<Integer>();
+		Queue<Integer> y_queue = new LinkedList<Integer>();
+		Queue<Integer> z_queue = new LinkedList<Integer>();
+		Queue<Integer> length = new LinkedList<Integer>();
+		
+		// Initialization
+		
+		// Set initial current value of the grid search
+		int current_x = x;
+		int current_y = y;
+		int current_z = z;
+		this.grid[current_x][current_y][current_z] = this.flag_threshold;
+		
+		// Enqueue the first point
+		x_queue.add(current_x);
+		y_queue.add(current_y);
+		z_queue.add(current_z);
+		length.add(0);
 
-	public int getCellCounts(byte cell_type) {
+		do {
+			// Get next grid point and the length
+			current_x = x_queue.poll();
+			current_y = y_queue.poll();
+			current_z = z_queue.poll();
+			int current_length = length.poll();
+			
+			if (current_length < max_length) {
+				
+				// Consider all possible directions, but only walk into solvent
+				if (this.grid[current_x-1][current_y][current_z] < this.flag_threshold) {
 
-		if ( ! this.cell_counts.containsKey(cell_type)) {
+					x_queue.add(current_x-1);
+					y_queue.add(current_y);
+					z_queue.add(current_z);
+					this.grid[current_x-1][current_y][current_z] = this.flag_threshold;
+					length.add(current_length+1);
+				}
+				if (this.grid[current_x+1][current_y][current_z] < this.flag_threshold) {
 
-			return -1;
-		}
-		return this.cell_counts.get(cell_type);
+					x_queue.add(current_x+1);
+					y_queue.add(current_y);
+					z_queue.add(current_z);
+					this.grid[current_x+1][current_y][current_z] = this.flag_threshold;
+					length.add(current_length+1);
+				}
+
+				if (this.grid[current_x][current_y-1][current_z] < this.flag_threshold) {
+
+					x_queue.add(current_x);
+					y_queue.add(current_y-1);
+					z_queue.add(current_z);
+					this.grid[current_x][current_y-1][current_z] = this.flag_threshold; 
+					length.add(current_length+1);
+				}
+
+				if (this.grid[current_x][current_y+1][current_z] < this.flag_threshold) {
+
+					x_queue.add(current_x);
+					y_queue.add(current_y+1);
+					z_queue.add(current_z);
+					this.grid[current_x][current_y+1][current_z] = this.flag_threshold;
+					
+					length.add(current_length+1);
+				}
+
+				if (this.grid[current_x][current_y][current_z-1] < this.flag_threshold) {
+
+					x_queue.add(current_x);
+					y_queue.add(current_y);
+					z_queue.add(current_z-1);
+					this.grid[current_x][current_y][current_z-1] = this.flag_threshold;
+					length.add(current_length+1);
+					
+				}
+
+				if (this.grid[current_x][current_y][current_z+1] < this.flag_threshold) {
+
+					x_queue.add(current_x);
+					y_queue.add(current_y);
+					z_queue.add(current_z+1);
+					this.grid[current_x][current_y][current_z+1] = this.flag_threshold; 
+					length.add(current_length+1);
+				}
+			}
+
+		} while( ! x_queue.isEmpty());
+		
+		// BFS has finished. Increase the flag threshold
+		this.flag_threshold++;
 	}
-
-	/**
-	 * Sets the cell in the grid having the provided coordinates to true
-	 * 
-	 * @param x x-coordinate
-	 * @param y y-coordinate
-	 * @param z z-coordinate
-	 */
-	private void flagCell(final double x, final double y, final double z, byte value_to_set) {
-
-		// Increase the value in the grid
-		int index_x = this.translateX(x);
-		int index_y = this.translateY(y);
-		int index_z = this.translateZ(z);
-
-		byte current_value = this.grid[index_x][index_y][index_z];
-
-		// Once occupied, always occupied, we ignore value_to_set.
-		// Also, setting SOLVENT does not make sense
-		if (current_value == OCCUPIED || value_to_set == SOLVENT) {
-			return;
-		}
-		byte final_value = value_to_set;
-
-		if (    (current_value == DONOR && value_to_set == ACCEPTOR)
-				||	(current_value == ACCEPTOR && value_to_set == DONOR)
-				|| (current_value == DONOR_ACCEPTOR && (   value_to_set == DONOR 
-				|| value_to_set == ACCEPTOR))){
-
-			final_value = DONOR_ACCEPTOR;
-		}
-
-		// Update cell counts
-		this.cell_counts.put(current_value, this.cell_counts.get(current_value) - 1 );
-		this.cell_counts.put(final_value,   this.cell_counts.get(final_value) + 1 );
-
-		this.grid[index_x][index_y][index_z] = final_value;
-	}
-
-	/**
-	 * Returns the byte value of the grid that is associated with the provided coordinates (in A space)
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public int getValue(final double x, final double y, final double z) {
-
-		return this.grid[this.translateX(x)][this.translateY(y)][this.translateZ(z)];
-	}
-
-	/**
-	 * Returns the byte value of the grid that is associated with the provided coordinates (in index space)
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public int getValue(final int x, final int y, final int z) {
-
-		return this.grid[x][y][z];
-	}
-
-	/**
-	 * Transforms Angstrom coordinates of the grid to the index domain
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	public int[] toIndex(final double x, final double y, final double z) {
-
-		return new int[] {
-				this.translateX(x),
-				this.translateY(y),
-				this.translateZ(z)
-		};
-	}
-
+	
+	
 	public int getXDim() {
 
 		return this.x_dim;
@@ -312,6 +329,86 @@ public final class Grid implements Serializable {
 		return this.size;
 	}
 
+	/**
+	 * Occupies (set cell value to OCCUPIED) all cells in the grid that lie within 
+	 * the VDW radius of an encountered atom
+	 * @param x x coordinate of the atom
+	 * @param y y coordinate of the atom
+	 * @param z z coordinate of the atom
+	 * @param atom 
+	 * @return Number of cells were occupied by this call
+	 */
+	private void occupyVDW(final double x, final double y, final double z, Element element) {
+
+		// Space to block is determined by the VDW radius of the atom
+		double radius = element.vdWRadius;
+
+		for (double x_iter = 0; x_iter < radius; x_iter++) {
+
+			int coord_x_1 = this.translateX(x + x_iter);
+			int coord_x_2 = this.translateX(x - x_iter);
+
+			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
+
+			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
+
+				int coord_y_1 = this.translateY(y + y_iter);
+				int coord_y_2 = this.translateY(y - y_iter);
+
+				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+
+				for (double z_iter = 0; z_iter < y_radius; z_iter++) {
+
+					int coord_z_1 = this.translateZ(z + z_iter);
+					int coord_z_2 = this.translateZ(z - z_iter);
+
+					this.grid[coord_x_1][coord_y_1][coord_z_1] = Grid.OCCUPIED;
+					this.grid[coord_x_1][coord_y_1][coord_z_2] = Grid.OCCUPIED;
+					this.grid[coord_x_1][coord_y_2][coord_z_1] = Grid.OCCUPIED;
+					this.grid[coord_x_1][coord_y_2][coord_z_2] = Grid.OCCUPIED;
+					this.grid[coord_x_2][coord_y_1][coord_z_1] = Grid.OCCUPIED;
+					this.grid[coord_x_2][coord_y_1][coord_z_2] = Grid.OCCUPIED;
+					this.grid[coord_x_2][coord_y_2][coord_z_1] = Grid.OCCUPIED;
+					this.grid[coord_x_2][coord_y_2][coord_z_2] = Grid.OCCUPIED;
+				}
+				// Update cells or z_iter = y_radius
+				int coord_z_1 = this.translateZ(z + y_radius);
+				int coord_z_2 = this.translateZ(z - y_radius);
+
+				this.grid[coord_x_1][coord_y_1][coord_z_1] = Grid.OCCUPIED;
+				this.grid[coord_x_1][coord_y_1][coord_z_2] = Grid.OCCUPIED;
+				this.grid[coord_x_1][coord_y_2][coord_z_1] = Grid.OCCUPIED;
+				this.grid[coord_x_1][coord_y_2][coord_z_2] = Grid.OCCUPIED;
+				this.grid[coord_x_2][coord_y_1][coord_z_1] = Grid.OCCUPIED;
+				this.grid[coord_x_2][coord_y_1][coord_z_2] = Grid.OCCUPIED;
+				this.grid[coord_x_2][coord_y_2][coord_z_1] = Grid.OCCUPIED;
+				this.grid[coord_x_2][coord_y_2][coord_z_2] = Grid.OCCUPIED;
+			}
+
+			// Update for y_iter = x_radius
+			// Then z_iter = 0
+			int coord_y_1 = this.translateY(y + x_radius);
+			int coord_y_2 = this.translateY(y - x_radius);
+			int coord_z = this.translateZ(z);
+
+			this.grid[coord_x_1][coord_y_1][coord_z] = Grid.OCCUPIED;
+			this.grid[coord_x_1][coord_y_2][coord_z] = Grid.OCCUPIED;
+			this.grid[coord_x_2][coord_y_1][coord_z] = Grid.OCCUPIED;
+			this.grid[coord_x_2][coord_y_2][coord_z] = Grid.OCCUPIED;
+		}
+
+		// Update for x_iter = radius
+		// So y_iter = 0
+		// So z_iter = 0
+		int coord_y = this.translateY(y);
+		int coord_z = this.translateZ(z);
+
+		this.grid[this.translateX(x + radius)][coord_y][coord_z] = Grid.OCCUPIED;
+		this.grid[this.translateX(x - radius)][coord_y][coord_z] = Grid.OCCUPIED;
+	}
+
+
+
 	public void addAtom(
 			final double x,
 			final double y,
@@ -319,246 +416,288 @@ public final class Grid implements Serializable {
 			final Residue residue,
 			final Atom atom) {
 
-		// See whether the atom is donor or acceptor
-		boolean isDonor = this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
-		boolean isAcceptor = this.acceptors.containsKey(residue) && this.acceptors.get(residue).contains(atom);
-
-		// Decide which grid value needs to be set (flagCell will then ultimately decide how to set)
-		byte value_to_set = (isDonor && isAcceptor) ? DONOR_ACCEPTOR : (isDonor ? DONOR : (isAcceptor ? ACCEPTOR : OCCUPIED));
-
-		// Set grid cells occupied by that atom to true
-		double radius = atom.element.vdWRadius + solvent_buffer;
-
-		for (double x_iter = 0; x_iter <= radius; x_iter += 1) {
-
-			// Radius of the x slice
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
-
-			for (double y_iter = 0; y_iter <= x_radius; y_iter += 1) {
-
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
-
-				for (double z_iter = 0; z_iter <= y_radius; z_iter += 1) {
-
-					// points to update
-					double coord_x_1 = x + x_iter;
-					double coord_x_2 = x - x_iter;
-					double coord_y_1 = y + y_iter;
-					double coord_y_2 = y - y_iter;
-					double coord_z_1 = z + z_iter;
-					double coord_z_2 = z - z_iter;
-
-					this.flagCell(coord_x_1, coord_y_1, coord_z_1, value_to_set);
-					this.flagCell(coord_x_1, coord_y_1, coord_z_2, value_to_set);
-					this.flagCell(coord_x_1, coord_y_2, coord_z_1, value_to_set);
-					this.flagCell(coord_x_1, coord_y_2, coord_z_2, value_to_set);
-					this.flagCell(coord_x_2, coord_y_1, coord_z_1, value_to_set);
-					this.flagCell(coord_x_2, coord_y_1, coord_z_2, value_to_set);
-					this.flagCell(coord_x_2, coord_y_2, coord_z_1, value_to_set);
-					this.flagCell(coord_x_2, coord_y_2, coord_z_2, value_to_set);					
-				}
-			}	
-		}
-
-
-
-	}
-
-
-	/**
-	 * Returns all cell indices around a cartesian center where the grid cells have particular values
-	 * TODO Modify such that only the shell is accessible
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param residue
-	 * @param atom
-	 * @param grid_values
-	 * @return
-	 */
-	public List<int[]>  queryAtom(
-			final double x,
-			final double y,
-			final double z,
-			final Residue residue,
-			final Atom atom,
-			final Set<Byte> grid_values) {
-
-		// traverse the grid cells
-		// Set grid cells occupied by that atom to true
-		double radius = atom.element.vdWRadius + solvent_buffer;
-
-		List<int[]> res = new ArrayList<int[]>();
-
-		for (double x_iter = 0; x_iter <= radius; x_iter += 1) {
-
-			// Radius of the x slice
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
-
-			for (double y_iter = 0; y_iter <= x_radius; y_iter += 1) {
-
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
-
-				for (double z_iter = 0; z_iter <= y_radius; z_iter += 1) {
-
-					// points to update
-					double coord_x_1 = x + x_iter;
-					double coord_x_2 = x - x_iter;
-					double coord_y_1 = y + y_iter;
-					double coord_y_2 = y - y_iter;
-					double coord_z_1 = z + z_iter;
-					double coord_z_2 = z - z_iter;
-
-					// Get the indices
-					int[] value0 = this.toIndex(coord_x_1, coord_y_1, coord_z_1);
-					int[] value1 = this.toIndex(coord_x_1, coord_y_1, coord_z_2);
-					int[] value2 = this.toIndex(coord_x_1, coord_y_2, coord_z_1);
-					int[] value3 = this.toIndex(coord_x_1, coord_y_2, coord_z_2);
-					int[] value4 = this.toIndex(coord_x_2, coord_y_1, coord_z_1);
-					int[] value5 = this.toIndex(coord_x_2, coord_y_1, coord_z_2);
-					int[] value6 = this.toIndex(coord_x_2, coord_y_2, coord_z_1);
-					int[] value7 = this.toIndex(coord_x_2, coord_y_2, coord_z_2);
-
-					if (grid_values.contains(this.grid[value0[0]][value0[1]][value0[2]])) {
-
-						res.add(value0);
-					}
-					if (grid_values.contains(this.grid[value1[0]][value1[1]][value1[2]])) {
-
-						res.add(value1);
-					}
-					if (grid_values.contains(this.grid[value2[0]][value2[1]][value2[2]])) {
-
-						res.add(value2);
-					}
-					if (grid_values.contains(this.grid[value3[0]][value3[1]][value3[2]])) {
-
-						res.add(value3);
-					}
-					if (grid_values.contains(this.grid[value4[0]][value4[1]][value4[2]])) {
-
-						res.add(value4);
-					}
-					if (grid_values.contains(this.grid[value5[0]][value5[1]][value5[2]])) {
-
-						res.add(value5);
-					}
-					if (grid_values.contains(this.grid[value6[0]][value6[1]][value6[2]])) {
-
-						res.add(value6);
-					}
-					if (grid_values.contains(this.grid[value7[0]][value7[1]][value7[2]])) {
-
-						res.add(value7);
-					}
-				}
-			}	
-		}
-		return res;
-	}
-
-
-	
-
-	
-	/**
-	 * Returns all cell indices around a cartesian center where the grid cells have particular values
-	 * TODO Modify such that only the shell is accessible
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @param residue
-	 * @param atom
-	 * @param grid_values
-	 * @return
-	 */
-	public double queryAtomPercentage(
-			final double x,
-			final double y,
-			final double z,
-			final Residue residue,
-			final Atom atom,
-			final Set<Byte> grid_values) {
-
-		// traverse the grid cells
-		// Set grid cells occupied by that atom to true
-		double radius = atom.element.vdWRadius + solvent_buffer;
-
-		int total_points = 0;
-		int enumerator = 0;
+		// Related to the 
+		boolean residueBelongsToDonor = this.donors.containsKey(residue);
+		boolean residueBelongsToAcceptor = this.acceptors.containsKey(residue);
 		
-		for (double x_iter = 0; x_iter <= radius; x_iter += 1) {
+		boolean isDonor = residueBelongsToDonor && this.donors.get(residue).contains(atom);
+		boolean isAcceptor = residueBelongsToAcceptor && this.acceptors.get(residue).contains(atom);
 
-			// Radius of the x slice
+		// Ignore hydrogen
+		if (atom.element.equals(Element.H)) {
+			return;
+		}
+		
+		// Decide which grid value needs to be set (flagCell will then ultimately decide how to set)
+		byte value_to_set = (isDonor && isAcceptor) ? Grid.DONOR_ACCEPTOR : (isDonor ? Grid.DONOR : (isAcceptor ? Grid.ACCEPTOR : Grid.OCCUPIED));
+
+		// occupy the vdW volume of the atom
+		this.occupyVDW(x, y, z, atom.element);
+
+		if (value_to_set != OCCUPIED) {
+
+			this.makeAccessible(x, y, z, atom.element, value_to_set);
+		}
+	}
+
+
+	private void setIfNotOccupied(int x_index, int y_index, int z_index, byte value_to_set) {			
+		if (this.grid[x_index][y_index][z_index] != OCCUPIED) {
+			this.grid[x_index][y_index][z_index] = value_to_set;
+		}
+	}
+
+
+	private void makeAccessible(double x, double y, double z, Element element, byte value_to_set) {
+
+		double radius = element.vdWRadius + 1;
+
+		for (double x_iter = 0; x_iter < radius; x_iter++) {
+
+			int coord_x_1 = this.translateX(x + x_iter);
+			int coord_x_2 = this.translateX(x - x_iter);
+
 			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
 
-			for (double y_iter = 0; y_iter <= x_radius; y_iter += 1) {
+			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
+
+				int coord_y_1 = this.translateY(y + y_iter);
+				int coord_y_2 = this.translateY(y - y_iter);
 
 				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
 
-				for (double z_iter = 0; z_iter <= y_radius; z_iter += 1) {
+				// Update cells or z_iter = y_radius
+				int coord_z_1 = this.translateZ(z + y_radius);
+				int coord_z_2 = this.translateZ(z - y_radius);
 
-					total_points += 8;
-					
-					// points to update
-					double coord_x_1 = x + x_iter;
-					double coord_x_2 = x - x_iter;
-					double coord_y_1 = y + y_iter;
-					double coord_y_2 = y - y_iter;
-					double coord_z_1 = z + z_iter;
-					double coord_z_2 = z - z_iter;
+				this.setIfNotOccupied(coord_x_1, coord_y_1, coord_z_1, value_to_set);
+				this.setIfNotOccupied(coord_x_1, coord_y_1, coord_z_2, value_to_set);
+				this.setIfNotOccupied(coord_x_1, coord_y_2, coord_z_1, value_to_set);
+				this.setIfNotOccupied(coord_x_1, coord_y_2, coord_z_2, value_to_set);
+				this.setIfNotOccupied(coord_x_2, coord_y_1, coord_z_1, value_to_set);
+				this.setIfNotOccupied(coord_x_2, coord_y_1, coord_z_2, value_to_set);
+				this.setIfNotOccupied(coord_x_2, coord_y_2, coord_z_1, value_to_set);
+				this.setIfNotOccupied(coord_x_2, coord_y_2, coord_z_2, value_to_set);
+			}
 
-					// Get the indices
-					int[] value0 = this.toIndex(coord_x_1, coord_y_1, coord_z_1);
-					int[] value1 = this.toIndex(coord_x_1, coord_y_1, coord_z_2);
-					int[] value2 = this.toIndex(coord_x_1, coord_y_2, coord_z_1);
-					int[] value3 = this.toIndex(coord_x_1, coord_y_2, coord_z_2);
-					int[] value4 = this.toIndex(coord_x_2, coord_y_1, coord_z_1);
-					int[] value5 = this.toIndex(coord_x_2, coord_y_1, coord_z_2);
-					int[] value6 = this.toIndex(coord_x_2, coord_y_2, coord_z_1);
-					int[] value7 = this.toIndex(coord_x_2, coord_y_2, coord_z_2);
+			// Update for y_iter = x_radius
+			// Then z_iter = 0
+			int coord_y_1 = this.translateY(y + x_radius);
+			int coord_y_2 = this.translateY(y - x_radius);
+			int coord_z = this.translateZ(z);
 
-					if (grid_values.contains(this.grid[value0[0]][value0[1]][value0[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value1[0]][value1[1]][value1[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value2[0]][value2[1]][value2[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value3[0]][value3[1]][value3[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value4[0]][value4[1]][value4[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value5[0]][value5[1]][value5[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value6[0]][value6[1]][value6[2]])) {
-
-						enumerator++;
-					}
-					if (grid_values.contains(this.grid[value7[0]][value7[1]][value7[2]])) {
-
-						enumerator++;
-					}
-				}
-			}	
+			this.setIfNotOccupied(coord_x_1, coord_y_1, coord_z, value_to_set);
+			this.setIfNotOccupied(coord_x_1, coord_y_2, coord_z, value_to_set);
+			this.setIfNotOccupied(coord_x_2, coord_y_1, coord_z, value_to_set);
+			this.setIfNotOccupied(coord_x_2, coord_y_2, coord_z, value_to_set);
 		}
-		return ((double)enumerator ) /  ((double) total_points);
+
+		// Update for x_iter = radius
+		// So y_iter = 0
+		// So z_iter = 0
+		int coord_y = this.translateY(y);
+		int coord_z = this.translateZ(z);
+
+		this.setIfNotOccupied(this.translateX(x + radius), coord_y, coord_z, value_to_set);
+		this.setIfNotOccupied(this.translateX(x - radius), coord_y, coord_z, value_to_set);
 	}
-	
-	
-	
-	
+
+	public int[] queryAtom(
+			final double x,
+			final double y,
+			final double z,
+			final Residue residue,
+			final Element element) {
+
+		double radius = element.vdWRadius + 1;
+		
+		for (double x_iter = 0; x_iter < radius; x_iter++) {
+
+			int coord_x_1 = this.translateX(x + x_iter);
+			int coord_x_2 = this.translateX(x - x_iter);
+
+			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
+
+			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
+
+				int coord_y_1 = this.translateY(y + y_iter);
+				int coord_y_2 = this.translateY(y - y_iter);
+
+				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+
+				// Update cells or z_iter = y_radius
+				int coord_z_1 = this.translateZ(z + y_radius);
+				int coord_z_2 = this.translateZ(z - y_radius);
+
+				if (this.grid[coord_x_1][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_1, coord_y_1, coord_z_1  };
+				}
+				if (this.grid[coord_x_1][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
+					return new int[]  {coord_x_1, coord_y_1, coord_z_2 };
+				}
+				if (this.grid[coord_x_1][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_1, coord_y_2, coord_z_1};
+				}
+				if (this.grid[coord_x_1][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_1, coord_y_2, coord_z_2 };
+				}
+				if (this.grid[coord_x_2][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_2, coord_y_1, coord_z_1};
+				}
+				if (this.grid[coord_x_2][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_2, coord_y_1, coord_z_2};
+				}
+				if (this.grid[coord_x_2][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_2, coord_y_2, coord_z_1} ;
+				}
+				if (this.grid[coord_x_2][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
+					return new int[] {coord_x_2, coord_y_2, coord_z_2};
+				}
+			}
+
+			// Update for y_iter = x_radius
+			// Then z_iter = 0
+			int coord_y_1 = this.translateY(y + x_radius);
+			int coord_y_2 = this.translateY(y - x_radius);
+			int coord_z = this.translateZ(z);
+
+			if (this.grid[coord_x_1][coord_y_1][coord_z] != Grid.OCCUPIED) {	
+				return new int[] {coord_x_1, coord_y_1, coord_z};
+			}
+			if (this.grid[coord_x_1][coord_y_2][coord_z] != Grid.OCCUPIED) {	
+				return new int[] {coord_x_1, coord_y_2, coord_z};
+			}
+			if (this.grid[coord_x_2][coord_y_1][coord_z] != Grid.OCCUPIED) {	
+				return new int[] {coord_x_2, coord_y_1, coord_z};
+			}
+			if (this.grid[coord_x_2][coord_y_2][coord_z] != Grid.OCCUPIED) {	
+				return new int[] {coord_x_2, coord_y_2, coord_z};
+			}
+		}
+
+		// Update for x_iter = radius
+		// So y_iter = 0
+		// So z_iter = 0
+		
+		int coord_x_1 = this.translateX(x + radius);
+		int coord_x_2 = this.translateX(x - radius);
+		int coord_y = this.translateY(y);
+		int coord_z = this.translateZ(z);
+
+		if (this.grid[coord_x_1][coord_y][coord_z] != Grid.OCCUPIED) {	
+			return new int[] {coord_x_1, coord_y, coord_z};
+		}
+		if (this.grid[coord_x_2][coord_y][coord_z] != Grid.OCCUPIED) {	
+			return new int[] {coord_x_2, coord_y, coord_z};
+		}
+		return null;
+	}
+
+
+	/**
+	 * Returns the percentage of the surface shell that is accessible of the atom
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param residue
+	 * @param atom
+	 * @param grid_values
+	 * @return
+	 */
+	public double queryAtomAccessibility(
+			final double x,
+			final double y,
+			final double z,
+			final Residue residue,
+			final Element element) {
+
+		double radius = element.vdWRadius + 1;
+		
+		double numerator = 0;
+		double denominator = 0;
+
+		for (double x_iter = 0; x_iter < radius; x_iter++) {
+
+			int coord_x_1 = this.translateX(x + x_iter);
+			int coord_x_2 = this.translateX(x - x_iter);
+
+			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
+
+			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
+
+				int coord_y_1 = this.translateY(y + y_iter);
+				int coord_y_2 = this.translateY(y - y_iter);
+
+				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+
+				// Update cells or z_iter = y_radius
+				int coord_z_1 = this.translateZ(z + y_radius);
+				int coord_z_2 = this.translateZ(z - y_radius);
+
+				if (this.grid[coord_x_1][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_1][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_1][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_1][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_2][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_2][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_2][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				if (this.grid[coord_x_2][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
+					numerator++;
+				}
+				denominator += 8;
+			}
+
+			// Update for y_iter = x_radius
+			// Then z_iter = 0
+			int coord_y_1 = this.translateY(y + x_radius);
+			int coord_y_2 = this.translateY(y - x_radius);
+			int coord_z = this.translateZ(z);
+
+			if (this.grid[coord_x_1][coord_y_1][coord_z] != Grid.OCCUPIED) {	
+				numerator++;
+			}
+			if (this.grid[coord_x_1][coord_y_2][coord_z] != Grid.OCCUPIED) {	
+				numerator++;
+			}
+			if (this.grid[coord_x_2][coord_y_1][coord_z] != Grid.OCCUPIED) {	
+				numerator++;
+			}
+			if (this.grid[coord_x_2][coord_y_2][coord_z] != Grid.OCCUPIED) {	
+				numerator++;
+			}
+			denominator += 4;
+		}
+
+		// Update for x_iter = radius
+		// So y_iter = 0
+		// So z_iter = 0
+		int coord_y = this.translateY(y);
+		int coord_z = this.translateZ(z);
+
+		if (this.grid[this.translateX(x + radius)][coord_y][coord_z] != Grid.OCCUPIED) {	
+			numerator++;
+		}
+		if (this.grid[this.translateX(x - radius)][coord_y][coord_z] != Grid.OCCUPIED) {	
+			numerator++;
+		}
+		denominator += 2;
+		
+		return ((double) numerator) / ((double) denominator);
+	}
 
 
 	/**

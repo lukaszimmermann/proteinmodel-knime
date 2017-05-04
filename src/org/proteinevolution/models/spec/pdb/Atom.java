@@ -2,6 +2,8 @@ package org.proteinevolution.models.spec.pdb;
 
 public enum Atom {
 
+	
+	// Carbon
 	CA(Element.C),
 	CB(Element.C),
 	CD(Element.C),
@@ -18,6 +20,16 @@ public enum Atom {
 	CZ(Element.C),
 	CZ2(Element.C),
 	CZ3(Element.C),
+	C7(Element.C),
+	C2_(Element.C),
+	C1_(Element.C),
+	C8(Element.C),
+	C5(Element.C),
+	C6(Element.C),
+	C2(Element.C),
+	C(Element.C),
+	C9(Element.C),
+	C4(Element.C),	
 	N(Element.N),
 	ND1(Element.N),
 	ND2(Element.N),
@@ -27,7 +39,6 @@ public enum Atom {
 	NH1(Element.N),
 	NH2(Element.N),
 	NZ(Element.N),
-	C(Element.C),
 	O(Element.O),
 	OD(Element.O),
 	OD1(Element.O),
@@ -133,13 +144,7 @@ public enum Atom {
 	O3_(Element.O),
 	O6(Element.O),
 	O2_(Element.O),
-	C7(Element.C),
-	C2_(Element.C),
-	C1_(Element.C),
-	C8(Element.C),
-	C5(Element.C),
-	C6(Element.C),
-	C2(Element.C),
+
 	N9(Element.N),
 	N7(Element.N),
 	N3(Element.N),
@@ -147,8 +152,7 @@ public enum Atom {
 	N1(Element.N),
 	N2(Element.N),
 	N4(Element.N),
-	C9(Element.C),
-	C4(Element.C),
+
 	OP1(Element.O),
 	O2(Element.O),
 	O4(Element.O),

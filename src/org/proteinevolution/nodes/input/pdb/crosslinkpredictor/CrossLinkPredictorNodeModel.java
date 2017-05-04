@@ -8,9 +8,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 import org.knime.core.data.DataCell;
@@ -44,6 +42,7 @@ import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.Grid;
 import org.proteinevolution.models.structure.GridFlag;
+import org.proteinevolution.models.structure.Point3D;
 
 
 /**
@@ -52,14 +51,21 @@ import org.proteinevolution.models.structure.GridFlag;
 public class CrossLinkPredictorNodeModel extends NodeModel {
 
 
-	private final class LocalAtom {
+	/**
+	 * This class is used internally by the CrossLinkPredictor node to keep track of
+	 * information of encountered atoms
+	 * 
+	 * @author lzimmermann
+	 *
+	 */
+	private final class LocalAtom implements Point3D {
 
-		public final int resid;
-		public final String resname;
-		public final String chain;
-		public final double x;
-		public final double y;
-		public final double z;
+		private final int resid;
+		private final String resname;
+		private final String chain;
+		private final double x;
+		private final double y;
+		private final double z;
 
 		public LocalAtom(int resid, String resname, String chain, double x, double y, double z) {
 			this.resid = resid;
@@ -68,6 +74,24 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			this.x = x;
 			this.y = y;
 			this.z = z;
+		}
+
+		@Override
+		public double getX() {
+			
+			return this.x;
+		}
+
+		@Override
+		public double getY() {
+	
+			return this.y;
+		}
+
+		@Override
+		public double getZ() {
+			
+			return this.z;
 		}
 	}
 
@@ -102,41 +126,10 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	public static final String GRID_SELECTION_LABEL = "Select column with protein grid";
 	private final SettingsModelString grid = new SettingsModelString(GRID_SELECTION_CFGKEY, GRID_SELECTION_DEFAULT);
 
-	/////////////////////////////////////////////////////////////////////////////////////////////
+	// Accessibility threshold
+	private static final double minAccessibility = 0.5;
 
 
-	/**
-	 * Performs BFS Search on the Grid to find accessible residues
-	 * 
-	 * @param grid
-	 * @param start
-	 */
-	private void performBFS(final Grid grid, final int[] start) {
-
-		// Queue used for Exploring the grid, one for each direction
-		Queue<Byte> x_queue = new LinkedList<Byte>();
-		Queue<Byte> y_queue = new LinkedList<Byte>();
-		Queue<Byte> z_queue = new LinkedList<Byte>();
-
-		// all queues are required to be equally long
-
-		int[] current_cell = start;
-
-		do {
-
-
-
-
-
-
-
-		} while( ! x_queue.isEmpty());
-	}
-
-
-
-
-	/////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Returns the distances between the atoms a and b. The distance metrics currently supported are:
 	 * 	* Euclidean
@@ -203,16 +196,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		BufferedDataTable intable = inData[0];
 		int grid_index = intable.getSpec().findColumnIndex(this.grid.getStringValue());
 
-		// Grid values for the SASD residues
-		Set<Byte> grid_values_donor = new HashSet<Byte>();
-		grid_values_donor.add(Grid.DONOR);
-
-		Set<Byte> grid_values_acceptor = new HashSet<Byte>();
-		grid_values_donor.add(Grid.ACCEPTOR);
-
-		Set<Byte> grid_values_boths = new HashSet<Byte>();
-		grid_values_boths.add(Grid.DONOR_ACCEPTOR);
-
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if (intable.size() != 1) {
 
@@ -234,7 +217,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			throw new IllegalArgumentException("This Grid cannot be used for SASD calculation. Check GridBuilder settings.");
 		}
 
-
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
 
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
@@ -251,6 +233,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
+
 		// List keeping track of the acceptor/donors residues (for Euclidean distance)
 		List<LocalAtom> euc_donors = new ArrayList<LocalAtom>();
 		List<LocalAtom> euc_acceptors = new ArrayList<LocalAtom>();
@@ -263,7 +246,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		List<int[]> sasd_donors_start = new ArrayList<int[]>();
 		List<int[]> sasd_acceptors_start = new ArrayList<int[]>();
 		List<int[]> sasd_donors_acceptors_start = new ArrayList<int[]>();
-		
+
 		// Figure out which atoms we care about
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		Set<Atom> atoms_sasd = new HashSet<Atom>();
@@ -283,7 +266,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		int row_counter = 0;
 
 
-
 		/// Temporary stuff
 		/*
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
@@ -292,13 +274,11 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				new DataColumnSpecCreator("resname", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("chain", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resid", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("percentage", DoubleCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("accessibility", DoubleCell.TYPE).createSpec(),
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
-		BufferedDataContainer container = exec.createDataContainer(outputSpec);
+		BufferedDataContainer container = exec.createDataContainer(outputSpec);	
 		 */
-
-
 		////////
 
 		String input_filename = this.input.getStringValue();
@@ -370,32 +350,37 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			}
 
 
+			// Consider case that we have an atom for SASD calculation
 			if (isAtomForSASD) {
 
 				boolean isSASDDonor = grid.isDonor(residue, atom);
 				boolean isSASDAcceptor = grid.isAcceptor(residue, atom);
 
-				
-				
-				// Residue is xl donor as well as xl acceptor
-				if (isSASDDonor && isSASDAcceptor) {
+				// We only consider this residue if it has a minimum accessability
+				if (grid.queryAtomAccessibility(x, y, z, residue, atom.element) >= minAccessibility) {
 
-					List<int[]> accessible_points = grid.queryAtom(x, y, z, residue, atom, grid_values_boths);
+					// Decide which list the atom will be added to
+					(isSASDDonor && isSASDAcceptor ? sasd_donors_acceptors
+							: (isSASDDonor ? sasd_donors : sasd_acceptors)).add(
+									new LocalAtom(resid, residueName, chain, x, y, z));
 
-					// Decide whether the current residue is solvent accessible and start BFS on first cell
-					performBFS(grid, accessible_points.get(0));
-
-				} else if (isSASDDonor) {
-
-
-				} else if (isSASDAcceptor) {
-
+					(isSASDDonor && isSASDAcceptor ? sasd_donors_acceptors_start
+							: (isSASDDonor ? sasd_donors_acceptors_start : sasd_acceptors_start)).add(
+									grid.queryAtom(x, y, z, residue, atom.element));
 				}
 			}
+		}
 
-		}    		
+		// Perform BFS on each recorded residue for SASD
 
-		// once we are done, we close the container and return its table
+		// TODO TEST
+		LocalAtom atom = sasd_donors_acceptors.get(0);
+		int[] start = sasd_donors_acceptors_start.get(0);
+
+				
+		grid.performBFS(start[0], start[1], start[2], 40);
+
+
 		br.close();
 		br = null;
 		container.close();

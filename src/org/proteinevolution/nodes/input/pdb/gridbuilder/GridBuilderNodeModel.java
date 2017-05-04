@@ -30,6 +30,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
@@ -54,7 +55,7 @@ public class GridBuilderNodeModel extends NodeModel {
 	public static String INPUT_CFGKEY = "INPUT_CFGKEY";
 	public static String INPUT_DEFAULT = "";
 	public static String INPUT_HISTORY = "INPUT_HISTORY";
-	private SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT); 
+	private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT); 
 
 	// SAS SASD compatibility
 	public static String SASD_CFGKEY = "SASD_CFGKEY";
@@ -87,11 +88,6 @@ public class GridBuilderNodeModel extends NodeModel {
 				new DataColumnSpecCreator("y_dim", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("z_dim", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("size", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("n_solvent", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("n_donor", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("n_acceptor", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("n_donor_acceptor", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("n_occupied", IntCell.TYPE).createSpec()
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 
@@ -142,7 +138,15 @@ public class GridBuilderNodeModel extends NodeModel {
 				upper_z = z > upper_z ? z : upper_z;        			
 			}
 		}
-		grid = new Grid(lower_x, lower_y, lower_z, upper_x, upper_y, upper_z, donors, acceptors);
+		grid = new Grid(
+				lower_x,
+				lower_y,
+				lower_z,
+				upper_x,
+				upper_y,
+				upper_z,
+				donors,
+				acceptors);
 
 		br = null;
 		br = new BufferedReader(new FileReader(this.input.getStringValue()));
@@ -178,11 +182,6 @@ public class GridBuilderNodeModel extends NodeModel {
 						IntCellFactory.create(grid.getYDim()),
 						IntCellFactory.create(grid.getZDim()),
 						IntCellFactory.create(grid.getSize()),
-						IntCellFactory.create(grid.getCellCounts(Grid.SOLVENT)),
-						IntCellFactory.create(grid.getCellCounts(Grid.DONOR)),
-						IntCellFactory.create(grid.getCellCounts(Grid.ACCEPTOR)),
-						IntCellFactory.create(grid.getCellCounts(Grid.DONOR_ACCEPTOR)),
-						IntCellFactory.create(grid.getCellCounts(Grid.OCCUPIED))
 		}));
 
 		br.close();
