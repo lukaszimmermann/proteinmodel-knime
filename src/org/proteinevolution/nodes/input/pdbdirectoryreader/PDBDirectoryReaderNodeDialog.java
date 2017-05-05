@@ -1,11 +1,9 @@
-package org.proteinevolution.nodes.input.pdbdirreader;
+package org.proteinevolution.nodes.input.pdbdirectoryreader;
 
 import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -19,29 +17,23 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author Lukas Zimmermann
  */
-public class PDBDirReaderNodeDialog extends DefaultNodeSettingsPane {
+public class PDBDirectoryReaderNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring PDBDirReader node dialog.
      * This is just a suggestion to demonstrate possible default dialog
      * components.
      */
-    protected PDBDirReaderNodeDialog() {
+    protected PDBDirectoryReaderNodeDialog() {
         super();
         
         
         this.addDialogComponent(new DialogComponentFileChooser(
         		new SettingsModelString(
-        				PDBDirReaderNodeModel.INPUT_CFGKEY,
-        				PDBDirReaderNodeModel.INPUT_DEFAULT),
-        		PDBDirReaderNodeModel.INPUT_HISTORY,
+        				PDBDirectoryReaderNodeModel.INPUT_CFGKEY,
+        				PDBDirectoryReaderNodeModel.INPUT_DEFAULT),
+        		PDBDirectoryReaderNodeModel.INPUT_HISTORY,
         		JFileChooser.OPEN_DIALOG,
         		true)); 
-        
-        this.addDialogComponent(new DialogComponentBoolean(
-        		new SettingsModelBoolean(
-        				PDBDirReaderNodeModel.ATOM_CFGKEY,
-        				PDBDirReaderNodeModel.ATOM_DEFAULT),
-        		PDBDirReaderNodeModel.ATOM_LABEL));
     }	
 }

@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdbdirreader;
+package org.proteinevolution.nodes.input.pdbdirectoryreader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class PDBDirReaderNodeFactory 
-        extends NodeFactory<PDBDirReaderNodeModel> {
+public class PDBDirectoryReaderNodeFactory 
+        extends NodeFactory<PDBDirectoryReaderNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PDBDirReaderNodeModel createNodeModel() {
-        return new PDBDirReaderNodeModel();
+    public PDBDirectoryReaderNodeModel createNodeModel() {
+        return new PDBDirectoryReaderNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class PDBDirReaderNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<PDBDirReaderNodeModel> createNodeView(final int viewIndex,
-            final PDBDirReaderNodeModel nodeModel) {
-        return new PDBDirReaderNodeView(nodeModel);
+    public NodeView<PDBDirectoryReaderNodeModel> createNodeView(final int viewIndex,
+            final PDBDirectoryReaderNodeModel nodeModel) {
+        return new PDBDirectoryReaderNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class PDBDirReaderNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new PDBDirReaderNodeDialog();
+        return new PDBDirectoryReaderNodeDialog();
     }
 
 }
