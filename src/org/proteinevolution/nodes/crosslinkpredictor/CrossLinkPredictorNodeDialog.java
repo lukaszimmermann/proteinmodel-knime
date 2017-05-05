@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.crosslinkpredictor;
+package org.proteinevolution.nodes.crosslinkpredictor;
 
 import javax.swing.ListSelectionModel;
 

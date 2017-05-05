@@ -21,8 +21,8 @@ public enum Atom {
 	CZ2(Element.C),
 	CZ3(Element.C),
 	C7(Element.C),
-	C2_(Element.C),
-	C1_(Element.C),
+	C2_(Element.C, "C2'"),
+	C1_(Element.C, "C1'"),
 	C8(Element.C),
 	C5(Element.C),
 	C6(Element.C),
@@ -52,15 +52,15 @@ public enum Atom {
 	OXT(Element.O),
 	SD(Element.S),
 	SG(Element.S),
-	_1H(Element.H),
-	_2H(Element.H),
-	_3H(Element.H),
+	_1H(Element.H, "1H"),
+	_2H(Element.H, "2H"),
+	_3H(Element.H, "3H"),
 	HA(Element.H),
 	HB(Element.H),
-	_1HG1(Element.H),
-	_2HG1(Element.H),
-	_3HG1(Element.H),
-	_1HG2(Element.H),
+	_1HG1(Element.H, "1HG1"),
+	_2HG1(Element.H, "2HG1"),
+	_3HG1(Element.H, "3HG1"),
+	_1HG2(Element.H, "1HG2"),
 	_2HG2(Element.H),
 	_3HG2(Element.H),
 	_1HB(Element.H),
@@ -183,7 +183,8 @@ public enum Atom {
 	H71(Element.H);
 	
 	public final Element element;
-
+	public final String repr;
+	
 	
 	public static Atom toAtom(final String value) {
 		
@@ -192,10 +193,19 @@ public enum Atom {
 	}
 	
 	
-	private Atom(final Element element) {
+	private Atom(final Element element, final String repr) {
 	
 		this.element = element;
+		this.repr = repr;
 	}
+	
+	private Atom(final Element element) {
+		
+		this.element = element;
+		this.repr = this.name();
+	}
+	
+	
 	public static final String name = "ATOM";
 
 	

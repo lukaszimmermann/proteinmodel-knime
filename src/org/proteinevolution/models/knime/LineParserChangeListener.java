@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 
 import org.knime.core.node.NodeLogger;
-import org.proteinevolution.nodes.input.pdb.crosslinkpredictor.CrossLinkPredictorNodeModel;
+import org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeModel;
 
 
 public class LineParserChangeListener extends SettingsModelStringChangeListener {

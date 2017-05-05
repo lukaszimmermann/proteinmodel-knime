@@ -30,11 +30,12 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Residue;
+import org.proteinevolution.models.structure.AtomIdentification;
 import org.proteinevolution.models.structure.Grid;
+import org.proteinevolution.models.structure.LocalAtom;
 
 
 /**
@@ -61,7 +62,7 @@ public class GridBuilderNodeModel extends NodeModel {
 	public static String SASD_CFGKEY = "SASD_CFGKEY";
 	public static boolean SASD_DEFAULT = true;
 	public static String SASD_LABEL = "SASD Compatibility";
-	
+
 
 	/**
 	 * Constructor for the node model.
@@ -92,20 +93,20 @@ public class GridBuilderNodeModel extends NodeModel {
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 
 		Grid grid = null;
-		
+
 		// TODO Donor and acceptor residues (should be parameterized)
 		///// TODO -BLOCK
 		Map<Residue, Set<Atom>> donors = new HashMap<Residue, Set<Atom>>();
 		Map<Residue, Set<Atom>> acceptors = new HashMap<Residue, Set<Atom>>();
-		
+
 		Set<Atom> lys_atoms = new HashSet<Atom>();
 		lys_atoms.add(Atom.NZ);
-		
+
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
 		// END- TODO Block
-		
-		
+
+
 		// Read the input file in two passes.
 		// First: Determine the dimensions of the grid
 		BufferedReader br = new BufferedReader(new FileReader(this.input.getStringValue()));
@@ -113,7 +114,7 @@ public class GridBuilderNodeModel extends NodeModel {
 		double lower_x = Double.MAX_VALUE;
 		double lower_y = Double.MAX_VALUE;
 		double lower_z = Double.MAX_VALUE;
-		
+
 		double upper_x = Double.MIN_VALUE;
 		double upper_y = Double.MIN_VALUE;
 		double upper_z = Double.MIN_VALUE;
@@ -151,21 +152,24 @@ public class GridBuilderNodeModel extends NodeModel {
 		br = null;
 		br = new BufferedReader(new FileReader(this.input.getStringValue()));
 
+	
 		while ( (line = br.readLine()) != null ) {
 
 			// Only care about atom records
 			if (Atom.isRecord(line)) {
-
 				grid.addAtom(
-						Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
-						Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
-						Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
-						Residue.valueOf(line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim()),
-						Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim())
-				);
+						new LocalAtom(
+								Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
+								Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
+								Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
+										new AtomIdentification(
+												Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim()),
+												Residue.valueOf(line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim()),
+												Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim()),
+												line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END).trim())));;
 			}
-		}
-
+		} 
+		
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream out = new ObjectOutputStream(bos);

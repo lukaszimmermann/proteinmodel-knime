@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.crosslinkpredictor;
+package org.proteinevolution.nodes.crosslinkpredictor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 
 import org.knime.core.data.DataCell;
@@ -17,7 +17,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.blob.BinaryObjectFileStoreDataCell;
 import org.knime.core.data.container.DataContainer;
 import org.knime.core.data.def.DefaultRow;
@@ -42,94 +42,17 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.Atom;
 import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
+import org.proteinevolution.models.structure.AtomIdentification;
 import org.proteinevolution.models.structure.Grid;
 import org.proteinevolution.models.structure.GridFlag;
-import org.proteinevolution.models.structure.Point3D;
+import org.proteinevolution.models.structure.LocalAtom;
+import org.proteinevolution.models.structure.UnorderedAtomPair;
 
 
 /**
  * @author Lukas Zimmermann
  */
 public class CrossLinkPredictorNodeModel extends NodeModel {
-
-
-	/**
-	 * This class is used internally by the CrossLinkPredictor node to keep track of
-	 * information of encountered atoms
-	 * 
-	 * @author lzimmermann
-	 *
-	 */
-	private final class LocalAtom implements Point3D {
-
-		public static final byte DONOR = 1;
-		public static final byte ACCEPTOR = 2;
-		public static final byte DONOR_ACCEPTOR = 3;
-
-		private final int resid;
-		private final String resname;
-		private final String chain;
-		private final double x;
-		private final double y;
-		private final double z;
-		private final byte type;
-		private final Element element;
-
-		public LocalAtom(final int resid, final String resname, 
-				final String chain, final double x, final double y, final double z, final byte type, final Element element) {
-			this.resid = resid;
-			this.resname = resname;
-			this.chain = chain;
-			this.x = x;
-			this.y = y;
-			this.z = z;
-			this.type = type;
-			this.element = element;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-
-			if (o == null || ! (o instanceof LocalAtom)) {
-
-				return false;
-			}
-			LocalAtom other = (LocalAtom) o;
-
-			return     other.resid == this.resid
-					&& other.resname.equals(this.resname)
-					&& other.chain.equals(this.chain)
-					&& other.x == this.x 
-					&& other.y == this.y 
-					&& other.z == this.z
-					&& other.type == this.type
-					&& other.element == this.element;
-		}
-
-		@Override
-		public int hashCode() {
-
-			return Objects.hash(this.resid, this.resname, this.chain, this.x, this.y, this.z, this.type, this.element);
-		}
-
-		@Override
-		public double getX() {
-
-			return this.x;
-		}
-
-		@Override
-		public double getY() {
-
-			return this.y;
-		}
-
-		@Override
-		public double getZ() {
-
-			return this.z;
-		}
-	}
 
 	// the logger instance
 	@SuppressWarnings("unused")
@@ -166,47 +89,57 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	private static final double minAccessibility = 0.5;
 
 
-	/**
-	 * Returns the distances between the atoms a and b. The distance metrics currently supported are:
-	 * 	* Euclidean
-	 * 
-	 * @param a First atom of the distance pair between the distances should be computed
-	 * @param b Second atom of the distance pair between the distances should be computed
-	 * @return New row number that can be used
-	 */
-	private static int assembleRow(
-			LocalAtom current_atom,
-			List<LocalAtom> previous_atoms,
-			DataContainer container,
-			int row_number) {
+	private static int addRow(
+			final List<LocalAtom> atomList1,
+			final List<LocalAtom> atomList2,
+			final Map<UnorderedAtomPair, Integer> sasd_distances,
+			final DataContainer container,
+			int rowNumber) {
 
-		for (LocalAtom previous_atom : previous_atoms) {
+		boolean same = atomList1 == atomList2;
+		int sizeList2 = atomList2.size();
+		
+		for(int i = 0; i < atomList1.size(); ++i) {
+			
+			int max = same ? i : sizeList2;
+			LocalAtom atom1 = atomList1.get(i);
+			
+			for (int j = 0; j < max; j++) {
+				
+				LocalAtom atom2 = atomList2.get(j);
+				// calculate the euclidean distance between the atoms
+				double diff1 = atom1.getX() - atom2.getX();
+				double diff2 = atom1.getY() - atom2.getY();
+				double diff3 = atom1.getZ() - atom2.getZ();
 
-			double diff1 = current_atom.x - previous_atom.x;
-			double diff2 = current_atom.y - previous_atom.y;
-			double diff3 = current_atom.z - previous_atom.z;
+				AtomIdentification atomIdent1 = atom1.getAtomIdentification();
+				AtomIdentification atomIdent2 = atom2.getAtomIdentification();
 
-			// Assemble the data cell for this cross-link		
-			container.addRowToTable(
-					new DefaultRow(
-							new RowKey("Row" + row_number++),
-							new DataCell[] {
+				UnorderedAtomPair pair = new UnorderedAtomPair(atomIdent1, atomIdent2);
+				DataCell sasd_cell = sasd_distances.containsKey(pair) ? DoubleCellFactory.create(sasd_distances.get(pair)) : new MissingCell("no_SASD"); 
+				sasd_distances.remove(pair); // Because we are no longer interested in these distances
 
-									StringCellFactory.create(current_atom.resname),
-									IntCellFactory.create(current_atom.resid),
-									StringCellFactory.create(Atom.CB.toString()),
-									StringCellFactory.create(current_atom.chain),
-									StringCellFactory.create(previous_atom.resname),
-									IntCellFactory.create(previous_atom.resid),
-									StringCellFactory.create(Atom.CB.toString()),   // Because we still assume CB here
-									StringCellFactory.create(previous_atom.chain),
-									DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3)),
-									DoubleCellFactory.create(0)
-							}));
+				// Add Row to the final data table
+				container.addRowToTable(
+						new DefaultRow(
+								"Row"+rowNumber++,
+								new DataCell[] {
+
+										StringCellFactory.create(atomIdent1.getResidue().name()),
+										IntCellFactory.create(atomIdent1.getResi()),
+										StringCellFactory.create(atomIdent1.getAtom().repr),
+										StringCellFactory.create(atomIdent1.getChain()),
+										StringCellFactory.create(atomIdent2.getResidue().name()),
+										IntCellFactory.create(atomIdent2.getResi()),
+										StringCellFactory.create(atomIdent2.getAtom().repr),
+										StringCellFactory.create(atomIdent2.getChain()),
+										DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3)),
+										sasd_cell
+								}));		
+			}
 		}
-		return row_number;
+		return rowNumber;
 	}
-
 
 	/**
 	 * Constructor for the node model.
@@ -269,17 +202,11 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-
 		// List keeping track of the acceptor/donors residues (for Euclidean distance)
 		List<LocalAtom> euc_donors = new ArrayList<LocalAtom>();
 		List<LocalAtom> euc_acceptors = new ArrayList<LocalAtom>();
 		List<LocalAtom> euc_donors_acceptors = new ArrayList<LocalAtom>();
 
-		// List keeping track of the acceptor/donors residues (for SASD distance)
-		List<LocalAtom> sasd_donors = new ArrayList<LocalAtom>();
-		List<LocalAtom> sasd_acceptors = new ArrayList<LocalAtom>();
-		List<LocalAtom> sasd_donors_acceptors = new ArrayList<LocalAtom>();
-		
 		// Figure out which atoms we care about
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		Set<Atom> atoms_sasd = new HashSet<Atom>();
@@ -296,27 +223,12 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		Set<Atom> atoms_euclidean = new HashSet<Atom>();
 		atoms_euclidean.add(Atom.CB);
 		//////////////////////////////////////////////////////////////////////////////////////////////
-		int row_counter = 0;
 
-
-		/// Temporary stuff
-		/*
-		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-
-				new DataColumnSpecCreator("path", StringCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("resname", StringCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("chain", StringCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("resid", IntCell.TYPE).createSpec(),
-				new DataColumnSpecCreator("accessibility", DoubleCell.TYPE).createSpec(),
-		};
-		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);    
-		BufferedDataContainer container = exec.createDataContainer(outputSpec);	
-		 */
-		////////
 
 		String input_filename = this.input.getStringValue();
 		BufferedReader br = new BufferedReader(new FileReader(input_filename));
 		String line;
+		// Fetch the Euclidean distances
 		while( ( line = br.readLine()) != null  ) {
 
 			// Skip non-ATOM line
@@ -326,13 +238,13 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			}
 			// Determine current Atom and residue name
 			Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
-			
+
 			// Skip hydrogen
 			if (atom.element == Element.H) {
-		
+
 				continue;
 			}
-			
+
 			// Continue if we do not care about this atom at all
 			if ( ! atoms_euclidean.contains(atom) && ! atoms_sasd.contains(atom)) {
 				continue;
@@ -345,111 +257,45 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
 			String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
 			String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
-			Residue residue = Residue.valueOf(residueName);	
-			
+
 
 			//  Type (Donor/Acceptor) for Euclidean
 			boolean isEucDonor = euc_donors_arg.contains(residueName);
 			boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
 
-			// handle case for euclidean
 			if (isEucDonor || isEucAcceptor) {
 
-				byte eucType =  isEucDonor && isEucAcceptor ? LocalAtom.DONOR_ACCEPTOR : (isEucDonor ? LocalAtom.DONOR : LocalAtom.ACCEPTOR);
-				LocalAtom currentAtom = new LocalAtom(resid, residueName, chain, x, y, z, eucType, atom.element);
+				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(atom, Residue.valueOf(residueName), resid, chain));
 
-				// Independent of Euc Type, we have to calculate the distance to all donor_accepto
-				row_counter = assembleRow(currentAtom, euc_donors_acceptors, container, row_counter);
+				if (isEucDonor && isEucAcceptor) {
 
-				switch (eucType) {
+					euc_donors_acceptors.add(currentAtom);
 
-				case LocalAtom.DONOR_ACCEPTOR:
+				} else if (isEucDonor) {
 
-					row_counter = assembleRow(currentAtom, euc_donors, container, row_counter);
-					row_counter = assembleRow(currentAtom, euc_acceptors, container, row_counter);
-					euc_donors_acceptors.add(currentAtom);			
-					break;
-				case LocalAtom.DONOR:
-					row_counter = assembleRow(currentAtom, euc_acceptors, container, row_counter);
 					euc_donors.add(currentAtom);
-					break;
 
-				case LocalAtom.ACCEPTOR:
-					row_counter = assembleRow(currentAtom, euc_donors, container, row_counter);
+					// Must be acceptor
+				} else {
+
 					euc_acceptors.add(currentAtom);
-					break;
-				}
-			}
-
-			//  Type (Donor/Acceptor) for SASD
-			boolean isSASDDonor = grid.isDonor(residue, atom);
-			boolean isSASDAcceptor = grid.isAcceptor(residue, atom);
-
-			if (isSASDDonor || isSASDAcceptor) {
-
-				// We only consider this residue if it has a minimum accessibility
-				if (grid.queryAtomAccessibility(x, y, z, residue, atom.element) >= minAccessibility) {
-
-					byte sasdType = isSASDDonor && isSASDAcceptor ? LocalAtom.DONOR_ACCEPTOR : (isSASDDonor ? LocalAtom.DONOR : LocalAtom.ACCEPTOR);
-					LocalAtom currentAtom = new LocalAtom(resid, residueName, chain, x, y, z, sasdType, atom.element);
-					
-					switch (sasdType) {
-
-					case LocalAtom.DONOR_ACCEPTOR:
-
-						sasd_donors_acceptors.add(currentAtom);
-						break;
-
-					case LocalAtom.DONOR:
-
-						sasd_donors.add(currentAtom);
-						break;
-					case LocalAtom.ACCEPTOR:
-
-						sasd_acceptors.add(currentAtom);
-
-						break;
-					}
 				}
 			}
 		}
 		br.close();
 		br = null;
 
-	
-		// Perform BFS on each recorded residue for SASD
+		int rowCounter = 0;
 
-		// TODO TEST
-		LocalAtom atom = sasd_donors_acceptors.get(0);
+		// Perform the grid search
+		grid.performBFS(40);
+		Map<UnorderedAtomPair, Integer> sasd_distances = grid.copyDistances();
+		
+		rowCounter = addRow(euc_donors_acceptors, euc_donors_acceptors, sasd_distances, container, rowCounter);
+		rowCounter = addRow(euc_donors_acceptors, euc_donors, sasd_distances, container, rowCounter);
+		rowCounter = addRow(euc_donors_acceptors, euc_acceptors, sasd_distances, container, rowCounter);
+		rowCounter = addRow(euc_donors, euc_acceptors, sasd_distances, container, rowCounter);
 
-		// In any case, we always have to find donors_acceptors
-		Set<Point3D> toFind = new HashSet<Point3D>(sasd_donors_acceptors);
-		
-		switch (atom.type) {
-		
-		case LocalAtom.DONOR_ACCEPTOR:
-			
-			toFind.addAll(sasd_donors);
-			toFind.addAll(sasd_acceptors);
-			break;
-			
-		case LocalAtom.DONOR:
-			
-			toFind.addAll(sasd_acceptors);
-			break;
-			
-		case LocalAtom.ACCEPTOR:
-			
-			toFind.addAll(sasd_donors);
-			break;
-		}
-		
-		
-		
-		grid.performBFS(atom.x, atom.y, atom.z, atom.element, 40, toFind);
-
-
-		
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}
