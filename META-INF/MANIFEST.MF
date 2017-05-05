@@ -8,7 +8,7 @@ Bundle-ClassPath: proteinevolution.jar,
  lib/biojava-structure-4.2.0.jar,
  lib/biojava-alignment-4.2.0.jar,
  lib/jmol-14.13.1.jar
-Bundle-Activator: org.proteinevolution.nodes.ProteinevolutionNodePlugin
+Bundle-Activator: org.proteinevolution.ProteinevolutionNodePlugin
 Bundle-Vendor: Lukas Zimmermann
 Require-Bundle: org.eclipse.core.runtime,
  org.knime.workbench.core,

@@ -4,7 +4,7 @@ import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.proteinevolution.nodes.ProteinevolutionNodePlugin;
+import org.proteinevolution.ProteinevolutionNodePlugin;
 
 public class HHSuitePreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
