@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.gridbuilder;
+package org.proteinevolution.nodes.index.gridbuilder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

@@ -1,21 +1,21 @@
-package org.proteinevolution.nodes.crosslinkpredictor;
+package org.proteinevolution.nodes.input.pdbatomreader;
 
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeView</code> for the "XWalk" Node.
- * This node represents an adaption of the XWalk program originally developed by Kahraman et al. [1]. * n * n[1] Abdullah Kahraman, Lars Malmström, Ruedi Aebersold; Xwalk: computing and visualizing distances in cross-linking experiments. Bioinformatics 2011; 27 (15): 2163-2164. doi: 10.1093/bioinformatics/btr348
+ * <code>NodeView</code> for the "PDBATOMReader" Node.
+ * Reads ATOM records from a PDB file and lists them in KNIME table.
  *
  * @author Lukas Zimmermann
  */
-public class CrossLinkPredictorNodeView extends NodeView<CrossLinkPredictorNodeModel> {
+public class PDBATOMReaderNodeView extends NodeView<PDBATOMReaderNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link CrossLinkPredictorNodeModel})
+     * @param nodeModel The model (class: {@link PDBATOMReaderNodeModel})
      */
-    protected CrossLinkPredictorNodeView(final CrossLinkPredictorNodeModel nodeModel) {
+    protected PDBATOMReaderNodeView(final PDBATOMReaderNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class CrossLinkPredictorNodeView extends NodeView<CrossLinkPredictorNodeM
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        CrossLinkPredictorNodeModel nodeModel = 
-            (CrossLinkPredictorNodeModel)getNodeModel();
+        PDBATOMReaderNodeModel nodeModel = 
+            (PDBATOMReaderNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve

@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.pdbdirreader;
+package org.proteinevolution.nodes.input.pdbdirreader;
 
 import javax.swing.JFileChooser;
 

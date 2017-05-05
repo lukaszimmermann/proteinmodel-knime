@@ -16,11 +16,11 @@
       <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
 <node category-path="/protevo/viz" factory-class="org.proteinevolution.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdb.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdb.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
-<node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbdirreader.PDBDirReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
+<node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
 </extension>
    
    

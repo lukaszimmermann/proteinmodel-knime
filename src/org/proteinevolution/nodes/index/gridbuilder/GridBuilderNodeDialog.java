@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.gridbuilder;
+package org.proteinevolution.nodes.index.gridbuilder;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;

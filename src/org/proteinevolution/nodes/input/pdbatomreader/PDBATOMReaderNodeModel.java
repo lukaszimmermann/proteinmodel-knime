@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.pdbatomreader;
+package org.proteinevolution.nodes.input.pdbatomreader;
 
 import java.io.BufferedReader;
 import java.io.File;

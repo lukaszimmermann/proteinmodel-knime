@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.crosslinkpredictor;
+package org.proteinevolution.nodes.analysis.crosslinkpredictor;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

@@ -290,7 +290,7 @@ Export-Package: chemcomp,
  org.openscience.jmol.app.webexport,
  org.openscience.jmol.app.webexport.html,
  org.proteinevolution.nodes.index.fastaindexer,
- org.proteinevolution.nodes.input.pdb.pdbatomreader,
+ org.proteinevolution.nodes.input.pdbatomreader,
  org.proteinevolution.nodes.input.xquestreader,
  org.proteinevolution.nodes.visualization.structureviewer,
  org.proteinevolution.nodes.visualization.structureviewer.components

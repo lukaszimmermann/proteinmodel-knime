@@ -1,21 +1,21 @@
-package org.proteinevolution.nodes.input.pdb.gridbuilder;
+package org.proteinevolution.nodes.input.pdbdirreader;
 
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeView</code> for the "GridBuilder" Node.
- * Build a grid with a certain grid spacing around a pdb structure. This can currently be used for SASD calculation.
+ * <code>NodeView</code> for the "PDBDirReader" Node.
+ * Reads PDB files from a directory into a table with the corresponding file path.
  *
  * @author Lukas Zimmermann
  */
-public class GridBuilderNodeView extends NodeView<GridBuilderNodeModel> {
+public class PDBDirReaderNodeView extends NodeView<PDBDirReaderNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link GridBuilderNodeModel})
+     * @param nodeModel The model (class: {@link PDBDirReaderNodeModel})
      */
-    protected GridBuilderNodeView(final GridBuilderNodeModel nodeModel) {
+    protected PDBDirReaderNodeView(final PDBDirReaderNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class GridBuilderNodeView extends NodeView<GridBuilderNodeModel> {
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        GridBuilderNodeModel nodeModel = 
-            (GridBuilderNodeModel)getNodeModel();
+        PDBDirReaderNodeModel nodeModel = 
+            (PDBDirReaderNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve

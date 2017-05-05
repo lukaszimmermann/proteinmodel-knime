@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.pdbatomreader;
+package org.proteinevolution.nodes.input.pdbatomreader;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

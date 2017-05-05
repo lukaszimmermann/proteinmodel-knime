@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.input.pdb.gridbuilder;
+package org.proteinevolution.nodes.index.gridbuilder;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

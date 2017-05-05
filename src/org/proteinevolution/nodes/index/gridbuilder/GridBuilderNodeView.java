@@ -1,21 +1,21 @@
-package org.proteinevolution.nodes.input.pdb.pdbatomreader;
+package org.proteinevolution.nodes.index.gridbuilder;
 
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeView</code> for the "PDBATOMReader" Node.
- * Reads ATOM records from a PDB file and lists them in KNIME table.
+ * <code>NodeView</code> for the "GridBuilder" Node.
+ * Build a grid with a certain grid spacing around a pdb structure. This can currently be used for SASD calculation.
  *
  * @author Lukas Zimmermann
  */
-public class PDBATOMReaderNodeView extends NodeView<PDBATOMReaderNodeModel> {
+public class GridBuilderNodeView extends NodeView<GridBuilderNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link PDBATOMReaderNodeModel})
+     * @param nodeModel The model (class: {@link GridBuilderNodeModel})
      */
-    protected PDBATOMReaderNodeView(final PDBATOMReaderNodeModel nodeModel) {
+    protected GridBuilderNodeView(final GridBuilderNodeModel nodeModel) {
         super(nodeModel);
 
         // TODO instantiate the components of the view here.
@@ -30,8 +30,8 @@ public class PDBATOMReaderNodeView extends NodeView<PDBATOMReaderNodeModel> {
 
         // TODO retrieve the new model from your nodemodel and 
         // update the view.
-        PDBATOMReaderNodeModel nodeModel = 
-            (PDBATOMReaderNodeModel)getNodeModel();
+        GridBuilderNodeModel nodeModel = 
+            (GridBuilderNodeModel)getNodeModel();
         assert nodeModel != null;
         
         // be aware of a possibly not executed nodeModel! The data you retrieve
