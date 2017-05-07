@@ -116,26 +116,38 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				double diff3 = atom1.getZ() - atom2.getZ();
 
 				AtomIdentification atomIdent1 = atom1.getAtomIdentification();
+				String resname1 = atomIdent1.getResidue().name();
+				int resi1 = atomIdent1.getResi();
+				String chain1 = atomIdent1.getChain();
+				String atomname1 = atomIdent1.getAtom().repr;
+				
 				AtomIdentification atomIdent2 = atom2.getAtomIdentification();
-
+				String resname2 = atomIdent2.getResidue().name();
+				int resi2 = atomIdent2.getResi();
+				String chain2 = atomIdent2.getChain();
+				String atomname2 = atomIdent2.getAtom().repr;
+				
+				String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);
+				String id2 = String.join("-", resname2, String.valueOf(resi2), chain2, atomname2);
+				
 				UnorderedAtomPair pair = new UnorderedAtomPair(atomIdent1, atomIdent2);
 				DataCell sasd_cell = sasd_distances.containsKey(pair) ? DoubleCellFactory.create(sasd_distances.get(pair)) : new MissingCell("no_SASD"); 
 				sasd_distances.remove(pair); // Because we are no longer interested in these distances
-
+				
 				// Add Row to the final data table
 				container.addRowToTable(
 						new DefaultRow(
 								"Row"+rowNumber++,
 								new DataCell[] {
-
-										StringCellFactory.create(atomIdent1.getResidue().name()),
-										IntCellFactory.create(atomIdent1.getResi()),
-										StringCellFactory.create(atomIdent1.getAtom().repr),
-										StringCellFactory.create(atomIdent1.getChain()),
-										StringCellFactory.create(atomIdent2.getResidue().name()),
-										IntCellFactory.create(atomIdent2.getResi()),
-										StringCellFactory.create(atomIdent2.getAtom().repr),
-										StringCellFactory.create(atomIdent2.getChain()),
+										StringCellFactory.create( id1.compareToIgnoreCase(id2) <= 0 ? id1 + "_" + id2 : id2 + "_" + id1),
+										StringCellFactory.create(resname1),
+										IntCellFactory.create(resi1),
+										StringCellFactory.create(atomname1),
+										StringCellFactory.create(chain1),
+										StringCellFactory.create(resname2),
+										IntCellFactory.create(resi2),
+										StringCellFactory.create(atomname2),
+										StringCellFactory.create(chain2),
 										DoubleCellFactory.create(Math.sqrt(diff1*diff1 + diff2*diff2 + diff3*diff3)),
 										sasd_cell
 								}));		
@@ -190,7 +202,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		}
 
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-
+				new DataColumnSpecCreator("atom_pair_identification", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resid1", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("atomname1", StringCell.TYPE).createSpec(),
@@ -307,28 +319,38 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		for (UnorderedAtomPair atomPair : sasd_distances.keySet()) {
 			
 			AtomIdentification atomIdent1 = atomPair.getFirst();
+			String resname1 = atomIdent1.getResidue().name();
+			int resi1 = atomIdent1.getResi();
+			String chain1 = atomIdent1.getChain();
+			String atomname1 = atomIdent1.getAtom().repr;
+			
 			AtomIdentification atomIdent2 = atomPair.getSecond();
+			String resname2 = atomIdent2.getResidue().name();
+			int resi2 = atomIdent2.getResi();
+			String chain2 = atomIdent2.getChain();
+			String atomname2 = atomIdent2.getAtom().repr;
+			
+			String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);
+			String id2 = String.join("-", resname2, String.valueOf(resi2), chain2, atomname2);
 			
 			// Add Row to the final data table
 			container.addRowToTable(
 					new DefaultRow(
 							"Row"+rowCounter++,
 							new DataCell[] {
-									StringCellFactory.create(atomIdent1.getResidue().name()),
-									IntCellFactory.create(atomIdent1.getResi()),
-									StringCellFactory.create(atomIdent1.getAtom().repr),
-									StringCellFactory.create(atomIdent1.getChain()),
-									StringCellFactory.create(atomIdent2.getResidue().name()),
-									IntCellFactory.create(atomIdent2.getResi()),
-									StringCellFactory.create(atomIdent2.getAtom().repr),
-									StringCellFactory.create(atomIdent2.getChain()),
+									StringCellFactory.create(id1.compareToIgnoreCase(id2) <= 0 ? id1 + "_" + id2 : id2 + "_" + id1),
+									StringCellFactory.create(resname1),
+									IntCellFactory.create(resi1),
+									StringCellFactory.create(atomname1),
+									StringCellFactory.create(chain1),
+									StringCellFactory.create(resname2),
+									IntCellFactory.create(resi2),
+									StringCellFactory.create(atomname2),
+									StringCellFactory.create(chain2),
 									new MissingCell("No Euclidean distance calculated"),
 									IntCellFactory.create(sasd_distances.get(atomPair))
 							}));
 		}
-		
-		
-		
 		
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
