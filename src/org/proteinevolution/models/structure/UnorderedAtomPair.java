@@ -13,6 +13,18 @@ public class UnorderedAtomPair {
 		this.atom2 = atom2;
 	}
 	
+	
+	public AtomIdentification getFirst() {
+		
+		return this.atom1;
+	}
+	
+	public AtomIdentification getSecond() {
+		
+		return this.atom2;
+	}
+	
+	
 	public AtomIdentification getOther(final AtomIdentification atomIdent) {
 		
 		if (atomIdent.equals(this.atom1)) {

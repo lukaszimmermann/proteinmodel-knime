@@ -200,7 +200,7 @@ public final class Grid implements Serializable {
 		return this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
 	}
 
-	public void performBFS(final int max_length) {
+	public void performBFS() {
 
 		// The BFS is repeated for all localAtoms stored in the grid, we go from right to left
 		for (byte sourceIndex = this.atomIdentIndex; sourceIndex > -1; --sourceIndex) {
@@ -268,8 +268,6 @@ public final class Grid implements Serializable {
 				current_y = y_queue.poll();
 				current_z = z_queue.poll();
 				current_length = length.poll();
-
-				if (current_length < max_length) {
 
 					// Direction 1
 					current_dir = this.grid[current_x-1][current_y][current_z];		
@@ -421,7 +419,7 @@ public final class Grid implements Serializable {
 										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 					}
-				}
+				
 
 				// Break if the queue is empty or we already found all possible donor, acceptors
 			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() );

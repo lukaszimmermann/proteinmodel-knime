@@ -5,10 +5,12 @@ import javax.swing.ListSelectionModel;
 import org.knime.core.data.blob.BinaryObjectDataValue;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.knime.LineParserChangeListener;
@@ -66,6 +68,14 @@ public class CrossLinkPredictorNodeDialog extends DefaultNodeSettingsPane {
         fileChooser.getModel().addChangeListener(changeListener);
         this.addDialogComponent(fileChooser);
           
+        this.createNewGroup("Distances to Calculate");
+        this.addDialogComponent(new DialogComponentBoolean(
+        		new SettingsModelBoolean(
+        				CrossLinkPredictorNodeModel.ENABLE_EUCLIDEAN_CFGKEY,
+        				CrossLinkPredictorNodeModel.ENABLE_EUCLIDEAN_DEFAULT),
+        		"Calculate Euclidean Distance"));
+        
+        
         /*
          * RESIDUE/ATOM Selection
          */

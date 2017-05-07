@@ -13,7 +13,7 @@
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
-      <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
 <node category-path="/protevo/viz" factory-class="org.proteinevolution.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
@@ -26,12 +26,8 @@
    
 <!-- Preference Page for setting the HH-suite build directory -->
 
- <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            class="org.proteinevolution.preferences.hhsuite.HHSuitePreferencePage"
-            id="org.proteinevolution.preferences.hhsuite.preferencespage"
-            name="HH-Suite">
+ <extension point="org.eclipse.ui.preferencePages">
+      <page class="org.proteinevolution.preferences.hhsuite.HHSuitePreferencePage" id="org.proteinevolution.preferences.hhsuite.preferencespage" name="HH-Suite">
       </page>
    </extension>
    

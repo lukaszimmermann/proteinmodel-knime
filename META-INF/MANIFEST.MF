@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Proteinevolution extension for KNIME Workbench
 Bundle-SymbolicName: org.proteinevolution; singleton:=true
-Bundle-Version: 0.0.1
+Bundle-Version: 0.0.1.qualifier
 Bundle-ClassPath: proteinevolution.jar,
  lib/biojava-core-4.2.0.jar,
  lib/biojava-structure-4.2.0.jar,
@@ -289,9 +289,19 @@ Export-Package: chemcomp,
  org.openscience.jmol.app.surfacetool,
  org.openscience.jmol.app.webexport,
  org.openscience.jmol.app.webexport.html,
+ org.proteinevolution,
+ org.proteinevolution.models.knime,
+ org.proteinevolution.models.spec.metrics,
+ org.proteinevolution.models.spec.pdb,
+ org.proteinevolution.models.structure,
+ org.proteinevolution.nodes.analysis.crosslinkpredictor,
  org.proteinevolution.nodes.index.fastaindexer,
+ org.proteinevolution.nodes.index.gridbuilder,
  org.proteinevolution.nodes.input.pdbatomreader,
+ org.proteinevolution.nodes.input.pdbdirectoryreader,
+ org.proteinevolution.nodes.input.plinkreader,
  org.proteinevolution.nodes.input.xquestreader,
  org.proteinevolution.nodes.visualization.structureviewer,
- org.proteinevolution.nodes.visualization.structureviewer.components
+ org.proteinevolution.nodes.visualization.structureviewer.components,
+ org.proteinevolution.preferences.hhsuite
 

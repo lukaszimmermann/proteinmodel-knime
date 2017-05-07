@@ -37,6 +37,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.Atom;
@@ -65,6 +66,12 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
 
 
+	public static final String ENABLE_EUCLIDEAN_CFGKEY = "ENABLE_EUCLIDEAN_CFGKEY";
+	public static final boolean ENABLE_EUCLIDEAN_DEFAULT = true;
+	private final SettingsModelBoolean enable_euclidean = new SettingsModelBoolean(ENABLE_EUCLIDEAN_CFGKEY, ENABLE_EUCLIDEAN_DEFAULT);
+
+
+
 	// EUCLIDEAN
 	// Donor
 	public static final String EUC_DONORS_CFGKEY = "EUC_DONORS_CFGKEY";
@@ -85,10 +92,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	public static final String GRID_SELECTION_LABEL = "Select column with protein grid";
 	private final SettingsModelString grid = new SettingsModelString(GRID_SELECTION_CFGKEY, GRID_SELECTION_DEFAULT);
 
-	// Accessibility threshold
-	private static final double minAccessibility = 0.5;
-
-
 	private static int addRow(
 			final List<LocalAtom> atomList1,
 			final List<LocalAtom> atomList2,
@@ -98,14 +101,14 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		boolean same = atomList1 == atomList2;
 		int sizeList2 = atomList2.size();
-		
+
 		for(int i = 0; i < atomList1.size(); ++i) {
-			
+
 			int max = same ? i : sizeList2;
 			LocalAtom atom1 = atomList1.get(i);
-			
+
 			for (int j = 0; j < max; j++) {
-				
+
 				LocalAtom atom2 = atomList2.get(j);
 				// calculate the euclidean distance between the atoms
 				double diff1 = atom1.getX() - atom2.getX();
@@ -228,57 +231,60 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		String input_filename = this.input.getStringValue();
 		BufferedReader br = new BufferedReader(new FileReader(input_filename));
 		String line;
-		// Fetch the Euclidean distances
-		while( ( line = br.readLine()) != null  ) {
+		
+		// Fetch the Euclidean distances (Only when requested)
+		if (this.enable_euclidean.getBooleanValue()) {
+			while( ( line = br.readLine()) != null  ) {
 
-			// Skip non-ATOM line
-			if ( ! Atom.isRecord(line)) {
+				// Skip non-ATOM line
+				if ( ! Atom.isRecord(line)) {
 
-				continue;
-			}
-			// Determine current Atom and residue name
-			Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
+					continue;
+				}
+				// Determine current Atom and residue name
+				Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
 
-			// Skip hydrogen
-			if (atom.element == Element.H) {
+				// Skip hydrogen
+				if (atom.element == Element.H) {
 
-				continue;
-			}
+					continue;
+				}
 
-			// Continue if we do not care about this atom at all
-			if ( ! atoms_euclidean.contains(atom) && ! atoms_sasd.contains(atom)) {
-				continue;
-			}
+				// Continue if we do not care about this atom at all
+				if ( ! atoms_euclidean.contains(atom) && ! atoms_sasd.contains(atom)) {
+					continue;
+				}
 
-			// Get required attributes of the atom
-			double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-			double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-			double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
-			int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
-			String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
-			String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
+				// Get required attributes of the atom
+				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
+				double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
+				double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
+				int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+				String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
+				String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
 
 
-			//  Type (Donor/Acceptor) for Euclidean
-			boolean isEucDonor = euc_donors_arg.contains(residueName);
-			boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
+				//  Type (Donor/Acceptor) for Euclidean
+				boolean isEucDonor = euc_donors_arg.contains(residueName);
+				boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
 
-			if (isEucDonor || isEucAcceptor) {
+				if (isEucDonor || isEucAcceptor) {
 
-				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(atom, Residue.valueOf(residueName), resid, chain));
+					LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(atom, Residue.valueOf(residueName), resid, chain));
 
-				if (isEucDonor && isEucAcceptor) {
+					if (isEucDonor && isEucAcceptor) {
 
-					euc_donors_acceptors.add(currentAtom);
+						euc_donors_acceptors.add(currentAtom);
 
-				} else if (isEucDonor) {
+					} else if (isEucDonor) {
 
-					euc_donors.add(currentAtom);
+						euc_donors.add(currentAtom);
 
-					// Must be acceptor
-				} else {
+						// Must be acceptor
+					} else {
 
-					euc_acceptors.add(currentAtom);
+						euc_acceptors.add(currentAtom);
+					}
 				}
 			}
 		}
@@ -288,14 +294,42 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		int rowCounter = 0;
 
 		// Perform the grid search
-		grid.performBFS(40);
+		grid.performBFS();
 		Map<UnorderedAtomPair, Integer> sasd_distances = grid.copyDistances();
-		
+
 		rowCounter = addRow(euc_donors_acceptors, euc_donors_acceptors, sasd_distances, container, rowCounter);
 		rowCounter = addRow(euc_donors_acceptors, euc_donors, sasd_distances, container, rowCounter);
 		rowCounter = addRow(euc_donors_acceptors, euc_acceptors, sasd_distances, container, rowCounter);
 		rowCounter = addRow(euc_donors, euc_acceptors, sasd_distances, container, rowCounter);
 
+		
+		// Add the rows for remaining distance pairs in the SASD version
+		for (UnorderedAtomPair atomPair : sasd_distances.keySet()) {
+			
+			AtomIdentification atomIdent1 = atomPair.getFirst();
+			AtomIdentification atomIdent2 = atomPair.getSecond();
+			
+			// Add Row to the final data table
+			container.addRowToTable(
+					new DefaultRow(
+							"Row"+rowCounter++,
+							new DataCell[] {
+									StringCellFactory.create(atomIdent1.getResidue().name()),
+									IntCellFactory.create(atomIdent1.getResi()),
+									StringCellFactory.create(atomIdent1.getAtom().repr),
+									StringCellFactory.create(atomIdent1.getChain()),
+									StringCellFactory.create(atomIdent2.getResidue().name()),
+									IntCellFactory.create(atomIdent2.getResi()),
+									StringCellFactory.create(atomIdent2.getAtom().repr),
+									StringCellFactory.create(atomIdent2.getChain()),
+									new MissingCell("No Euclidean distance calculated"),
+									IntCellFactory.create(sasd_distances.get(atomPair))
+							}));
+		}
+		
+		
+		
+		
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}
@@ -337,6 +371,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		this.euc_donors.saveSettingsTo(settings);
 		this.euc_acceptors.saveSettingsTo(settings);
 		this.grid.saveSettingsTo(settings);
+		this.enable_euclidean.saveSettingsTo(settings);
 	}
 
 	/**
@@ -354,6 +389,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		this.euc_donors.loadSettingsFrom(settings);
 		this.euc_acceptors.loadSettingsFrom(settings);
 		this.grid.loadSettingsFrom(settings);
+		this.enable_euclidean.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -372,6 +408,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		this.euc_donors.validateSettings(settings);
 		this.euc_acceptors.validateSettings(settings);
 		this.grid.validateSettings(settings);
+		this.enable_euclidean.validateSettings(settings);
 	}
 
 	/**
