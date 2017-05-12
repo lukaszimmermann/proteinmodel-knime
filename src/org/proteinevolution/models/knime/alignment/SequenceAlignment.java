@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jmol.g3d.HermiteRenderer;
+import org.jmol.util.Logger;
+
 /**
  * Objects of this class represent sequence alignments. The class needs to be instantiated with
  * provided factory methods. The class is also used to store a single sequence (which is a special case of an alignment).
@@ -83,17 +86,16 @@ public final class SequenceAlignment implements Serializable {
 
 					// Store previous if present
 					if (notFirst) {
-
+						sequences.add(currentSequence.toString());
 						// If the size of the currentSequence does not match the first sequence, this is not an alignment
 						if (currentSequence.length() != sequences.get(0).length()) {
 							
-							throw new NotAnAlignmentException("Sequences in FASTA File do not have equal length!");
+							throw new NotAnAlignmentException("Sequences in FASTA File do not have equal length!" + currentSequence.length()  + " vs " +  sequences.get(0).length());
 						}
-						sequences.add(currentSequence.toString());
 						currentSequence.setLength(0);
-						notFirst = true;
 					}
 					headers.add(line.substring(1));
+					notFirst = true;
 
 				} else {
 					currentSequence.append(line);
@@ -108,7 +110,7 @@ public final class SequenceAlignment implements Serializable {
 		// Check some properties of the resulting lists
 		if (headersSize != sequences.size()) {
 			
-			throw new IOException("Error while parsing FASTA file");
+			throw new IOException("Error while parsing FASTA file. Number of headers: " + headersSize + ". Number of sequences: " + sequences.size());
 		}
 		if (headersSize == 0) {
 			

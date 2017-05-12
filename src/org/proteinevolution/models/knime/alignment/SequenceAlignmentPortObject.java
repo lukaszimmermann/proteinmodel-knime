@@ -29,6 +29,8 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
     public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(SequenceAlignmentPortObject.class);
 	
     
+    
+    
     private SequenceAlignment m_content;
     
     private SequenceAlignmentPortObjectSpec m_spec;
