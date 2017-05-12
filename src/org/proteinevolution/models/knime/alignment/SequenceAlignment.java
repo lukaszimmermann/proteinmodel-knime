@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,12 @@ import java.util.Map;
  * @author lzimmermann
  *
  */
-public final class SequenceAlignment {
+public final class SequenceAlignment implements Serializable {
 
 
+	private static final long serialVersionUID = -4773393149609106987L;
+	
+	
 	// The first sequence of an alignment is stored here
 	private final String referenceHeader;
 	private final String referenceSequence;
@@ -43,7 +47,6 @@ public final class SequenceAlignment {
 		}
 	}	
 
-	
 	public int getNumberOfSequences() {
 		
 		return this.sequences.size() + 1;
