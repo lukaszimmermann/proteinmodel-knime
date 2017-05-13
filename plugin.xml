@@ -24,6 +24,7 @@
 <node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
 </extension>
    
    
@@ -42,10 +43,7 @@
   <extension point="org.knime.core.DataType">
   
   <DataType cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell">
-  <serializer   
-  	cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell" 
-    serializerClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"             
-   />
+  <serializer cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell" serializerClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"/>
   </DataType>   
 
 

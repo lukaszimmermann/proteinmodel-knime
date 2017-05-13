@@ -110,6 +110,7 @@ public final class SequenceAlignment implements Serializable {
 		}
 		// Write remaining chunk
 		out.write(this.referenceSequence.substring(end-80));
+		out.write(linesep);
 		
 		// Write the remaining sequences
 		for ( String header : this.sequences.keySet()) {
@@ -128,7 +129,10 @@ public final class SequenceAlignment implements Serializable {
 				end += 80;
 				out.write(linesep);
 			}
+			out.write(seq.substring(end-80));
+			out.write(linesep);
 		}
+		out.flush();
 	}
 
 	

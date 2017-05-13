@@ -1,25 +1,20 @@
-package org.proteinevolution.nodes.analysis.alignmentinfo;
+package org.proteinevolution.nodes.output.alignmentwriter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.IntCell.IntCellFactory;
-import org.knime.core.data.image.png.PNGImageContent;
-import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -28,21 +23,31 @@ import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 
 
 /**
- * This is the model implementation of AlignmentInfo.
+ * This is the model implementation of AlignmentWriter.
  * 
  *
  * @author Lukas Zimmermann
  */
-public class AlignmentInfoNodeModel extends NodeModel {
+public class AlignmentWriterNodeModel extends NodeModel {
+    
+    // the logger instance
+    private static final NodeLogger logger = NodeLogger
+            .getLogger(AlignmentWriterNodeModel.class);
+   
+    public static final String OUTPUT_CFGKEY = "OUTPUT";
+    public static final String OUTPUT_DEFAULT = "";
+    public static final String OUTPUT_HISTORY = "OUTPUT_HISTORY";
+    private final SettingsModelString output = new SettingsModelString(OUTPUT_CFGKEY, OUTPUT_DEFAULT);
+    
     
 
     /**
      * Constructor for the node model.
      */
-    protected AlignmentInfoNodeModel() {
+    protected AlignmentWriterNodeModel() {
     
         super(new PortType[] {SequenceAlignmentPortObject.TYPE},
-        	  new PortType[] {BufferedDataTable.TYPE});
+          	  new PortType[] {});
     }
 
     /**
@@ -51,29 +56,14 @@ public class AlignmentInfoNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
-    
-        // the data table spec of the single output table, 
-        // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-        		
-        		new DataColumnSpecCreator("no_sequences", IntCell.TYPE).createSpec(),
-        		new DataColumnSpecCreator("length", IntCell.TYPE).createSpec()
-        };
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-        SequenceAlignment in = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-             
-        container.addRowToTable(
-        		new DefaultRow(
-        				"Row0",
-        				 new DataCell[] {
-        						 
-        						 IntCellFactory.create(in.getNumberOfSequences()),
-        						 IntCellFactory.create(in.getLength())
-        				 }));
-        container.close();
-        return new BufferedDataTable[]{container.getTable()};
+
+    	SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+    	FileWriter fw = new FileWriter(this.output.getStringValue());
+    	sequenceAlignment.writeFASTA(fw);
+    	fw.close();
+    
+        return null;
     }
 
     /**
@@ -93,7 +83,13 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
         
-        return new DataTableSpec[]{null};
+        // TODO: check if user settings are available, fit to the incoming
+        // table structure, and the incoming types are feasible for the node
+        // to execute. If the node can execute in its current state return
+        // the spec of its output data table(s) (if you can, otherwise an array
+        // with null elements), or throw an exception with a useful user message
+
+        return null;
     }
 
     /**
@@ -102,9 +98,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-       
-        
-
+    	this.output.saveSettingsTo(settings);
     }
 
     /**
@@ -114,11 +108,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        // TODO load (valid) settings from the config object.
-        // It can be safely assumed that the settings are valided by the 
-        // method below.
-        
-
+    	this.output.loadSettingsFrom(settings);
     }
 
     /**
@@ -128,12 +118,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        // TODO check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
-
-
+    	this.output.validateSettings(settings);
     }
     
     /**

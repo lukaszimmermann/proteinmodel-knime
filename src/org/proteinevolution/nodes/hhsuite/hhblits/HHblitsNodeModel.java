@@ -82,13 +82,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
         // Get the alignment and preapre for HHblits input
         SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
         
-        File hhblitsInput = File.cr
-        
-        
-        
-        
-      
-        
+                
         
        
         container.close();
