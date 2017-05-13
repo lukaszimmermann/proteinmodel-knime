@@ -1,10 +1,18 @@
-package org.proteinevolution.nodes.input.alignmentreader;
+package org.proteinevolution.nodes.analysis.alignmentinfo;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.IntCell.IntCellFactory;
 import org.knime.core.data.image.png.PNGImageContent;
+import org.knime.core.node.BufferedDataContainer;
+import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -12,54 +20,64 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.image.ImagePortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignment;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
-import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
 
 
 /**
- * This is the model implementation of AlignmentReader.
+ * This is the model implementation of AlignmentInfo.
  * 
  *
  * @author Lukas Zimmermann
  */
-public class AlignmentReaderNodeModel extends NodeModel {
-	
-    public static final String INPUT_CFGKEY = "INPUT";
-    public static final String INPUT_DEFAULT = "";
-    public static final String INPUT_HISTORY = "INPUT_HISTORY";
-    private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
-        
+public class AlignmentInfoNodeModel extends NodeModel {
+    
+
     /**
      * Constructor for the node model.
      */
-    protected AlignmentReaderNodeModel() {
-                	
-        super(new PortType[] {},
-              new PortType[] {SequenceAlignmentPortObject.TYPE});
+    protected AlignmentInfoNodeModel() {
+    
+        super(new PortType[] {SequenceAlignmentPortObject.TYPE},
+        	  new PortType[] {BufferedDataTable.TYPE});
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SequenceAlignmentPortObject[] execute(final PortObject[] inData,
+    protected BufferedDataTable[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
     
-        return new SequenceAlignmentPortObject[] {
+        // the data table spec of the single output table, 
+        // the table will have three columns:
+        DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
         		
-        		
-        	new SequenceAlignmentPortObject(
-        			SequenceAlignment.fromFASTA(this.input.getStringValue()),
-        			new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE))	
+        		new DataColumnSpecCreator("no_sequences", IntCell.TYPE).createSpec(),
+        		new DataColumnSpecCreator("length", IntCell.TYPE).createSpec()
         };
+        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+        BufferedDataContainer container = exec.createDataContainer(outputSpec);
+
+        SequenceAlignment in = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+             
+        container.addRowToTable(
+        		new DefaultRow(
+        				"Row0",
+        				 new DataCell[] {
+        						 
+        						 IntCellFactory.create(in.getNumberOfSequences()),
+        						 IntCellFactory.create(in.getLength())
+        				 }));
+        container.close();
+        return new BufferedDataTable[]{container.getTable()};
     }
 
     /**
+     * {@inheritDoc}
      */
     @Override
     protected void reset() {
@@ -72,7 +90,7 @@ public class AlignmentReaderNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
+    protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
         
         // TODO: check if user settings are available, fit to the incoming
@@ -80,7 +98,7 @@ public class AlignmentReaderNodeModel extends NodeModel {
         // to execute. If the node can execute in its current state return
         // the spec of its output data table(s) (if you can, otherwise an array
         // with null elements), or throw an exception with a useful user message
-    	
+
         return new DataTableSpec[]{null};
     }
 
@@ -90,7 +108,9 @@ public class AlignmentReaderNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-        this.input.saveSettingsTo(settings);
+       
+        
+
     }
 
     /**
@@ -100,7 +120,11 @@ public class AlignmentReaderNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-    	this.input.loadSettingsFrom(settings);
+        // TODO load (valid) settings from the config object.
+        // It can be safely assumed that the settings are valided by the 
+        // method below.
+        
+
     }
 
     /**
@@ -110,7 +134,12 @@ public class AlignmentReaderNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-    		this.input.validateSettings(settings);
+        // TODO check if the settings could be applied to our model
+        // e.g. if the count is in a certain range (which is ensured by the
+        // SettingsModel).
+        // Do not actually set any values of any member variables.
+
+
     }
     
     /**
@@ -146,4 +175,6 @@ public class AlignmentReaderNodeModel extends NodeModel {
         // (e.g. data used by the views).
 
     }
+
 }
+

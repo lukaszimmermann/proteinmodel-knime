@@ -22,7 +22,8 @@
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
 </extension>
    
    
@@ -32,6 +33,24 @@
       <page class="org.proteinevolution.preferences.hhsuite.HHSuitePreferencePage" id="org.proteinevolution.preferences.hhsuite.preferencespage" name="HH-Suite">
       </page>
    </extension>
+   
+   
+  <extension point="org.knime.core.PortType">
+  <portType color="#FF0000" hidden="false" name="Sequence Alignment" objectClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject" objectSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject$Serializer" specClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec" specSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec$Serializer"/>
+  </extension> 
+   
+  <extension point="org.knime.core.DataType">
+  
+  <DataType cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell">
+  <serializer   
+  	cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell" 
+    serializerClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"             
+   />
+  </DataType>   
+
+
+  
+  </extension> 
    
    
 </plugin>
