@@ -23,7 +23,7 @@
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
 </extension>
    
    

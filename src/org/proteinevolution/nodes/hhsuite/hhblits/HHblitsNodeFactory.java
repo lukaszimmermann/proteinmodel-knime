@@ -1,5 +1,6 @@
 package org.proteinevolution.nodes.hhsuite.hhblits;
 
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
@@ -17,8 +18,15 @@ public class HHblitsNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public HHblitsNodeModel createNodeModel() {
-        return new HHblitsNodeModel();
+    public HHblitsNodeModel createNodeModel(){
+    	
+        try {
+			return new HHblitsNodeModel();
+			
+		} catch (InvalidSettingsException e) {
+			
+			throw new RuntimeException(e.getMessage());
+		}
     }
 
     /**

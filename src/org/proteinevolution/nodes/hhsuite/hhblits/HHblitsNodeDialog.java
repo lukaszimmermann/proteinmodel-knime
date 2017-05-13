@@ -1,8 +1,6 @@
 package org.proteinevolution.nodes.hhsuite.hhblits;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
 /**
  * <code>NodeDialog</code> for the "HHblits" Node.
@@ -24,14 +22,6 @@ public class HHblitsNodeDialog extends DefaultNodeSettingsPane {
      */
     protected HHblitsNodeDialog() {
         super();
-        
-        addDialogComponent(new DialogComponentNumber(
-                new SettingsModelIntegerBounded(
-                    HHblitsNodeModel.CFGKEY_COUNT,
-                    HHblitsNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE),
-                    "Counter:", /*step*/ 1, /*componentwidth*/ 5));
-                    
+         
     }
 }
-
