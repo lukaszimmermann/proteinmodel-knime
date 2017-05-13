@@ -1,7 +1,10 @@
 package org.proteinevolution.nodes.hhsuite.hhblits;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.UUID;
 
 import org.knime.core.data.DataColumnSpec;
@@ -16,6 +19,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeProgressMonitor;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
@@ -29,7 +33,7 @@ import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
 
 /*
- 
+
  hhblits 
   -cpu 8 
   -v 2
@@ -49,139 +53,171 @@ import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
  * @author Lukas Zimmermann
  */
 public class HHblitsNodeModel extends HHSuiteNodeModel {
-    
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(HHblitsNodeModel.class);
-        
 
-    /**
-     * Constructor for the node model.
-     */
-    protected HHblitsNodeModel() throws InvalidSettingsException {
-    
-        super(new PortType[] {SequenceAlignmentPortObject.TYPE},
-        	  new PortType[] {BufferedDataTable.TYPE});
-    }
+	// the logger instance
+	private static final NodeLogger logger = NodeLogger
+			.getLogger(HHblitsNodeModel.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final PortObject[] inData,
-            final ExecutionContext exec) throws Exception {
 
-        // the data table spec of the single output table, 
-        // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
-        allColSpecs[0] = new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
+	/**
+	 * Constructor for the node model.
+	 */
+	protected HHblitsNodeModel() throws InvalidSettingsException {
 
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
-        
-        // Get the alignment and preapre for HHblits input
-        SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-        
-                
-        
-       
-        container.close();
-        return new BufferedDataTable[]{container.getTable()};
-    }
+		super(new PortType[] {SequenceAlignmentPortObject.TYPE},
+				new PortType[] {BufferedDataTable.TYPE});
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected BufferedDataTable[] execute(final PortObject[] inData,
+			final ExecutionContext exec) throws Exception {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
-            throws InvalidSettingsException {
-    	
-    	
-        return new DataTableSpec[]{null};
-    }
+		// the data table spec of the single output table, 
+		// the table will have three columns:
+		DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
+		allColSpecs[0] = new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
+		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-        
+		// Get the alignment and prepare for HHblits input
+		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 
-    }
+		// Write sequenceAlignment as FASTA file into temporary file
+		File temp = File.createTempFile("hhblits", ".fas");
+		temp.deleteOnExit();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-  
+		FileWriter fw = new FileWriter(temp);
+		sequenceAlignment.writeFASTA(fw);
+		fw.close(); 
 
-    }
+		// Start HHblits
+		File execFile = this.getExecutable();
+		exec.setMessage("Starting HHblits...");
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-        // TODO check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
+		Process p = Runtime.getRuntime().exec(execFile.getAbsolutePath() + " -i " + temp.getAbsolutePath());
 
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        
-        // TODO load internal data. 
-        // Everything handed to output ports is loaded automatically (data
-        // returned by the execute method, models loaded in loadModelContent,
-        // and user settings set through loadSettingsFrom - is all taken care 
-        // of). Load here only the other internals that need to be restored
-        // (e.g. data used by the views).
 
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-       
-        // TODO save internal models. 
-        // Everything written to output ports is saved automatically (data
-        // returned by the execute method, models saved in the saveModelContent,
-        // and user settings saved through saveSettingsTo - is all taken care 
-        // of). Save here only the other internals that need to be preserved
-        // (e.g. data used by the views).
+		BufferedReader stdError = new BufferedReader(new 
+				InputStreamReader(p.getErrorStream()));
 
-    }
+		// print the error
+		String s;
+		while ((s = stdError.readLine()) != null) {
+			logger.warn(s);
+		}
+
+		if ( p.waitFor() == 0)
+		{
+			logger.warn("Execution has been successful");
+
+		} else {
+
+			logger.warn("Execution failed: ");
+		}
+
+
+		temp.delete();
+		container.close();
+		return new BufferedDataTable[]{container.getTable()};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void reset() {
+		// TODO Code executed on reset.
+		// Models build during execute are cleared here.
+		// Also data handled in load/saveInternals will be erased here.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
+			throws InvalidSettingsException {
+
+
+		return new DataTableSpec[]{null};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveSettingsTo(final NodeSettingsWO settings) {
+
+
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+			throws InvalidSettingsException {
+
+
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void validateSettings(final NodeSettingsRO settings)
+			throws InvalidSettingsException {
+
+		// TODO check if the settings could be applied to our model
+		// e.g. if the count is in a certain range (which is ensured by the
+		// SettingsModel).
+		// Do not actually set any values of any member variables.
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadInternals(final File internDir,
+			final ExecutionMonitor exec) throws IOException,
+	CanceledExecutionException {
+
+		// TODO load internal data. 
+		// Everything handed to output ports is loaded automatically (data
+		// returned by the execute method, models loaded in loadModelContent,
+		// and user settings set through loadSettingsFrom - is all taken care 
+		// of). Load here only the other internals that need to be restored
+		// (e.g. data used by the views).
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveInternals(final File internDir,
+			final ExecutionMonitor exec) throws IOException,
+	CanceledExecutionException {
+
+		// TODO save internal models. 
+		// Everything written to output ports is saved automatically (data
+		// returned by the execute method, models saved in the saveModelContent,
+		// and user settings saved through saveSettingsTo - is all taken care 
+		// of). Save here only the other internals that need to be preserved
+		// (e.g. data used by the views).
+
+	}
 
 	@Override
 	protected String getExecutableName() {
-		
+
 		return "hhblits";
 	}
 }

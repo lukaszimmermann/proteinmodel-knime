@@ -38,6 +38,14 @@
    
   <extension point="org.knime.core.PortType">
   <portType color="#FF0000" hidden="false" name="Sequence Alignment" objectClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject" objectSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject$Serializer" specClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec" specSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec$Serializer"/>
+  
+  <portType color="#0000FF" hidden="false" 
+  name="HHsuite Databases" 
+  objectClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB" 
+  objectSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB$Serializer"
+  specClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec"
+  specSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
+  
   </extension> 
    
   <extension point="org.knime.core.DataType">
@@ -46,6 +54,10 @@
   <serializer cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell" serializerClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"/>
   </DataType>   
 
+
+ <DataType cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell">
+  <serializer cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell" serializerClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell$HHsuiteDBCellSerializer"/>
+  </DataType>  
 
   
   </extension> 
