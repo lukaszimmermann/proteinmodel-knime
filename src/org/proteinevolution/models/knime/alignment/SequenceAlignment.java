@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +66,8 @@ public final class SequenceAlignment implements Serializable {
 		this.sequences = sequenceAlignment.sequences;
 	}
 
-
+	
+	
 	private SequenceAlignment(final List<String> headers, final List<String> seqs) {
 
 		int nSequences = headers.size();
@@ -90,8 +92,48 @@ public final class SequenceAlignment implements Serializable {
 	}
 
 
-	public static SequenceAlignment fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
+	public void writeFASTA(final Writer out) throws IOException {
+		
+		String linesep = System.lineSeparator();
+		// Write first sequence
+		out.write(">");
+		out.write(this.referenceHeader);
+		out.write(linesep);
+		
+		// Write the reference sequence in 80 character chunks
+		int end = 80;
+		while (end <= this.referenceSequence.length()) {
+			
+			out.write(this.referenceSequence.substring(end-80, end));
+			end += 80;
+			out.write(linesep);
+		}
+		// Write remaining chunk
+		out.write(this.referenceSequence.substring(end-80));
+		
+		// Write the remaining sequences
+		for ( String header : this.sequences.keySet()) {
+			
+			out.write(">");
+			out.write(this.referenceHeader);
+			out.write(linesep);
+			
+			String seq = this.sequences.get(header);
+			
+			// Write the reference sequence in 80 character chunks
+			end = 80;
+			while (end <= seq.length()) {
+				
+				out.write(seq.substring(end-80, end));
+				end += 80;
+				out.write(linesep);
+			}
+		}
+	}
 
+	
+	public static SequenceAlignment fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
+		
 		boolean notFirst = false;
 
 		List<String> headers = new ArrayList<String>();

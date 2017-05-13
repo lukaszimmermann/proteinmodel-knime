@@ -2,11 +2,13 @@ package org.proteinevolution.nodes.hhsuite.hhblits;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.filestore.FileStore;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -77,13 +79,17 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
         
-        // Get the alignment
+        // Get the alignment and preapre for HHblits input
         SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
         
-        File execFile = this.getExecutable();
+        File hhblitsInput = File.cr
         
-        logger.warn("Going to execute " + execFile);
-    
+        
+        
+        
+      
+        
+        
        
         container.close();
         return new BufferedDataTable[]{container.getTable()};
