@@ -60,7 +60,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";
 	public static final String[] HHSUITEDB_DEFAULT = new String[0];
-	private final SettingsModelStringArray hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
+	private final SettingsModelStringArray param_hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
 
 	/**
 	 * Constructor for the node model.
@@ -88,14 +88,8 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 		// Get the alignment and the hhsuite database
 		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-		
-		// Figure out which databases should be used
-		for (String db : this.hhsuitedb.getStringArrayValue()) {
-			
-			logger.warn(db);
-		}
-		
-		
+		HHsuiteDB hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
+	
 
 		// Write sequenceAlignment as FASTA file into temporary file
 		File temp = File.createTempFile("hhblits", ".fas");
@@ -107,10 +101,19 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 		// Start HHblits
 		File execFile = this.getExecutable();
-		exec.setMessage("Starting HHblits...");
-
-		Process p = Runtime.getRuntime().exec(execFile.getAbsolutePath() + " -i " + temp.getAbsolutePath());
-
+		
+		// Build up command-line
+		StringBuilder commandLine = new StringBuilder(execFile.getAbsolutePath());
+		commandLine.append(" -i ");
+		commandLine.append(temp.getAbsolutePath());
+		for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
+			
+			commandLine.append(" -d ");
+			commandLine.append(hhsuitedb.getPrefix(dbname));
+		}
+		
+		Process p = Runtime.getRuntime().exec(commandLine.toString());
+		
 		BufferedReader stdError = new BufferedReader(new 
 				InputStreamReader(p.getErrorStream()));
 
@@ -161,7 +164,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-		this.hhsuitedb.saveSettingsTo(settings);
+		this.param_hhsuitedb.saveSettingsTo(settings);
 	}
 
 	/**
@@ -171,7 +174,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-		this.hhsuitedb.loadSettingsFrom(settings);
+		this.param_hhsuitedb.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -181,7 +184,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 			
-		this.hhsuitedb.validateSettings(settings);
+		this.param_hhsuitedb.validateSettings(settings);
 	}
 
 	/**
