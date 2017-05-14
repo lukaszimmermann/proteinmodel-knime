@@ -5,13 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.UUID;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.filestore.FileStore;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -19,14 +17,15 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeProgressMonitor;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.models.knime.alignment.SequenceAlignment;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
 
@@ -58,13 +57,16 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(HHblitsNodeModel.class);
 
+	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";
+	public static final String[] HHSUITEDB_DEFAULT = new String[0];
+	private final SettingsModelStringArray hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
 
 	/**
 	 * Constructor for the node model.
 	 */
 	protected HHblitsNodeModel() throws InvalidSettingsException {
 
-		super(new PortType[] {SequenceAlignmentPortObject.TYPE},
+		super(new PortType[] {SequenceAlignmentPortObject.TYPE, HHsuiteDBPortObject.TYPE},
 				new PortType[] {BufferedDataTable.TYPE});
 	}
 
@@ -141,7 +143,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	@Override
 	protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
-
 
 		return new DataTableSpec[]{null};
 	}

@@ -25,6 +25,7 @@
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
 </extension>
    
    
@@ -39,12 +40,7 @@
   <extension point="org.knime.core.PortType">
   <portType color="#FF0000" hidden="false" name="Sequence Alignment" objectClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject" objectSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject$Serializer" specClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec" specSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec$Serializer"/>
   
-  <portType color="#0000FF" hidden="false" 
-  name="HHsuite Databases" 
-  objectClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB" 
-  objectSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB$Serializer"
-  specClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec"
-  specSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
+  <portType color="#0000FF" hidden="false" name="HHsuite Databases" objectClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject" objectSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject$Serializer" specClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec" specSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
   
   </extension> 
    

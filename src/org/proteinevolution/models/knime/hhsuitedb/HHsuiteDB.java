@@ -10,11 +10,11 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.knime.core.data.DataType;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -31,7 +31,9 @@ public final class HHsuiteDB implements Serializable {
 	// Maps database name to prefix path
 	private final Map<String, String> prefixes;
 	
-	
+    // the logger instance
+    private static final NodeLogger logger = NodeLogger
+            .getLogger(HHsuiteDB.class);
 
 	public HHsuiteDB(final InputStream in) throws IOException  {
 
@@ -62,9 +64,10 @@ public final class HHsuiteDB implements Serializable {
 	}
 
 	
-	public Set<String> getNames() {
+	public String[] getNames() {
 		
-		return new HashSet<String>(this.prefixes.keySet());		
+		Set<String> keySet = this.prefixes.keySet();
+		return keySet.toArray(new String[keySet.size()]);
 	}
 
 	
@@ -93,23 +96,21 @@ public final class HHsuiteDB implements Serializable {
 
 		// assemble prefices
 		for (File currentFile : files) {
-			
-			// get absolue Path
+				
+			// get absolute Path
 			String absolutePath = currentFile.getAbsolutePath();
-			
+						
 			// Name of Database
 			String name = currentFile.getName();
-			name = name.substring(name.length() - identificationString.length());
-			String prefix = absolutePath.substring(absolutePath.length() - identificationString.length());
+			name = name.substring(0, name.length() - identificationString.length());
+			String prefix = absolutePath.substring(0, absolutePath.length() - identificationString.length());
 						
-			File file1 = new File(prefix + "_a3m.ffindex");
-			File file2 = new File(prefix + "_cs219.ffdata");
-			File file3 = new File(prefix + "_cs219.ffindex");
-			File file4 = new File(prefix + "_hhm.ffdata");
-			File file5 = new File(prefix + "_hhm.ffindex");
-			
 			// Accept if all of the above files are present
-			if (file1.exists() && file2.exists() && file3.exists() && file4.exists() && file5.exists()) {
+			if (   (new File(prefix + "_a3m.ffindex")).exists() 
+				&& (new File(prefix + "_cs219.ffdata")).exists()
+				&& (new File(prefix + "_cs219.ffindex")).exists()
+				&& (new File(prefix + "_hhm.ffdata")).exists() 
+				&& (new File(prefix + "_hhm.ffindex")).exists()) {
 				
 				result.put(name, prefix);
 			}

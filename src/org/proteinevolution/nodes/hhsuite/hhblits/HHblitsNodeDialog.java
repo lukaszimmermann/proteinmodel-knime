@@ -1,6 +1,8 @@
 package org.proteinevolution.nodes.hhsuite.hhblits;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.proteinevolution.models.knime.hhsuitedb.DialogComponentHHsuiteDBSelection;
 
 /**
  * <code>NodeDialog</code> for the "HHblits" Node.
@@ -22,6 +24,15 @@ public class HHblitsNodeDialog extends DefaultNodeSettingsPane {
      */
     protected HHblitsNodeDialog() {
         super();
-         
+       
+        
+        this.addDialogComponent(
+        		new DialogComponentHHsuiteDBSelection(
+        				new SettingsModelStringArray(
+        						HHblitsNodeModel.HHSUITEDB_CFGKEY,
+        						HHblitsNodeModel.HHSUITEDB_DEFAULT), 
+        				"Select HHsuite database", 
+        				1)
+        		);
     }
 }
