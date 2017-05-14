@@ -1,8 +1,12 @@
 package org.proteinevolution.models.knime.hhsuitedb;
 
+import java.util.List;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NotConfigurableException;
@@ -34,6 +38,15 @@ public class DialogComponentHHsuiteDBSelection extends DialogComponent  {
         this.m_chooser.setEnabled(true);
         this.m_chooser.setVisible(true);
         this.m_chooser.setVisibleRowCount(4);
+        
+        this.m_chooser.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				updateModel();
+			}
+		});
+        
         getComponentPanel().add(m_chooser);
         
         this.m_specIndex = specIndex;      
@@ -59,7 +72,18 @@ public class DialogComponentHHsuiteDBSelection extends DialogComponent  {
     	this.setEnabledComponents(this.getModel().isEnabled());
     }
 
-
+    
+    /**
+     * Transfers the selected value from the component into the settings model.
+     */
+    private void updateModel() {
+    	
+    	List<String> valuesList = this.m_chooser.getSelectedValuesList();
+    	String[] valuesArray = new String[valuesList.size()];
+    	valuesArray = valuesList.toArray(valuesArray);	
+    	((SettingsModelStringArray) this.getModel()).setStringArrayValue(valuesArray);
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -85,6 +109,8 @@ public class DialogComponentHHsuiteDBSelection extends DialogComponent  {
     @Override
     protected void validateSettingsBeforeSave()
             throws InvalidSettingsException {
+    	
+    	this.updateModel();
     }
 
 

@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.knime.core.data.DataType;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -54,6 +55,7 @@ public final class HHsuiteDB implements Serializable {
 
 			throw new IOException("Class: HHSuiteDB could not be found");
 		}
+	
 		this.prefixes = hhsuitedb.prefixes;
 	}
 
@@ -62,7 +64,12 @@ public final class HHsuiteDB implements Serializable {
 
 		this.prefixes = prefixes;
 	}
-
+	
+	
+	public String getPrefix(final String name) {
+		
+		return this.prefixes.get(name);
+	}
 	
 	public String[] getNames() {
 		

@@ -25,6 +25,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.models.knime.alignment.SequenceAlignment;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
@@ -85,8 +86,16 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-		// Get the alignment and prepare for HHblits input
+		// Get the alignment and the hhsuite database
 		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+		
+		// Figure out which databases should be used
+		for (String db : this.hhsuitedb.getStringArrayValue()) {
+			
+			logger.warn(db);
+		}
+		
+		
 
 		// Write sequenceAlignment as FASTA file into temporary file
 		File temp = File.createTempFile("hhblits", ".fas");
@@ -101,7 +110,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		exec.setMessage("Starting HHblits...");
 
 		Process p = Runtime.getRuntime().exec(execFile.getAbsolutePath() + " -i " + temp.getAbsolutePath());
-
 
 		BufferedReader stdError = new BufferedReader(new 
 				InputStreamReader(p.getErrorStream()));
@@ -153,8 +161,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-
-
+		this.hhsuitedb.saveSettingsTo(settings);
 	}
 
 	/**
@@ -164,8 +171,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-
-
+		this.hhsuitedb.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -174,12 +180,8 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	@Override
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
-
-		// TODO check if the settings could be applied to our model
-		// e.g. if the count is in a certain range (which is ensured by the
-		// SettingsModel).
-		// Do not actually set any values of any member variables.
-
+			
+		this.hhsuitedb.validateSettings(settings);
 	}
 
 	/**
