@@ -48,8 +48,6 @@ public class HHblitsNodeDialog extends DefaultNodeSettingsPane {
     				   "Number of Iterations", 
     				   "1", "2", "3", "4", "5", "6", "7", "8"));
        
-       // E-value cut-off
-       //  -e     [0,1]   E-value cutoff for inclusion in result alignment (def=0.001)  
        
        this.addDialogComponent(
     		   new DialogComponentNumberEdit(
@@ -59,5 +57,22 @@ public class HHblitsNodeDialog extends DefaultNodeSettingsPane {
     						   HHblitsNodeModel.EVALUE_MIN,
     						   HHblitsNodeModel.EVALUE_MAX), 
     				   "E-value cutoff"));
+       this.addDialogComponent(
+    		   new DialogComponentNumberEdit(
+    				   new SettingsModelDoubleBounded(
+    						   HHblitsNodeModel.QID_CFGKEY,
+    						   HHblitsNodeModel.QID_DEFAULT,
+    						   HHblitsNodeModel.QID_MIN,
+    						   HHblitsNodeModel.QID_MAX), 
+    				   "Minimum sequence identity with master sequence (%)"));
+       
+       this.addDialogComponent(
+    		   new DialogComponentNumberEdit(
+    				   new SettingsModelDoubleBounded(
+    						   HHblitsNodeModel.COV_CFGKEY,
+    						   HHblitsNodeModel.COV_DEFAULT,
+    						   HHblitsNodeModel.COV_MIN,
+    						   HHblitsNodeModel.COV_MAX), 
+    				   "Minimum coverage with master sequence (%)"));
     }
 }

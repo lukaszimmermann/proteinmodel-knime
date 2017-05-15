@@ -1,6 +1,7 @@
 package org.proteinevolution.nodes.hhsuite;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
@@ -32,6 +33,7 @@ public abstract class HHSuiteNodeModel extends NodeModel {
 		file.setExecutable(true);
 	}
 
+	
 	/**
 	 * Returns the name of the executable of the HHsuite tool.
 	 * 
@@ -56,5 +58,18 @@ public abstract class HHSuiteNodeModel extends NodeModel {
 			return null;
 		}
 		return file;
+	}
+	
+	
+
+	
+	protected final File getTempFile(final String suffix) throws IOException {
+	
+		// TODO Can this be done better (automatically call temp.delete() once the file is no longer needed
+		
+		// Write sequenceAlignment as FASTA file into temporary file
+		File temp = File.createTempFile(this.getExecutableName(), suffix);
+		temp.deleteOnExit();
+		return temp;
 	}
 }
