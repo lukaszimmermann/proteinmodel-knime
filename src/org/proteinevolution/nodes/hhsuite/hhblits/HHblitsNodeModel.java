@@ -19,6 +19,8 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -33,7 +35,6 @@ import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
 
 /*
-
  hhblits 
   -cpu 8 
   -v 2
@@ -44,7 +45,6 @@ import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
    -oa3m #{a3mFile} -n #{@maxhhblitsit}
     -mact 0.35  
  */
-
 
 /**
  * This is the model implementation of HHblits.
@@ -58,9 +58,23 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(HHblitsNodeModel.class);
 
+	// HHsuite database
 	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";
 	public static final String[] HHSUITEDB_DEFAULT = new String[0];
 	private final SettingsModelStringArray param_hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
+	
+	// No. of iterations
+	public static final String NITERATIONS_CFGKEY = "NITERATIONS";
+	public static final String NITERATIONS_DEFAULT = "2";
+	private final SettingsModelString param_niterations = new SettingsModelString(NITERATIONS_CFGKEY, NITERATIONS_DEFAULT);
+	
+	// E-value cutoff
+	public static final String EVALUE_CFGKEY = "EVALUE";
+	public static final double EVALUE_DEFAULT = 0.001;
+	public static final double EVALUE_MIN = 0;
+	public static final double EVALUE_MAX = 1;
+	
+	private final SettingsModelDoubleBounded param_evalue = new SettingsModelDoubleBounded(EVALUE_CFGKEY, EVALUE_DEFAULT, EVALUE_MIN, EVALUE_MAX);
 
 	/**
 	 * Constructor for the node model.
@@ -104,15 +118,30 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		
 		// Build up command-line
 		StringBuilder commandLine = new StringBuilder(execFile.getAbsolutePath());
+		
+		// Append input alignment
 		commandLine.append(" -i ");
 		commandLine.append(temp.getAbsolutePath());
+		
+		// Append databases which are to be searched
 		for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
 			
 			commandLine.append(" -d ");
 			commandLine.append(hhsuitedb.getPrefix(dbname));
 		}
 		
-		Process p = Runtime.getRuntime().exec(commandLine.toString());
+		// Append number of iterations
+		commandLine.append(" -n ");
+		commandLine.append(this.param_niterations.getStringValue());
+	
+		// Append e-value cutoff
+		commandLine.append(" -e ");
+		commandLine.append(this.param_evalue.getDoubleValue());
+		
+		String commandLineString = commandLine.toString();
+		logger.warn(commandLineString);
+		
+		Process p = Runtime.getRuntime().exec(commandLineString);
 		
 		BufferedReader stdError = new BufferedReader(new 
 				InputStreamReader(p.getErrorStream()));
@@ -165,6 +194,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
 		this.param_hhsuitedb.saveSettingsTo(settings);
+		this.param_niterations.saveSettingsTo(settings);
 	}
 
 	/**
@@ -175,6 +205,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			throws InvalidSettingsException {
 
 		this.param_hhsuitedb.loadSettingsFrom(settings);
+		this.param_niterations.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -185,6 +216,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			throws InvalidSettingsException {
 			
 		this.param_hhsuitedb.validateSettings(settings);
+		this.param_niterations.validateSettings(settings);
 	}
 
 	/**

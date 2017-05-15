@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.knime.core.data.DataType;
 import org.knime.core.util.FileUtil;
+import org.proteinevolution.models.spec.AlignmentFormat;
 
 /**
  * Objects of this class represent sequence alignments. The class needs to be instantiated with
@@ -40,6 +41,9 @@ public final class SequenceAlignment implements Serializable {
 	// All other sequences of an alignment, unordered
 	private final Map<String, String> sequences;
 
+	// Specification of the alignment format
+	private final AlignmentFormat alignmentformat;
+	
 
 	public SequenceAlignment(final InputStream in) throws IOException  {
 
@@ -64,6 +68,7 @@ public final class SequenceAlignment implements Serializable {
 		this.referenceHeader = sequenceAlignment.referenceHeader;
 		this.referenceSequence = sequenceAlignment.referenceSequence;
 		this.sequences = sequenceAlignment.sequences;
+		this.alignmentformat = sequenceAlignment.alignmentformat;
 	}
 
 	
@@ -78,7 +83,10 @@ public final class SequenceAlignment implements Serializable {
 		for (int i = 1; i < nSequences; ++i) {
 
 			this.sequences.put(headers.get(i), seqs.get(i));
-		}		
+		}
+		
+		// Check that single sequences do not contain any gap characters
+		this.alignmentformat = this.sequences.size() == 0 ? AlignmentFormat.SingleSequence : AlignmentFormat.FASTA;
 	}
 
 	public int getNumberOfSequences() {
@@ -91,6 +99,10 @@ public final class SequenceAlignment implements Serializable {
 		return this.referenceSequence.length();
 	}
 
+	public AlignmentFormat getAlignmentFormat() {
+		
+		return this.alignmentformat;
+	}	
 
 	public void writeFASTA(final Writer out) throws IOException {
 		
@@ -191,6 +203,7 @@ public final class SequenceAlignment implements Serializable {
 
 			throw new NotAnAlignmentException("Input file did not contain any sequences!");
 		}
+		
 		return new SequenceAlignment(headers, sequences);
 	}
 }

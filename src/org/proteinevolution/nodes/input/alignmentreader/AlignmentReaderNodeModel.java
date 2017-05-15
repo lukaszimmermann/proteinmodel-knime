@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -15,10 +14,10 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.image.ImagePortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignment;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
+import org.proteinevolution.models.spec.AlignmentFormat;
 
 
 /**
@@ -50,12 +49,15 @@ public class AlignmentReaderNodeModel extends NodeModel {
     protected SequenceAlignmentPortObject[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
     
+    	// TODO Currently, only reading FASTA is supported
+    	SequenceAlignment sequenceAlignment = SequenceAlignment.fromFASTA(this.input.getStringValue());
+    	AlignmentFormat alignmentFormat = sequenceAlignment.getAlignmentFormat();
+    	
         return new SequenceAlignmentPortObject[] {
         		
-        		
         	new SequenceAlignmentPortObject(
-        			SequenceAlignment.fromFASTA(this.input.getStringValue()),
-        			new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE))	
+        			sequenceAlignment,
+        			new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, alignmentFormat))	
         };
     }
 

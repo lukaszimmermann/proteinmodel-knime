@@ -10,7 +10,8 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.IntCell.IntCellFactory;
-import org.knime.core.data.image.png.PNGImageContent;
+import org.knime.core.data.def.StringCell.StringCellFactory;
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -57,7 +58,8 @@ public class AlignmentInfoNodeModel extends NodeModel {
         DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
         		
         		new DataColumnSpecCreator("no_sequences", IntCell.TYPE).createSpec(),
-        		new DataColumnSpecCreator("length", IntCell.TYPE).createSpec()
+        		new DataColumnSpecCreator("length", IntCell.TYPE).createSpec(),
+        		new DataColumnSpecCreator("format", StringCell.TYPE).createSpec()
         };
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
@@ -70,7 +72,8 @@ public class AlignmentInfoNodeModel extends NodeModel {
         				 new DataCell[] {
         						 
         						 IntCellFactory.create(in.getNumberOfSequences()),
-        						 IntCellFactory.create(in.getLength())
+        						 IntCellFactory.create(in.getLength()),
+        						 StringCellFactory.create(in.getAlignmentFormat().toString())
         				 }));
         container.close();
         return new BufferedDataTable[]{container.getTable()};
