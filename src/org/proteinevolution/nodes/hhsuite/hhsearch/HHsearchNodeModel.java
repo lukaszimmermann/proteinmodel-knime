@@ -1,4 +1,4 @@
-package org.proteinevolution.nodes.hhsuite.hhblits;
+package org.proteinevolution.nodes.hhsuite.hhsearch;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -17,7 +18,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -32,39 +32,23 @@ import org.proteinevolution.models.util.CommandLine;
 import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
 
-/*
- hhblits 
-  -cpu 8 
-  -v 2
-  -i #{@basename}.resub_domain.a2m
-   #{@E_hhblits} 
-   -d #{HHBLITS_DB}
-   -o #{@basename}.hhblits 
-   -oa3m #{a3mFile} -n #{@maxhhblitsit}
-    -mact 0.35  
- */
-
 /**
- * This is the model implementation of HHblits.
+ * This is the model implementation of HHsearch.
  * 
  *
  * @author Lukas Zimmermann
  */
-public class HHblitsNodeModel extends HHSuiteNodeModel {
+public class HHsearchNodeModel extends HHSuiteNodeModel {
 
 	// the logger instance
 	private static final NodeLogger logger = NodeLogger
-			.getLogger(HHblitsNodeModel.class);
+			.getLogger(HHsearchNodeModel.class);
 
 	// HHsuite database
 	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";
 	public static final String[] HHSUITEDB_DEFAULT = new String[0];
 	private final SettingsModelStringArray param_hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
 
-	// No. of iterations
-	public static final String NITERATIONS_CFGKEY = "NITERATIONS";
-	public static final String NITERATIONS_DEFAULT = "2";
-	private final SettingsModelString param_niterations = new SettingsModelString(NITERATIONS_CFGKEY, NITERATIONS_DEFAULT);
 
 	// E-value cutoff
 	public static final String EVALUE_CFGKEY = "EVALUE";
@@ -88,13 +72,15 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	private final SettingsModelDoubleBounded param_cov = new SettingsModelDoubleBounded(COV_CFGKEY, COV_DEFAULT, COV_MIN, COV_MAX);
 
 
+
 	/**
 	 * Constructor for the node model.
 	 */
-	protected HHblitsNodeModel() throws InvalidSettingsException {
+	protected HHsearchNodeModel() throws InvalidSettingsException {
 
 		super(new PortType[] {SequenceAlignmentPortObject.TYPE, HHsuiteDBPortObject.TYPE},
-				new PortType[] {SequenceAlignmentPortObject.TYPE, BufferedDataTable.TYPE});
+				new PortType[] {BufferedDataTable.TYPE, SequenceAlignmentPortObject.TYPE});
+
 	}
 
 	/**
@@ -125,7 +111,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			}
 
 			cmd
-			.withOption("-n", this.param_niterations.getStringValue())
 			.withOption("-e", this.param_evalue.getDoubleValue())
 			.withOption("-qid", this.param_qid.getDoubleValue())
 			.withOption("-cov", this.param_cov.getDoubleValue())
@@ -134,7 +119,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);
-
 
 			// Run hhblits process and constantly check whether is needs to be terminated 
 			// (TODO) Might need to be adapted for cluster execution
@@ -194,10 +178,10 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		}
 
 		return new PortObject[]{
+				container.getTable(),
 				new SequenceAlignmentPortObject(
 						sequenceAlignmentOut,
-						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat)),
-				container.getTable()
+						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat))
 		};
 	}
 
@@ -218,7 +202,13 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		return new PortObjectSpec[]{ null, null };
+		// TODO: check if user settings are available, fit to the incoming
+		// table structure, and the incoming types are feasible for the node
+		// to execute. If the node can execute in its current state return
+		// the spec of its output data table(s) (if you can, otherwise an array
+		// with null elements), or throw an exception with a useful user message
+
+		return new DataTableSpec[]{null, null};
 	}
 
 	/**
@@ -228,7 +218,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
 		this.param_hhsuitedb.saveSettingsTo(settings);
-		this.param_niterations.saveSettingsTo(settings);
 		this.param_evalue.saveSettingsTo(settings);
 		this.param_qid.saveSettingsTo(settings);
 		this.param_cov.saveSettingsTo(settings);
@@ -242,7 +231,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			throws InvalidSettingsException {
 
 		this.param_hhsuitedb.loadSettingsFrom(settings);
-		this.param_niterations.loadSettingsFrom(settings);
 		this.param_evalue.loadSettingsFrom(settings);
 		this.param_qid.loadSettingsFrom(settings);
 		this.param_cov.loadSettingsFrom(settings);
@@ -256,12 +244,12 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			throws InvalidSettingsException {
 
 		this.param_hhsuitedb.validateSettings(settings);
-		this.param_niterations.validateSettings(settings);
 		this.param_evalue.validateSettings(settings);
 		this.param_qid.validateSettings(settings);
 		this.param_cov.validateSettings(settings);
 	}
-
+	
+	
 
 	/**
 	 * {@inheritDoc}
@@ -299,8 +287,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 	@Override
 	protected String getExecutableName() {
-
-		return "hhblits";
+		return "hhsearch";
 	}
 }
 

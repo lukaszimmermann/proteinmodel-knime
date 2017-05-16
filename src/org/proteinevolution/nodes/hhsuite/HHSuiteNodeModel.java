@@ -32,6 +32,7 @@ public abstract class HHSuiteNodeModel extends NodeModel {
 		return new DataTableSpec(new DataColumnSpec[] {
 
 				new DataColumnSpecCreator("No", IntCell.TYPE ).createSpec(),
+				new DataColumnSpecCreator("Accession", StringCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Hit", StringCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Probability", DoubleCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("E-value", DoubleCell.TYPE ).createSpec(),
@@ -53,10 +54,14 @@ public abstract class HHSuiteNodeModel extends NodeModel {
 		String ref = line.substring(HHR.REF_START).trim();
 		ref = ref.substring(1, ref.length() - 1);
 		
+		String hit = line.substring(HHR.HIT_START, HHR.HIT_END).trim();
+		String[] spt = hit.split("\\s+");
+		
 		return new DataCell[] {
 
 				IntCellFactory.create(line.substring(HHR.NO_START,HHR.NO_END).trim()),
-				StringCellFactory.create(line.substring(HHR.HIT_START, HHR.HIT_END).trim()),
+				StringCellFactory.create(spt[0]),
+				StringCellFactory.create(spt[1]),
 				DoubleCellFactory.create(line.substring(HHR.PROB_START, HHR.PROB_END).trim()),
 				DoubleCellFactory.create(line.substring(HHR.EVAL_START, HHR.EVAL_END).trim()),
 				DoubleCellFactory.create(line.substring(HHR.PVAL_START, HHR.PVAL_END).trim()),

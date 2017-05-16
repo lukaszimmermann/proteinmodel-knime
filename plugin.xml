@@ -6,10 +6,12 @@
       <category description="Category containing nodes from the Proteinevolution department" level-id="protevo" name="Proteinevolution" path="/"/>
       
       <category description="Nodes for Data input" level-id="input" name="Input" path="/protevo"/>
+      <category description="Nodes for Data output" level-id="output" name="Output" path="/protevo"/>
       
       <category description="Nodes for visualization" level-id="viz" name="Visualization" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="idx" name="Index" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/protevo"/>
+      <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
@@ -21,12 +23,13 @@
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
+<node category-path="/protevo/output" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
 </extension>
    
    
