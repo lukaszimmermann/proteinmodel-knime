@@ -23,9 +23,13 @@ public final class HHsuiteDBPortObjectSpec extends AbstractSimplePortObjectSpec 
      */
     public static final class Serializer extends AbstractSimplePortObjectSpecSerializer<HHsuiteDBPortObjectSpec> {}
 	
+    private static final String CFG_HHSUITEDB_NAMES = "CFG_HHSUITEDB_NAMES";
+  
+    
 	private DataType m_type;
 	private String[] names;
     
+	
 	public HHsuiteDBPortObjectSpec(final DataType type, final String[] names) {
 		
 		if (type == null || names == null) {
@@ -62,12 +66,15 @@ public final class HHsuiteDBPortObjectSpec extends AbstractSimplePortObjectSpec 
 	protected void load(final ModelContentRO model) throws InvalidSettingsException {
 		
 		this.m_type = DataType.load(model);
+		this.names = model.getStringArray(CFG_HHSUITEDB_NAMES);
 	}
 	
 	 /** {@inheritDoc} */
     @Override
     protected void save(final ModelContentWO model) {
+    	
         this.m_type.save(model);
+        model.addStringArray(CFG_HHSUITEDB_NAMES, this.names);
     }
 }
  

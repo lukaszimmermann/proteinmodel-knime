@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -21,7 +23,8 @@ public final class CommandLine implements AutoCloseable {
 	private final File executable;
 
 	// Option/value pairs
-	private final Map<String, String> options; // Options having one argument
+	private List<String> optionsKeys;
+	private List<String> optionsValues;
 
 	// Temporary files used for IO
 	private final Map<String, File> files;
@@ -50,7 +53,9 @@ public final class CommandLine implements AutoCloseable {
 		}
 
 		this.executable = executable;
-		this.options = new HashMap<String, String>();
+		this.optionsKeys = new ArrayList<String>();
+		this.optionsValues = new ArrayList<String>();
+		
 		this.files = new HashMap<String, File>();
 	}
 
@@ -72,7 +77,10 @@ public final class CommandLine implements AutoCloseable {
 
 			throw new IllegalArgumentException("Provided value for option is not a valid value string");
 		}
-		this.options.put(option, value);
+		
+		this.optionsKeys.add(option);
+		this.optionsValues.add(value);
+		
 		return this;
 	}
 
@@ -159,14 +167,14 @@ public final class CommandLine implements AutoCloseable {
 
 		StringBuilder sb = new StringBuilder(this.executable.getAbsolutePath());
 
-		for (String option : this.options.keySet()) {
-
+		for (int i = 0; i < this.optionsKeys.size(); ++i) {
+			
 			sb.append(" ");
-			sb.append(option);
+			sb.append(optionsKeys.get(i));
 			sb.append(" ");
-			sb.append(this.options.get(option));	
+			sb.append(optionsValues.get(i));	
 		}
-		
+
 		for (String option : this.files.keySet()) {
 
 			sb.append(" ");

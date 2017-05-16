@@ -6,12 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
-import org.knime.core.data.def.IntCell.IntCellFactory;
-import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -33,7 +29,6 @@ import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSp
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.models.spec.AlignmentFormat;
-import org.proteinevolution.models.spec.HHR;
 import org.proteinevolution.models.util.CommandLine;
 import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
 
@@ -140,8 +135,22 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);
+		
+			
+			// Run hhblits process and constantly check whether is needs to be terminated 
+			// (TODO) Might need to be adapted for cluster execution
 			Process p = Runtime.getRuntime().exec(commandLineString);
-
+			while( p.isAlive() ) {
+				
+				try {	
+					exec.checkCanceled();
+					
+				}  catch(CanceledExecutionException e) {
+					
+					p.destroy();
+				}
+			}
+			
 			// Execute HHBlits, nodes throws exception if this fails.
 			if ( p.waitFor() != 0) {
 
@@ -153,8 +162,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 			// Read HHR output file
 			byte state = 0;
-			int rowCounter = 0;
-
+			int rowCounter = 0;			
 			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getAbsoluteFilePath("-o")))) {
 
 
