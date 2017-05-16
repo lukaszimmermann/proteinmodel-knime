@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -135,22 +134,22 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);
-		
-			
+
+
 			// Run hhblits process and constantly check whether is needs to be terminated 
 			// (TODO) Might need to be adapted for cluster execution
 			Process p = Runtime.getRuntime().exec(commandLineString);
 			while( p.isAlive() ) {
-				
+
 				try {	
 					exec.checkCanceled();
-					
+
 				}  catch(CanceledExecutionException e) {
-					
+
 					p.destroy();
 				}
 			}
-			
+
 			// Execute HHBlits, nodes throws exception if this fails.
 			if ( p.waitFor() != 0) {
 
@@ -178,7 +177,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 						// read a line of the header block of the HHR file
 					} else if (state == 1 && ! line.trim().isEmpty()) {
-;
+						;
 						// Add line to data table
 						container.addRowToTable(new DefaultRow("Row"+rowCounter++, getHHRRow(line) ));
 
@@ -216,10 +215,10 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
+	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		return new DataTableSpec[]{null};
+		return new PortObjectSpec[]{ null, null };
 	}
 
 	/**

@@ -10,7 +10,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -30,15 +29,10 @@ import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
  */
 public class AlignmentWriterNodeModel extends NodeModel {
     
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(AlignmentWriterNodeModel.class);
-   
     public static final String OUTPUT_CFGKEY = "OUTPUT";
     public static final String OUTPUT_DEFAULT = "";
     public static final String OUTPUT_HISTORY = "OUTPUT_HISTORY";
     private final SettingsModelString output = new SettingsModelString(OUTPUT_CFGKEY, OUTPUT_DEFAULT);
-    
     
 
     /**
@@ -57,10 +51,9 @@ public class AlignmentWriterNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
 
-
     	SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
     	FileWriter fw = new FileWriter(this.output.getStringValue());
-    	sequenceAlignment.writeFASTA(fw);
+    	sequenceAlignment.write(fw);
     	fw.close();
     
         return null;

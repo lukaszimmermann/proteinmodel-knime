@@ -26,6 +26,7 @@
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
 </extension>
    
    

@@ -34,7 +34,7 @@ public class HHblitsNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
