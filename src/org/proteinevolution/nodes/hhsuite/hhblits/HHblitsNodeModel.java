@@ -7,15 +7,10 @@ import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.DoubleCell.DoubleCellFactory;
-import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.IntCell.IntCellFactory;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -119,27 +114,8 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 		HHsuiteDB hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
 
-
-		// Assemble output data container (TODO Move to base class)
-		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-
-				new DataColumnSpecCreator("No", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Hit", StringCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Probability", DoubleCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("E-value", DoubleCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("P-value", DoubleCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Score", DoubleCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("SS", DoubleCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Cols", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Query_start", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Query_end", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Template_start", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Template_end", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Ref", IntCell.TYPE ).createSpec(),
-		};
-		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-		BufferedDataContainer container = exec.createDataContainer(outputSpec);
-
+		// Make container for HHR result table
+		BufferedDataContainer container = exec.createDataContainer(getHHRDataTableSpec());
 
 		SequenceAlignment sequenceAlignmentOut = null;
 		AlignmentFormat sequenceAlignmentOutFormat = null;
@@ -161,7 +137,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			.withOption("-cov", this.param_cov.getDoubleValue())
 			.withOutput("-o")
 			.withOutput("-oa3m");
-
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);
@@ -195,30 +170,9 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 
 						// read a line of the header block of the HHR file
 					} else if (state == 1 && ! line.trim().isEmpty()) {
-
-						String ref = line.substring(HHR.REF_START).trim();
-						ref = ref.substring(1, ref.length() - 1);
-
+;
 						// Add line to data table
-						container.addRowToTable(
-								new DefaultRow(
-										"Row"+rowCounter++,
-										new DataCell[] {
-
-												IntCellFactory.create(line.substring(HHR.NO_START,HHR.NO_END).trim()),
-												StringCellFactory.create(line.substring(HHR.HIT_START, HHR.HIT_END).trim()),
-												DoubleCellFactory.create(line.substring(HHR.PROB_START, HHR.PROB_END).trim()),
-												DoubleCellFactory.create(line.substring(HHR.EVAL_START, HHR.EVAL_END).trim()),
-												DoubleCellFactory.create(line.substring(HHR.PVAL_START, HHR.PVAL_END).trim()),
-												DoubleCellFactory.create(line.substring(HHR.SCORE_START, HHR.SCORE_END).trim()),
-												DoubleCellFactory.create(line.substring(HHR.SS_START, HHR.SS_END).trim()),
-												IntCellFactory.create(line.substring(HHR.COLS_START, HHR.COLS_END).trim()),
-												IntCellFactory.create(line.substring(HHR.QUERY_START_START, HHR.QUERY_START_END).trim()),
-												IntCellFactory.create(line.substring(HHR.QUERY_END_START, HHR.QUERY_END_END).trim()),
-												IntCellFactory.create(line.substring(HHR.TEMPLATE_START_START, HHR.TEMPLATE_START_END).trim()),
-												IntCellFactory.create(line.substring(HHR.TEMPLATE_END_START, HHR.TEMPLATE_END_END).trim()),
-												IntCellFactory.create(ref)
-										}));
+						container.addRowToTable(new DefaultRow("Row"+rowCounter++, getHHRRow(line) ));
 
 						// end of header block in HHR file
 					} else if (state == 1) {
@@ -238,7 +192,6 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 						sequenceAlignmentOut,
 						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat))
 		};
-
 	}
 
 	/**
