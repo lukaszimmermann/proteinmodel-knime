@@ -59,17 +59,4 @@ public abstract class HHSuiteNodeModel extends NodeModel {
 		}
 		return file;
 	}
-	
-	
-
-	
-	protected final File getTempFile(final String suffix) throws IOException {
-	
-		// TODO Can this be done better (automatically call temp.delete() once the file is no longer needed
-		
-		// Write sequenceAlignment as FASTA file into temporary file
-		File temp = File.createTempFile(this.getExecutableName(), suffix);
-		temp.deleteOnExit();
-		return temp;
-	}
 }

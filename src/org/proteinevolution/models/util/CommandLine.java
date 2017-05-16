@@ -1,0 +1,179 @@
+package org.proteinevolution.models.util;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+/**
+ * Helper method to construct a command line call. Some error checking for the option and argument
+ * strings is also provided.
+ * 
+ * @author lzimmermann
+ *
+ */
+public final class CommandLine implements AutoCloseable {
+
+	// The executable
+	private final File executable;
+
+	// Option/value pairs
+	private final Map<String, String> options; // Options having one argument
+
+	// Temporary files used for IO
+	private final Map<String, File> files;
+	
+	private static final Pattern optionPattern = Pattern.compile("(-){1,2}[0-9a-zA-Z]+");
+	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
+
+
+	/**
+	 * Creates a new CommandLine invocation with the provided executable.
+	 * 
+	 * @param executable Which file denotes the executable for the command-line call.
+	 * The file must exist and be executable.
+	 * 
+	 * @throws IllegalArgumentException If the file denoted by <code>executable</code> does either not exist or is not executable.
+	 */
+	public CommandLine(final File executable) throws IllegalArgumentException {
+
+		if ( ! executable.exists()) {
+
+			throw new IllegalArgumentException("Provided executable does not exist.");
+		}
+		if ( ! executable.canExecute()) {
+
+			throw new IllegalArgumentException("Provided executable is not executable.");
+		}
+
+		this.executable = executable;
+		this.options = new HashMap<String, String>();
+		this.files = new HashMap<String, File>();
+	}
+
+
+	/**
+	 * Adds a new option to the CommandLine invocation.
+	 * 
+	 * @param option
+	 * @param value
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public CommandLine withOption(String option, String value) throws IllegalArgumentException {
+
+		option = this.checkOption(option);
+		value = value.trim();
+
+		if ( ! valuePattern.matcher(value).matches()) {
+
+			throw new IllegalArgumentException("Provided value for option is not a valid value string");
+		}
+		this.options.put(option, value);
+		return this;
+	}
+
+	public String getAbsoluteFilePath(final String key) {
+		
+		return this.files.get(key).getAbsolutePath();
+	}
+	
+
+	/**
+	 * Adds a new option to the CommandLine invocation, where the argument will be written
+	 * to a temporary file. The temporary files are deleted once this CommandLine instance
+	 * is <code>close()</code>ed.
+	 * 
+	 * @param option
+	 * @param writeable
+	 * @return
+	 * @throws IOException
+	 */
+	public CommandLine withInput(String option, Writeable writeable) throws IOException  {
+
+		option = this.checkOption(option);
+		
+		// Make a new temporary file and ask writeable to write into it
+		File tempFile = File.createTempFile("commandLine", "");
+		tempFile.deleteOnExit();
+		FileWriter fw = new FileWriter(tempFile);
+		writeable.write(fw);
+		fw.close(); 
+		this.files.put(option, tempFile);
+		return this;
+	}
+
+	/**
+	 * Adds a new option to the CommandLine invocation.
+	 * 
+	 * @param option
+	 * @param value
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public CommandLine withOption(String option, double value) throws IllegalArgumentException {
+
+		return this.withOption(option, String.valueOf(value));
+	}
+
+
+	public CommandLine withOutput(String option) throws IOException {
+
+		option = this.checkOption(option);
+		// Make a new temporary file and ask writeable to write into it
+		File tempFile = File.createTempFile("commandLine", "");
+		tempFile.deleteOnExit();
+		
+		this.files.put(option, tempFile);
+		
+		return this;
+	}
+
+	private String checkOption(final String option) throws IllegalArgumentException {
+
+		String result = option.trim();
+
+		if ( ! optionPattern.matcher(result).matches()) {
+
+			throw new IllegalArgumentException("Provided option is not a valid option string.");
+		}
+		return result;
+	}
+
+
+	@Override
+	public void close() throws IOException {
+
+		// Delete all input/output files
+		for (File tempFile: this.files.values()) {
+
+			Files.delete(tempFile.toPath());
+		}
+	}	
+
+	@Override
+	public String toString() {
+
+		StringBuilder sb = new StringBuilder(this.executable.getAbsolutePath());
+
+		for (String option : this.options.keySet()) {
+
+			sb.append(" ");
+			sb.append(option);
+			sb.append(" ");
+			sb.append(this.options.get(option));	
+		}
+		
+		for (String option : this.files.keySet()) {
+
+			sb.append(" ");
+			sb.append(option);
+			sb.append(" ");
+			sb.append(this.files.get(option).getAbsolutePath());	
+		}
+		return sb.toString();
+	}
+}

@@ -19,6 +19,8 @@ import java.util.Map;
 import org.knime.core.data.DataType;
 import org.knime.core.util.FileUtil;
 import org.proteinevolution.models.spec.AlignmentFormat;
+import org.proteinevolution.models.util.Writeable;
+
 
 /**
  * Objects of this class represent sequence alignments. The class needs to be instantiated with
@@ -29,7 +31,7 @@ import org.proteinevolution.models.spec.AlignmentFormat;
  * @author lzimmermann
  *
  */
-public final class SequenceAlignment implements Serializable {
+public final class SequenceAlignment implements Serializable, Writeable {
 
 	private static final long serialVersionUID = -4773393149609106987L;
 	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
@@ -103,8 +105,9 @@ public final class SequenceAlignment implements Serializable {
 		
 		return this.alignmentformat;
 	}	
-
-	public void writeFASTA(final Writer out) throws IOException {
+	
+	@Override
+	public void write(final Writer out) throws IOException {
 		
 		String linesep = System.lineSeparator();
 		// Write first sequence

@@ -3,7 +3,6 @@ package org.proteinevolution.nodes.hhsuite.hhblits;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -35,12 +34,13 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.models.knime.alignment.SequenceAlignment;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
+import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.spec.HHR;
+import org.proteinevolution.models.util.CommandLine;
 import org.proteinevolution.nodes.hhsuite.HHSuiteNodeModel;
-
-
 
 
 /*
@@ -71,19 +71,19 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";
 	public static final String[] HHSUITEDB_DEFAULT = new String[0];
 	private final SettingsModelStringArray param_hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
-	
+
 	// No. of iterations
 	public static final String NITERATIONS_CFGKEY = "NITERATIONS";
 	public static final String NITERATIONS_DEFAULT = "2";
 	private final SettingsModelString param_niterations = new SettingsModelString(NITERATIONS_CFGKEY, NITERATIONS_DEFAULT);
-	
+
 	// E-value cutoff
 	public static final String EVALUE_CFGKEY = "EVALUE";
 	public static final double EVALUE_DEFAULT = 0.001;
 	public static final double EVALUE_MIN = 0;
 	public static final double EVALUE_MAX = 1;
 	private final SettingsModelDoubleBounded param_evalue = new SettingsModelDoubleBounded(EVALUE_CFGKEY, EVALUE_DEFAULT, EVALUE_MIN, EVALUE_MAX);
-	
+
 	// Min coverage with master
 	public static final String QID_CFGKEY = "QID";
 	public static final double QID_DEFAULT = 0;
@@ -105,79 +105,24 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	protected HHblitsNodeModel() throws InvalidSettingsException {
 
 		super(new PortType[] {SequenceAlignmentPortObject.TYPE, HHsuiteDBPortObject.TYPE},
-				new PortType[] {BufferedDataTable.TYPE});
+				new PortType[] {BufferedDataTable.TYPE, SequenceAlignmentPortObject.TYPE});
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final PortObject[] inData,
+	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
 		// Get the alignment and the hhsuite database
 		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 		HHsuiteDB hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
-	
 
-		// Write sequenceAlignment as FASTA file into temporary file
-		File inputFile = this.getTempFile(".fasta");
 
-		FileWriter fw = new FileWriter(inputFile);
-		sequenceAlignment.writeFASTA(fw);
-		fw.close(); 
-
-		// Start HHblits
-		File execFile = this.getExecutable();
-		
-		// Build up command-line
-		StringBuilder commandLine = new StringBuilder(execFile.getAbsolutePath());
-		
-		// Append input alignment
-		commandLine.append(" -i ");
-		commandLine.append(inputFile.getAbsolutePath());
-		
-		// Append databases which are to be searched
-		for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
-			
-			commandLine.append(" -d ");
-			commandLine.append(hhsuitedb.getPrefix(dbname));
-		}
-		
-		// Append number of iterations
-		commandLine.append(" -n ");
-		commandLine.append(this.param_niterations.getStringValue());
-	
-		// Append e-value cutoff
-		commandLine.append(" -e ");
-		commandLine.append(this.param_evalue.getDoubleValue());
-	
-		// Append min sequence identity
-		commandLine.append(" -qid ");
-		commandLine.append(this.param_qid.getDoubleValue());
-		
-		// Append min sequence coverage
-		commandLine.append(" -cov ");
-		commandLine.append(this.param_cov.getDoubleValue());
-		
-
-		// Append standard output to the command line call
-		File outputFile = this.getTempFile(".hhr");
-		commandLine.append(" -o ");
-		commandLine.append(outputFile.getAbsolutePath());
-	
-		String commandLineString = commandLine.toString();
-		
-		logger.warn(commandLine);
-		
-		Process p = Runtime.getRuntime().exec(commandLineString);
-
-		// Executing HHBlits
-		int statusCode = p.waitFor();
-
-		
+		// Assemble output data container (TODO Move to base class)
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-			
+
 				new DataColumnSpecCreator("No", IntCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Hit", StringCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Probability", DoubleCell.TYPE ).createSpec(),
@@ -194,70 +139,106 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		};
 		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
-		
-		try(BufferedReader br = new BufferedReader(new FileReader(outputFile))) {
-						
-			if ( statusCode != 0) {
-				
+
+
+		SequenceAlignment sequenceAlignmentOut = null;
+		AlignmentFormat sequenceAlignmentOutFormat = null;
+
+		// Construct the commandLine call for this hhblits invocation
+		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
+
+			cmd.withInput("-i", sequenceAlignment);
+
+			for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
+
+				cmd.withOption("-d", hhsuitedb.getPrefix(dbname));
+			}
+
+			cmd
+			.withOption("-n", this.param_niterations.getStringValue())
+			.withOption("-e", this.param_evalue.getDoubleValue())
+			.withOption("-qid", this.param_qid.getDoubleValue())
+			.withOption("-cov", this.param_cov.getDoubleValue())
+			.withOutput("-o")
+			.withOutput("-oa3m");
+
+
+			String commandLineString = cmd.toString();
+			logger.warn(cmd);
+			Process p = Runtime.getRuntime().exec(commandLineString);
+
+			// Execute HHBlits, nodes throws exception if this fails.
+			if ( p.waitFor() != 0) {
+
 				throw new ExecutionException("Execution of HHblits failed.");
 			}
-			
+
+			sequenceAlignmentOut = SequenceAlignment.fromFASTA(cmd.getAbsoluteFilePath("-oa3m"));
+			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
+
+			// Read HHR output file
 			byte state = 0;
 			int rowCounter = 0;
 
-			String line;
-			while ((line = br.readLine()) != null) {
-			
-				// Empty line before hitlist
-				if (line.trim().isEmpty() && state == 0) {
-					
-					// Advance by one line, we do not care about the header
-					br.readLine();					
-					state = 1;
-					
-				// read a line of the header block of the HHR file
-				} else if (state == 1 && ! line.trim().isEmpty()) {
-				
-					String ref = line.substring(HHR.REF_START).trim();
-					ref = ref.substring(1, ref.length() - 1);
-					
-					// Add line to data table
-					container.addRowToTable(
-							new DefaultRow(
-									"Row"+rowCounter++,
-									new DataCell[] {
-											
-											IntCellFactory.create(line.substring(HHR.NO_START,HHR.NO_END).trim()),
-											StringCellFactory.create(line.substring(HHR.HIT_START, HHR.HIT_END).trim()),
-											DoubleCellFactory.create(line.substring(HHR.PROB_START, HHR.PROB_END).trim()),
-											DoubleCellFactory.create(line.substring(HHR.EVAL_START, HHR.EVAL_END).trim()),
-											DoubleCellFactory.create(line.substring(HHR.PVAL_START, HHR.PVAL_END).trim()),
-											DoubleCellFactory.create(line.substring(HHR.SCORE_START, HHR.SCORE_END).trim()),
-											DoubleCellFactory.create(line.substring(HHR.SS_START, HHR.SS_END).trim()),
-											IntCellFactory.create(line.substring(HHR.COLS_START, HHR.COLS_END).trim()),
-											IntCellFactory.create(line.substring(HHR.QUERY_START_START, HHR.QUERY_START_END).trim()),
-											IntCellFactory.create(line.substring(HHR.QUERY_END_START, HHR.QUERY_END_END).trim()),
-											IntCellFactory.create(line.substring(HHR.TEMPLATE_START_START, HHR.TEMPLATE_START_END).trim()),
-											IntCellFactory.create(line.substring(HHR.TEMPLATE_END_START, HHR.TEMPLATE_END_END).trim()),
-											IntCellFactory.create(ref)
-									}));
-					
-					
-				// end of header block in HHR file
-				} else if (state == 1) {
-					
-					break;
+			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getAbsoluteFilePath("-o")))) {
+
+
+				String line;
+				while ((line = br.readLine()) != null) {
+
+					// Empty line before hitlist
+					if (line.trim().isEmpty() && state == 0) {
+
+						// Advance by one line, we do not care about the header
+						br.readLine();					
+						state = 1;
+
+						// read a line of the header block of the HHR file
+					} else if (state == 1 && ! line.trim().isEmpty()) {
+
+						String ref = line.substring(HHR.REF_START).trim();
+						ref = ref.substring(1, ref.length() - 1);
+
+						// Add line to data table
+						container.addRowToTable(
+								new DefaultRow(
+										"Row"+rowCounter++,
+										new DataCell[] {
+
+												IntCellFactory.create(line.substring(HHR.NO_START,HHR.NO_END).trim()),
+												StringCellFactory.create(line.substring(HHR.HIT_START, HHR.HIT_END).trim()),
+												DoubleCellFactory.create(line.substring(HHR.PROB_START, HHR.PROB_END).trim()),
+												DoubleCellFactory.create(line.substring(HHR.EVAL_START, HHR.EVAL_END).trim()),
+												DoubleCellFactory.create(line.substring(HHR.PVAL_START, HHR.PVAL_END).trim()),
+												DoubleCellFactory.create(line.substring(HHR.SCORE_START, HHR.SCORE_END).trim()),
+												DoubleCellFactory.create(line.substring(HHR.SS_START, HHR.SS_END).trim()),
+												IntCellFactory.create(line.substring(HHR.COLS_START, HHR.COLS_END).trim()),
+												IntCellFactory.create(line.substring(HHR.QUERY_START_START, HHR.QUERY_START_END).trim()),
+												IntCellFactory.create(line.substring(HHR.QUERY_END_START, HHR.QUERY_END_END).trim()),
+												IntCellFactory.create(line.substring(HHR.TEMPLATE_START_START, HHR.TEMPLATE_START_END).trim()),
+												IntCellFactory.create(line.substring(HHR.TEMPLATE_END_START, HHR.TEMPLATE_END_END).trim()),
+												IntCellFactory.create(ref)
+										}));
+
+						// end of header block in HHR file
+					} else if (state == 1) {
+
+						break;
+					}
 				}
 			}
-			
-			
 		} finally {
-			
-			inputFile.delete();
-			outputFile.delete();
+
 			container.close();
-		}		
-		return new BufferedDataTable[]{container.getTable()};
+		}
+
+		return new PortObject[]{
+				container.getTable(),
+				new SequenceAlignmentPortObject(
+						sequenceAlignmentOut,
+						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat))
+		};
+
 	}
 
 	/**
@@ -313,14 +294,14 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 	@Override
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
-			
+
 		this.param_hhsuitedb.validateSettings(settings);
 		this.param_niterations.validateSettings(settings);
 		this.param_evalue.validateSettings(settings);
 		this.param_qid.validateSettings(settings);
 		this.param_cov.validateSettings(settings);
 	}
-	
+
 
 	/**
 	 * {@inheritDoc}
