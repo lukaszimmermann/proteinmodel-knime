@@ -8,14 +8,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.def.StringCell.StringCellFactory;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -27,6 +28,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.databases.Uniprot;
 
 
 /**
@@ -45,9 +47,17 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 	public static final String INPUT_COLUMN_CFGKEY =  "INPUT_COLUMN";
 	public static final String INPUT_COLUMN_DEFAULT =  "";
 	private final SettingsModelString input_column = new SettingsModelString(INPUT_COLUMN_CFGKEY, INPUT_COLUMN_DEFAULT);
+	
+	public static final String FROM_CFGKEY =  "FROM";
+	public static final String FROM_DEFAULT =  "";
+	private final SettingsModelString param_from = new SettingsModelString(FROM_CFGKEY, FROM_DEFAULT);
+	
+	public static final String TO_CFGKEY =  "TO";
+	public static final String TO_DEFAULT =  "";
+	private final SettingsModelString param_to = new SettingsModelString(TO_CFGKEY, TO_DEFAULT);
+	
 
 	private static final String UNIPROT_SERVER = "http://www.uniprot.org/";
-
 
 
 	private static final class ParameterNameValue {
@@ -79,32 +89,27 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 
 		// Getting the IDs from the table
 		BufferedDataTable tab = inData[0];
-		int idx = tab.getDataTableSpec().findColumnIndex(this.input_column.getStringValue());
-	
-		
+		int idx = tab.getDataTableSpec().findColumnIndex(this.input_column.getStringValue());	
 		StringBuilder sb = new StringBuilder();
-		// the data table spec of the single output table, 
-		// the table will have three columns:
-		DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
-		allColSpecs[0] =  new DataColumnSpecCreator("Accession", StringCell.TYPE).createSpec();
-		
-		
+		// result String array
+		String[] lines = null;
+
 		for(DataRow row : tab) {
-		
+
 			sb.append(((StringCell) row.getCell(idx)).getStringValue());
 			sb.append(" ");
 		}
-		
+
 		StringBuilder locationBuilder = new StringBuilder(UNIPROT_SERVER +  "uploadlists/?");
 		ParameterNameValue[] params = new ParameterNameValue[] {
-				new ParameterNameValue("from", "P_REFSEQ_AC"),
-				new ParameterNameValue("to", "ID"),
-				new ParameterNameValue("format", "list"),
+				new ParameterNameValue("from", Uniprot.valueOf(this.param_from.getStringValue()).getID()),
+				new ParameterNameValue("to", Uniprot.valueOf(this.param_to.getStringValue()).getID()),
+				new ParameterNameValue("format", "tab"),
 				new ParameterNameValue("query", sb.toString().trim())
 		};
-			
+
 		for (int i = 0; i < params.length; i++) {
-			
+
 			if (i > 0) {
 				locationBuilder.append('&');
 			}
@@ -112,25 +117,25 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 		}
 		// Open connection
 		String location = locationBuilder.toString();
-						
+
 		HttpURLConnection conn = (HttpURLConnection) new URL(locationBuilder.toString()).openConnection();
 		conn.setDoInput(true);
 		conn.connect();
-	
+
 		int status = conn.getResponseCode();
-		
+
 		while (true) {
-		
+
 			int wait = 0;
 			String header = conn.getHeaderField("Retry-After");
-			
+
 			if (header != null) {
 				wait = Integer.valueOf(header);
 			}
 			if (wait == 0) {
 				break;
 			}
-			
+
 			conn.disconnect();
 			Thread.sleep(wait * 1000);
 			conn = (HttpURLConnection) new URL(location).openConnection();
@@ -138,9 +143,9 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 			conn.connect();
 			status = conn.getResponseCode();
 		}
-		
+
 		if (status == HttpURLConnection.HTTP_OK) {
-			
+
 			InputStream reader = conn.getInputStream();		
 			URLConnection.guessContentTypeFromStream(reader);
 			StringBuilder builder = new StringBuilder();
@@ -148,20 +153,40 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 			while ((a = reader.read()) != -1) {
 				builder.append((char) a);
 			}
-			logger.warn(builder.toString());
+
+			lines = builder.toString().split("\n");
 		}
-		
-		
-		
-		
-		
 
+		// Assemble the data table if we have a real structure
+		if (lines != null && lines.length > 0) {
 
-		DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-		BufferedDataContainer container = exec.createDataContainer(outputSpec);
-		// once we are done, we close the container and return its table
-		container.close();
-		return new BufferedDataTable[]{container.getTable()};
+			int row_counter = 0;
+			
+			// Asume that first line is the header
+			String[] headers = lines[0].split("\\s+");
+
+			BufferedDataContainer container = exec.createDataContainer(
+					new DataTableSpec(
+							new DataColumnSpec[] {
+
+									new DataColumnSpecCreator(headers[0], StringCell.TYPE).createSpec(),
+									new DataColumnSpecCreator(headers[1], StringCell.TYPE).createSpec()
+							}));
+
+			for (int i = 1; i < lines.length; ++i) {
+
+				String[] content = lines[i].split("\\s+");
+				
+				container.addRowToTable(new DefaultRow("Row"+row_counter++, new DataCell[] {
+						StringCellFactory.create(content[0]),
+						StringCellFactory.create(content[1])
+				}));
+			}
+			
+			container.close();
+			return new BufferedDataTable[]{container.getTable()};
+		}
+		return new BufferedDataTable[] {null};
 	}
 
 	/**
@@ -197,6 +222,8 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
 		this.input_column.saveSettingsTo(settings);
+		this.param_from.saveSettingsTo(settings);
+		this.param_to.saveSettingsTo(settings);
 	}
 
 	/**
@@ -205,8 +232,10 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 	@Override
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		
+
 		this.input_column.loadSettingsFrom(settings);
+		this.param_from.loadSettingsFrom(settings);
+		this.param_to.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -217,6 +246,8 @@ public class DatabaseIDMapperNodeModel extends NodeModel {
 			throws InvalidSettingsException {
 
 		this.input_column.validateSettings(settings);
+		this.param_from.validateSettings(settings);
+		this.param_to.validateSettings(settings);
 	}
 
 	/**

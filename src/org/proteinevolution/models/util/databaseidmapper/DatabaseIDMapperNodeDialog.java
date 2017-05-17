@@ -3,7 +3,9 @@ package org.proteinevolution.models.util.databaseidmapper;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.databases.Uniprot;
 
 /**
  * <code>NodeDialog</code> for the "DatabaseIDMapper" Node.
@@ -28,6 +30,21 @@ public class DatabaseIDMapperNodeDialog extends DefaultNodeSettingsPane {
         super();
         
         
+        this.addDialogComponent(new DialogComponentStringSelection(
+        		new SettingsModelString(
+        				DatabaseIDMapperNodeModel.FROM_CFGKEY,
+        				DatabaseIDMapperNodeModel.FROM_DEFAULT),
+        		"From",
+        		Uniprot.values()));
+        
+        this.addDialogComponent(new DialogComponentStringSelection(
+        		new SettingsModelString(
+        				DatabaseIDMapperNodeModel.TO_CFGKEY,
+        				DatabaseIDMapperNodeModel.TO_DEFAULT),
+        		"To",
+        		Uniprot.values()));
+        
+        
         this.addDialogComponent(new DialogComponentColumnNameSelection(
         		new SettingsModelString(
         				DatabaseIDMapperNodeModel.INPUT_COLUMN_CFGKEY,
@@ -35,6 +52,6 @@ public class DatabaseIDMapperNodeDialog extends DefaultNodeSettingsPane {
         		"Accession Column",
         		0,
         		true,
-        		StringValue.class));           
+        		StringValue.class));
     }
 }
