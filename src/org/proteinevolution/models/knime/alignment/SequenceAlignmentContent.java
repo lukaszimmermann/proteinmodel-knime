@@ -103,21 +103,20 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 			while (end <= seq.length) {
 
 				// Write characters end-80 to end exclusively
-				for (int j = end-80; i < end; ++i) {
+				for (int j = end-80; j < end; ++j) {
 
-					out.write(seq[i]);
+					out.write(seq[j]);
 				}
+				end += 80;
+				out.write(linesep);
 			}
-
-			end += 80;
-			out.write(linesep);
-			for (int j = end; i < seq.length; ++i ) {
+			for (int j = end-80; j < seq.length; ++j ) {
 
 				out.write(seq[j]);
 			}
 			out.write(linesep);
 		}
-		out.flush();		
+		out.flush();
 	}
 
 

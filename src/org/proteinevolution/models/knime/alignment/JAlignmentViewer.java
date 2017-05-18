@@ -2,7 +2,10 @@ package org.proteinevolution.models.knime.alignment;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -37,6 +40,10 @@ public class JAlignmentViewer extends JPanel {
 
 			Component renderer = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
+			
+			
+
+			
 			Color foreground, background;
 			if (isSelected) {
 				//foreground = Color.YELLOW;
@@ -126,8 +133,9 @@ public class JAlignmentViewer extends JPanel {
 		this.table = new JTable(sequenceAlignment.getAllUnsafe(), columnNames);
 		
 		SequenceAlignmentCellRenderer renderer = new SequenceAlignmentCellRenderer();
+		renderer.setHorizontalAlignment( JLabel.CENTER);
+
 		TableColumnModel tcm = table.getColumnModel();
-		
 		
 		// Configure the columns
 		for (int i = 0; i < tcm.getColumnCount(); ++i) {
@@ -138,7 +146,9 @@ public class JAlignmentViewer extends JPanel {
 			column.setCellRenderer(renderer);
 		}
 	
-	
+		// Set the font to monospace
+		this.table.setFont(new Font("monospaced", Font.PLAIN, 12));
+
 		this.add(this.table);
 	}
 }
