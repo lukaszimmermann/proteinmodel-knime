@@ -14,6 +14,8 @@ import javax.swing.table.TableColumnModel;
 
 import org.proteinevolution.models.interfaces.ISequenceAlignment;
 
+import sun.print.BackgroundLookupListener;
+
 public class JAlignmentViewer extends JPanel {
 
 	private static final long serialVersionUID = -2942263928345287502L;
@@ -40,84 +42,101 @@ public class JAlignmentViewer extends JPanel {
 
 			Component renderer = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-			
-			
+			Color background;
 
-			
-			Color foreground, background;
-			if (isSelected) {
-				//foreground = Color.YELLOW;
-				background = Color.GRAY;
-				
-			}  else {
-				
-				if (row % 2 == 0) {
-					//foreground = Color.BLUE;
-					background = Color.WHITE;
-				}  else {
-					//foreground = Color.WHITE;
-					background = Color.LIGHT_GRAY;
-				}
+			char c = ((Character) value).charValue();
+
+			switch(c) {
+
+			case 'A':
+				background = new Color( 204 , 255 , 0 );
+				break;
+
+			case 'V':
+				background = new Color( 153 , 255 , 0 );
+				break;
+
+			case 'I':
+				background = new Color( 102 , 255 , 0 );
+				break;
+
+			case 'M':
+				background = new Color( 0 , 255 , 0 );
+				break;
+
+			case 'P':
+				background = new Color( 255 , 204 , 0 );
+				break;
+
+			case 'G':
+				background =  new Color( 255 , 153 , 0 );
+				break;
+
+			case 'C':
+				background = new Color( 255 , 255 , 0 );
+				break;
+
+			case 'D':
+				background = new Color( 255 , 0 , 0 );
+				break;
+
+			case 'E':
+				background = new Color( 255 , 0 , 102 );
+				break;
+
+			case 'F':
+				background = new Color( 0 , 255 , 102 );
+				break;
+
+			case 'W':
+				background = new Color( 0 , 204 , 255 );
+				break;
+
+			case 'Y':
+				background = new Color( 0 , 255 , 204 );
+				break;
+
+
+			case 'S':
+				background = new Color( 255 , 51 , 0 );
+				break;
+
+			case 'T':
+				background = new Color( 255 , 102 , 0 );
+				break;
+
+			case 'N':
+
+				background = new Color( 204 , 0 , 255 );
+				break;
+
+			case 'Q':
+				background = new Color( 255 , 0 , 204 );
+				break;
+
+			case 'L':
+				background =  new Color( 102 , 0 , 255 );
+				break;
+
+			case 'H':
+				background =  new Color( 0 , 102 , 255 );
+				break;
+
+			case 'R':
+				background = new Color( 0 , 0 , 255 );
+				break;
+
+			default:
+				background = new Color( 0 , 0 , 255 );
+				break;
 			}
+			
 			renderer.setBackground(background);
 			return renderer;
 		}
 	}
 
-	/*
-	public void renderAlignmentViewerCell
-	( Graphics g, int x, int y, int width, int height, 
-			JAlignmentViewer viewer, Element element, 
-			SequenceAlignmentPoint location, Color bgColor, 
-			boolean isSelected, boolean hasFocus, boolean isAtPoint )
-	{
-		if( bgColor == null || element == Gap.GAP )
-			bgColor = viewer.getBackground();
 
-		Color borderColor = Color.black;
-
-		if( element != null ){
-
-
-			//draw the contents colour
-			g.setColor( bgColor );
-			g.fillRect( x + 1, y + 1, width - 2, height - 2 );
-
-
-
-			// now draw the char. 
-			// (PENDING:- PL) Need to work out the metrics properly. 
-			g.setColor( Color.black );
-			FontMetrics mets = g.getFontMetrics();
-			int  yOff, xOff;
-			int charWidth = mets.charWidth( element.toChar() );
-			xOff = (width - charWidth ) / 2;
-			yOff = (height + mets.getHeight() - mets.getDescent()) / 2;
-
-			charArray[ 0 ] = element.toChar();
-			g.drawChars( charArray, 0, 1, x + xOff, y + yOff );
-			//if( Debug.debug ) Debug.message( "Drawing cell within " + x + " " + y + " " 
-			//			       + width + " " + height + " .Char is at " + x
-			//			       + " " + (y + yOff) );
-
-		}
-		else{
-			borderColor = bgColor;
-			g.setColor( viewer.getBackground() );
-			g.fillRect( x, y, width, height );
-		}
-
-		// choose the border colour
-		if( isSelected ){
-			borderColor = Color.red;
-		}
-		if( isAtPoint ){
-			borderColor = Color.green;
-		}
-		//draw the border
-		g.setColor( borderColor );
-		g.drawRect( x, y, width - 1, height - 1 );
-	} */
 
 
 
@@ -129,25 +148,25 @@ public class JAlignmentViewer extends JPanel {
 
 			columnNames[i] = i + 1;
 		}
-		
+
 		this.table = new JTable(sequenceAlignment.getAllUnsafe(), columnNames);
-		
+
 		SequenceAlignmentCellRenderer renderer = new SequenceAlignmentCellRenderer();
 		renderer.setHorizontalAlignment( JLabel.CENTER);
 
 		TableColumnModel tcm = table.getColumnModel();
-		
+
 		// Configure the columns
 		for (int i = 0; i < tcm.getColumnCount(); ++i) {
-	
+
 			TableColumn column = tcm.getColumn(i);
-			
+
 			column.setPreferredWidth(5);
 			column.setCellRenderer(renderer);
 		}
-	
+
 		// Set the font to monospace
-		this.table.setFont(new Font("monospaced", Font.PLAIN, 12));
+		this.table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 
 		this.add(this.table);
 	}
