@@ -17,7 +17,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.alignment.SequenceAlignment;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 
 
@@ -51,7 +51,7 @@ public class AlignmentWriterNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+    	SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
     	FileWriter fw = new FileWriter(this.output.getStringValue());
     	sequenceAlignment.write(fw);
     	fw.close();

@@ -24,7 +24,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.alignment.SequenceAlignment;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 
 
@@ -64,7 +64,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
-        SequenceAlignment in = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+        SequenceAlignmentContent in = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
              
         container.addRowToTable(
         		new DefaultRow(

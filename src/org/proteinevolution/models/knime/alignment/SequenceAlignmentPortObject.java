@@ -1,5 +1,8 @@
 package org.proteinevolution.models.knime.alignment;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +11,9 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.util.zip.ZipEntry;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 
 import org.knime.core.data.image.ImageContent;
 import org.knime.core.node.CanceledExecutionException;
@@ -28,7 +33,7 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
     /** Convenience accessor for the port type. */
     public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(SequenceAlignmentPortObject.class);
 	
-    private SequenceAlignment m_content;
+    private SequenceAlignmentContent m_content;
     private SequenceAlignmentPortObjectSpec m_spec;
     
     /** Empty framework constructor. <b>Do not use!</b> */
@@ -37,8 +42,6 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
         // no op
     }
   
-    
-    
     
     
     /**
@@ -52,19 +55,18 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
      * @throws NullPointerException If either argument is null.
      */
     public SequenceAlignmentPortObject(
-    		final SequenceAlignment content,
+    		final SequenceAlignmentContent content,
             final SequenceAlignmentPortObjectSpec spec) {
     	
         if (spec == null || content == null) {
             throw new NullPointerException("Argument must not be null.");
         }
-        
         this.m_content = content;
         this.m_spec = spec;    
     }
     
     
-    public SequenceAlignment getAlignment() {
+    public SequenceAlignmentContent getAlignment() {
         	
     	return this.m_content;
     }
@@ -82,11 +84,19 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
 		return this.m_spec;
 	}
 
-	@Override
-	public JComponent[] getViews() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
+    /** {@inheritDoc} */
+    @Override
+    public JComponent[] getViews() {
+    
+    	return new JComponent[] {
+ 
+    			new JButton("Click me")
+    	};
+    }
+    
+    
+    
 
     /** {@inheritDoc} */
     @Override
@@ -115,15 +125,15 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
 	    ZipEntry nextEntry = in.getNextEntry();
 	    String contentClName = nextEntry.getName();
 
-	    Class<SequenceAlignment> contentCl;
+	    Class<SequenceAlignmentContent> contentCl;
 	    try {
-	        contentCl = (Class<SequenceAlignment>) Class.forName(contentClName);
+	        contentCl = (Class<SequenceAlignmentContent>) Class.forName(contentClName);
 	        
 	    } catch (ClassNotFoundException ex) {
 	        throw new IOException("Error converting to SequenceAlignment Class", ex);
 	    }
 	    
-	    Constructor<SequenceAlignment> cons;
+	    Constructor<SequenceAlignmentContent> cons;
 	    try {
 	        cons = contentCl.getConstructor(InputStream.class);
 	    } catch (Exception ex) {
@@ -139,8 +149,6 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
 	    }
 	    in.close();
 	    this.m_spec = (SequenceAlignmentPortObjectSpec) spec;
-	    
-
 	}
 }
 

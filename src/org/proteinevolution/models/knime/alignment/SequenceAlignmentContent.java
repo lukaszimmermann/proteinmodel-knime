@@ -31,7 +31,7 @@ import org.proteinevolution.models.util.Writeable;
  * @author lzimmermann
  *
  */
-public final class SequenceAlignment implements Serializable, Writeable {
+public final class SequenceAlignmentContent implements Serializable, Writeable {
 
 	private static final long serialVersionUID = -4773393149609106987L;
 	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
@@ -47,7 +47,7 @@ public final class SequenceAlignment implements Serializable, Writeable {
 	private final AlignmentFormat alignmentformat;
 	
 
-	public SequenceAlignment(final InputStream in) throws IOException  {
+	public SequenceAlignmentContent(final InputStream in) throws IOException  {
 
 		// Warning: in is not allowed to be closed here
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -55,11 +55,11 @@ public final class SequenceAlignment implements Serializable, Writeable {
 		out.flush();
 		out.close();
 		ByteArrayInputStream bis = new ByteArrayInputStream(out.toByteArray());
-		SequenceAlignment sequenceAlignment = null;
+		SequenceAlignmentContent sequenceAlignment = null;
 		
 		try(ObjectInput ois = new ObjectInputStream(bis)) {
 
-			sequenceAlignment = (SequenceAlignment) ois.readObject();
+			sequenceAlignment = (SequenceAlignmentContent) ois.readObject();
 
 			// Rethrow as IO Exception
 		} catch (ClassNotFoundException e) {
@@ -75,7 +75,7 @@ public final class SequenceAlignment implements Serializable, Writeable {
 
 	
 	
-	private SequenceAlignment(final List<String> headers, final List<String> seqs) {
+	private SequenceAlignmentContent(final List<String> headers, final List<String> seqs) {
 
 		int nSequences = headers.size();
 		this.sequences = new HashMap<String, String>(nSequences - 1);
@@ -151,7 +151,7 @@ public final class SequenceAlignment implements Serializable, Writeable {
 	}
 
 	
-	public static SequenceAlignment fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
+	public static SequenceAlignmentContent fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
 		
 		boolean notFirst = false;
 
@@ -207,6 +207,6 @@ public final class SequenceAlignment implements Serializable, Writeable {
 			throw new NotAnAlignmentException("Input file did not contain any sequences!");
 		}
 		
-		return new SequenceAlignment(headers, sequences);
+		return new SequenceAlignmentContent(headers, sequences);
 	}
 }

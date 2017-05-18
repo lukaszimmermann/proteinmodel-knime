@@ -14,7 +14,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.alignment.SequenceAlignment;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.spec.AlignmentFormat;
@@ -50,14 +50,14 @@ public class AlignmentReaderNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
     
     	// TODO Currently, only reading FASTA is supported
-    	SequenceAlignment sequenceAlignment = SequenceAlignment.fromFASTA(this.input.getStringValue());
+    	SequenceAlignmentContent sequenceAlignment = SequenceAlignmentContent.fromFASTA(this.input.getStringValue());
     	AlignmentFormat alignmentFormat = sequenceAlignment.getAlignmentFormat();
     	
         return new SequenceAlignmentPortObject[] {
         		
         	new SequenceAlignmentPortObject(
         			sequenceAlignment,
-        			new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, alignmentFormat))	
+        			new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, alignmentFormat))	
         };
     }
 

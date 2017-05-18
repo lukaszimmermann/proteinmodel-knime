@@ -17,7 +17,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.alignment.SequenceAlignment;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.spec.AlignmentFormat;
@@ -84,9 +84,9 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
-		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 
-		SequenceAlignment sequenceAlignmentOut = null;
+		SequenceAlignmentContent sequenceAlignmentOut = null;
 		AlignmentFormat sequenceAlignmentOutFormat = null;
 
 		// Construct the commandLine call for this hhblits invocation
@@ -121,13 +121,13 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 
 				throw new ExecutionException("Execution of HHfilter failed.");
 			}
-			sequenceAlignmentOut = SequenceAlignment.fromFASTA(cmd.getAbsoluteFilePath("-o"));
+			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getAbsoluteFilePath("-o"));
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 		}
 		return new PortObject[]{
 				new SequenceAlignmentPortObject(
 						sequenceAlignmentOut,
-						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat))
+						new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, sequenceAlignmentOutFormat))
 		};
 	}
 

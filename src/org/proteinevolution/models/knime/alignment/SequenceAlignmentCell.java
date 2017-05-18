@@ -37,7 +37,7 @@ public class SequenceAlignmentCell extends DataCell {
 			SequenceAlignmentCell sequenceAlignmentCell = null;
 			try(ObjectInput ois = new ObjectInputStream(bis)) {
 
-				sequenceAlignmentCell =  new SequenceAlignmentCell((SequenceAlignment) ois.readObject());
+				sequenceAlignmentCell =  new SequenceAlignmentCell((SequenceAlignmentContent) ois.readObject());
 
 				// Rethrow as IO Exception
 			} catch (ClassNotFoundException e) {
@@ -64,11 +64,11 @@ public class SequenceAlignmentCell extends DataCell {
 		}
 	}
 
-	private final SequenceAlignment m_content;
+	private final SequenceAlignmentContent m_content;
 
 
 
-	public SequenceAlignmentCell(final SequenceAlignment content) {
+	public SequenceAlignmentCell(final SequenceAlignmentContent content) {
 
 		if (content == null) {
 

@@ -22,7 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.alignment.SequenceAlignment;
+import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
@@ -91,13 +91,13 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 			final ExecutionContext exec) throws Exception {
 
 		// Get the alignment and the hhsuite database
-		SequenceAlignment sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
+		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 		HHsuiteDB hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
 
 		// Make container for HHR result table
 		BufferedDataContainer container = exec.createDataContainer(getHHRDataTableSpec());
 
-		SequenceAlignment sequenceAlignmentOut = null;
+		SequenceAlignmentContent sequenceAlignmentOut = null;
 		AlignmentFormat sequenceAlignmentOutFormat = null;
 
 		// Construct the commandLine call for this hhblits invocation
@@ -140,7 +140,7 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 				throw new ExecutionException("Execution of HHblits failed.");
 			}
 
-			sequenceAlignmentOut = SequenceAlignment.fromFASTA(cmd.getAbsoluteFilePath("-oa3m"));
+			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getAbsoluteFilePath("-oa3m"));
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 
 			// Read HHR output file
@@ -181,7 +181,7 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 				container.getTable(),
 				new SequenceAlignmentPortObject(
 						sequenceAlignmentOut,
-						new SequenceAlignmentPortObjectSpec(SequenceAlignment.TYPE, sequenceAlignmentOutFormat))
+						new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, sequenceAlignmentOutFormat))
 		};
 	}
 
