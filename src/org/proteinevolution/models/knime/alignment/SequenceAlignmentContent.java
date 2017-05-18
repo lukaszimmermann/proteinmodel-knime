@@ -12,12 +12,11 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.knime.core.data.DataType;
 import org.knime.core.util.FileUtil;
+import org.proteinevolution.models.interfaces.ISequenceAlignment;
 import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.util.Writeable;
 
@@ -31,21 +30,17 @@ import org.proteinevolution.models.util.Writeable;
  * @author lzimmermann
  *
  */
-public final class SequenceAlignmentContent implements Serializable, Writeable {
+public final class SequenceAlignmentContent implements Serializable, Writeable, ISequenceAlignment {
 
 	private static final long serialVersionUID = -4773393149609106987L;
 	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
 
-	// The first sequence of an alignment is stored here
-	private final String referenceHeader;
-	private final String referenceSequence;
-
-	// All other sequences of an alignment, unordered
-	private final Map<String, String> sequences;
+	private final String[] headers;
+	private final Character[][] sequences;
 
 	// Specification of the alignment format
 	private final AlignmentFormat alignmentformat;
-	
+
 
 	public SequenceAlignmentContent(final InputStream in) throws IOException  {
 
@@ -56,7 +51,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable {
 		out.close();
 		ByteArrayInputStream bis = new ByteArrayInputStream(out.toByteArray());
 		SequenceAlignmentContent sequenceAlignment = null;
-		
+
 		try(ObjectInput ois = new ObjectInputStream(bis)) {
 
 			sequenceAlignment = (SequenceAlignmentContent) ois.readObject();
@@ -66,93 +61,68 @@ public final class SequenceAlignmentContent implements Serializable, Writeable {
 
 			throw new IOException("Class: SequenceAlignment could not be found");
 		}
-		
-		this.referenceHeader = sequenceAlignment.referenceHeader;
-		this.referenceSequence = sequenceAlignment.referenceSequence;
+
+		this.headers = sequenceAlignment.headers;
 		this.sequences = sequenceAlignment.sequences;
 		this.alignmentformat = sequenceAlignment.alignmentformat;
 	}
 
-	
-	
-	private SequenceAlignmentContent(final List<String> headers, final List<String> seqs) {
 
-		int nSequences = headers.size();
-		this.sequences = new HashMap<String, String>(nSequences - 1);
-		this.referenceHeader = headers.get(0);
-		this.referenceSequence = seqs.get(0);
+	private SequenceAlignmentContent(final String[] headers, final Character[][] seqs) {
 
-		for (int i = 1; i < nSequences; ++i) {
-
-			this.sequences.put(headers.get(i), seqs.get(i));
-		}
-		
-		// Check that single sequences do not contain any gap characters
-		this.alignmentformat = this.sequences.size() == 0 ? AlignmentFormat.SingleSequence : AlignmentFormat.FASTA;
+		this.headers = headers;
+		this.sequences = seqs;
+		this.alignmentformat = headers.length == 1 ? AlignmentFormat.SingleSequence : AlignmentFormat.FASTA;
 	}
 
-	public int getNumberOfSequences() {
-
-		return this.sequences.size() + 1;
-	}
-
+	@Override
 	public int getLength() {
 
-		return this.referenceSequence.length();
+		return this.sequences[0].length;
 	}
 
 	public AlignmentFormat getAlignmentFormat() {
-		
+
 		return this.alignmentformat;
 	}	
-	
+
 	@Override
 	public void write(final Writer out) throws IOException {
-		
+
 		String linesep = System.lineSeparator();
-		// Write first sequence
-		out.write(">");
-		out.write(this.referenceHeader);
-		out.write(linesep);
-		
-		// Write the reference sequence in 80 character chunks
-		int end = 80;
-		while (end <= this.referenceSequence.length()) {
-			
-			out.write(this.referenceSequence.substring(end-80, end));
+
+		for (int i = 0; i <  this.headers.length; ++i) {
+
+			out.write(">");
+			out.write(this.headers[i]);
+			out.write(linesep);
+			Character[] seq = this.sequences[i];
+
+			// Write the reference sequence in 80 character chunks
+			int end = 80;
+			while (end <= seq.length) {
+
+				// Write characters end-80 to end exclusively
+				for (int j = end-80; i < end; ++i) {
+
+					out.write(seq[i]);
+				}
+			}
+
 			end += 80;
 			out.write(linesep);
-		}
-		// Write remaining chunk
-		out.write(this.referenceSequence.substring(end-80));
-		out.write(linesep);
-		
-		// Write the remaining sequences
-		for ( String header : this.sequences.keySet()) {
-			
-			out.write(">");
-			out.write(this.referenceHeader);
-			out.write(linesep);
-			
-			String seq = this.sequences.get(header);
-			
-			// Write the reference sequence in 80 character chunks
-			end = 80;
-			while (end <= seq.length()) {
-				
-				out.write(seq.substring(end-80, end));
-				end += 80;
-				out.write(linesep);
+			for (int j = end; i < seq.length; ++i ) {
+
+				out.write(seq[j]);
 			}
-			out.write(seq.substring(end-80));
 			out.write(linesep);
 		}
-		out.flush();
+		out.flush();		
 	}
 
-	
+
 	public static SequenceAlignmentContent fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
-		
+
 		boolean notFirst = false;
 
 		List<String> headers = new ArrayList<String>();
@@ -206,7 +176,46 @@ public final class SequenceAlignmentContent implements Serializable, Writeable {
 
 			throw new NotAnAlignmentException("Input file did not contain any sequences!");
 		}
-		
-		return new SequenceAlignmentContent(headers, sequences);
+
+		String[] type = new String[0];
+
+		// Write the strings to the char array
+		Character[][] content = new Character[sequences.size()][sequences.get(0).length()];
+
+		for (int i = 0; i < sequences.size(); i++) {
+
+			char[] symbols = sequences.get(i).toCharArray();
+			for (int j = 0; j < symbols.length; ++j) {
+
+				content[i][j] = symbols[j];
+			}
+		}
+		return new SequenceAlignmentContent(headers.toArray(type), content);
+	}
+
+
+	@Override
+	public Character[] getSequenceAt(final int index)  {
+
+		return this.sequences[index];
+	}
+
+	@Override
+	public int getNumberSequences() {
+
+		return this.sequences.length;
+	}
+
+	@Override
+	public char get(final int i, final int j) {
+
+		return this.sequences[i][j];
+	}
+
+
+	@Override
+	public Character[][] getAllUnsafe() {
+
+		return this.sequences;
 	}
 }

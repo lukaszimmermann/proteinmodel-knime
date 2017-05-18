@@ -53,6 +53,4 @@ public class AlignmentReaderNodeFactory
     public NodeDialogPane createNodeDialogPane() {
         return new AlignmentReaderNodeDialog();
     }
-
 }
-

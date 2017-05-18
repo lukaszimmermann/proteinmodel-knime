@@ -27,6 +27,7 @@
 
 package org.proteinevolution.cinema; // Package name inserted by JPack
 
+import org.proteinevolution.models.interfaces.ISequenceAlignment;
 
 /**
  * NoSuchSequenceException.java

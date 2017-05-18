@@ -26,7 +26,10 @@
  */
 
 
-package org.proteinevolution.cinema; // Package name inserted by JPack
+package org.proteinevolution.models.interfaces; // Package name inserted by JPack
+
+import org.proteinevolution.cinema.GappedSequence;
+import org.proteinevolution.cinema.NoSuchSequenceException;
 
 /**
  * SequenceAlignment.java
@@ -43,35 +46,9 @@ package org.proteinevolution.cinema; // Package name inserted by JPack
  * @version $Id: SequenceAlignment.java,v 1.17 2001/04/11 17:04:43 lord Exp $
  */
 
-public interface ISequenceAlignment extends SequenceEventProvider,
-					   VetoableSequenceListener, 
-					   AlignmentEventProvider, 
-					   Identifiable {
+public interface ISequenceAlignment {
 
-  /**
-   * Sets the inset of a sequence within the alignment. An inset of
-   * zero will mean that the first element starts at the left most
-   * position of the alignment.
-   * <p>
-   * Special N.B.: This was put into the interface because it  was
-   * felt that there would not be any instances when you would not
-   * wish to do this (apart from a read-only alignment, in which case
-   * there are ways and means).
-   * @param seqIndex the index of the sequence
-   * @param size the size of the inset
-   * @exception veto to setting
-   */
-  public void setInset(int seqIndex, int size) throws AlignmentVetoException;
 
-  /**
-   * Returns the inset of sequence within the alignment.
-   * A inset of 0 means that the first element means that the Sequence
-   * starts at the left most position of the alignment
-   * @param seqIndex the sequence index
-   * @return the inset or preceeding number of gaps
-   */
-  public int getInset(int seqIndex);
-  
   /**
    * Provides the sequence at a particular location in the alignment.
    * The indexing STARTS AT 1, and not 0. 
@@ -79,15 +56,7 @@ public interface ISequenceAlignment extends SequenceEventProvider,
    * @return      the sequence of interest
    * @throws      if index < 1 or index > getNumberSequences()
    */
-  public GappedSequence getSequenceAt(int index) throws NoSuchSequenceException;
-  
-  /**
-   * Returns the index in the alignment of a provided sequence.
-   *
-   * @param seq the query sequence
-   * @return the index of the sequence, or -1 if not found
-   */
-  public int getSequenceIndex(GappedSequence seq);   // TODO Sounds unnecessary
+  public Character[] getSequenceAt(int index) throws NoSuchSequenceException;
   
   /**
    * Returns the total number of sequences in the alignment.
@@ -102,6 +71,26 @@ public interface ISequenceAlignment extends SequenceEventProvider,
    * @return length of alignment
    */
   public int getLength();
+  
+  
+  /**
+   * Returns in the ith sequence the character at position j
+   * 
+   * @param i Sequence to look at
+   * @param j Column to look at
+   * @return
+   */
+  public char get(final int i, final int j);  
+  
+  
+  /**
+   * Returns the complete alignment, but does not make a copy.
+   * 
+   * @return
+   */
+  public Character[][] getAllUnsafe();
+  
+  
   
 } // SequenceAlignment
 

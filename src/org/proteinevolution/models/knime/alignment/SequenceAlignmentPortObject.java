@@ -1,8 +1,5 @@
 package org.proteinevolution.models.knime.alignment;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,9 +8,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.util.zip.ZipEntry;
 
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
 
 import org.knime.core.data.image.ImageContent;
 import org.knime.core.node.CanceledExecutionException;
@@ -75,7 +70,7 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
 	@Override
 	public String getSummary() {
 				
-		return "Number of sequences: " + this.m_content.getNumberOfSequences() + "\nLength: " + this.m_content.getLength();
+		return "Number of sequences: " + this.m_content.getNumberSequences() + "\nLength: " + this.m_content.getLength();
 	}
 
 	@Override
@@ -88,15 +83,11 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
     /** {@inheritDoc} */
     @Override
     public JComponent[] getViews() {
-    
-    	return new JComponent[] {
- 
-    			new JButton("Click me")
+ 	
+    	return new JComponent[] {			
+    			new JAlignmentViewer(m_content)
     	};
     }
-    
-    
-    
 
     /** {@inheritDoc} */
     @Override

@@ -27,13 +27,30 @@
  */
 
 package org.proteinevolution.cinema; // Package name inserted by JPack
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.proteinevolution.models.interfaces.ISequenceAlignment;
 
 
 /**
@@ -46,48 +63,448 @@ import javax.swing.event.ChangeListener;
  * @version $Id: JAlignmentViewer.java,v 1.28 2002/03/08 14:53:57 lord Exp $
  */
 
-public class JAlignmentViewer extends JComponent {
+public class JAlignmentViewer extends JPanel implements PropertyChangeListener {
 
 	private static final long serialVersionUID = -3204831648550371466L;
 	public static final String uiClassID = "AlignmentViewerUI";
-	
-	
-	// The actual sequence alignment
+
+
+	// Alignment ViewerUI and the actual alignment
+	private CellRendererPane rendererPane;
 	private ISequenceAlignment alignment;
-	
+
 	// TODO
 	// (PENDING:- PL) this default is not really acceptable. It should be
 	// changed to something more sensible, using the preferred size of
 	// the CellRenderer
-	
-	private Dimension prototypicalCellSize = new Dimension( 30, 30 );
+
+	private Dimension prototypicalCellSize;
 	private AlignmentViewerCellRenderer renderer;
-	private FastAlignmentViewerCellRenderer fastRenderer = new DefaultFastAlignmentViewerCellRenderer();
-	
-	private AlignmentSelectionRenderer selectionRenderer = new DefaultAlignmentSelectionRenderer();
-	
+	private FastAlignmentViewerCellRenderer fastRenderer;
+	private AlignmentSelectionRenderer selectionRenderer;
+
+	private int cellWidth;
+	private int cellHeight;
+
 	// TODO Replace by something less verbose
 	private SequenceCursor cursor;
-		
-	private AlignmentViewerUI viewerUI;
+	private SequenceAlignmentPoint cursorLocation;
+
+
+	// this is instance variable just to save on the object allocation
+	private SequenceAlignmentPoint rendererLocation;
+	private SequenceAlignmentRectangle seqRect;
+
+
 	private AlignmentSelectionModel selectionModel;
+	private boolean selectingToggle = false;
 	private ColorMap colorMap;
 
 
-	public JAlignmentViewer( ISequenceAlignment alignment )
-	{
+	private SequenceAlignmentPoint originalSequencePoint = null;
+	private SequenceAlignmentPoint currentSequencePoint = null;
+	private int originalMouseY = 0; 
+	private SequenceAlignmentPoint lastExtendedSelectionPoint = new SequenceAlignmentPoint();
+
+	private SequenceAlignmentPoint loc = new SequenceAlignmentPoint( 0, 0 );
+
+
+
+	public JAlignmentViewer( ISequenceAlignment alignment ) {
 		super();
 		// (PENDING:- PL) We probably need to install listeners here to
 		// this SequenceAlignment. Should we allow it to change outside? I
 		// think so...    
+
+		// Initialize the component
+		this.rendererPane =  new CellRendererPane();
 		this.alignment = alignment;
+
+		// Cursor and cursor location
 		this.cursor = new DefaultSequenceCursor();
+		this.cursorLocation = new SequenceAlignmentPoint();  
+
 		this.colorMap = new SingleColorMap(getBackground());
+		this.prototypicalCellSize = new Dimension( 30, 30 );
+
+		// Renderer
+		this.fastRenderer = new DefaultFastAlignmentViewerCellRenderer();
+		this.selectionRenderer = new DefaultAlignmentSelectionRenderer();
+		this.rendererLocation = new SequenceAlignmentPoint();
+		this.seqRect = new SequenceAlignmentRectangle();
 
 		this.selectionModel = new SingleAlignmentSelectionModel();
-		// bit surprising here, but this is NOT called by the super class cons
-		updateUI();
+
+		// Add the render pane
+		this.add(this.rendererPane);
+
+		// Register keyboard actions
+		this.registerKeyboardAction( new SelectionToggler(), KeyStroke.getKeyStroke ( KeyEvent.VK_ENTER, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction( new SelectionClearer(), KeyStroke.getKeyStroke( KeyEvent.VK_BACK_SPACE, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.RIGHT ), KeyStroke.getKeyStroke( KeyEvent.VK_RIGHT, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.LEFT ), KeyStroke.getKeyStroke( KeyEvent.VK_LEFT, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.DOWN ), KeyStroke.getKeyStroke( KeyEvent.VK_DOWN, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.UP ), KeyStroke.getKeyStroke( KeyEvent.VK_UP, 0 ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.RIGHT ), KeyStroke.getKeyStroke(  "KP_RIGHT"), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.LEFT ), KeyStroke.getKeyStroke(  "KP_LEFT"), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.DOWN ), KeyStroke.getKeyStroke( "KP_DOWN"), JComponent.WHEN_IN_FOCUSED_WINDOW );
+		this.registerKeyboardAction(  new KeyScroller( this, KeyScroller.UP ), KeyStroke.getKeyStroke(  "KP_UP" ), JComponent.WHEN_IN_FOCUSED_WINDOW );
+
+		// Further listener (Probably quite useless)
+		//this.addMouseListener(this);
+		//this.addMouseMotionListener(this);
+		this.addPropertyChangeListener(this);
+		this.addCursorChangeListener(new PointListener());
+
+
+		// Focus listener
+		this.addFocusListener
+		( new FocusListener(){
+			public void focusGained( FocusEvent event ) {
+				repaint();
+			}
+
+			public void focusLost( FocusEvent event ) {
+				repaint();
+			}
+		});	
 	}
+
+
+	public SequenceAlignmentRectangle getSequenceAlignmentRectangleAtRectangle( Rectangle rect ) {
+
+		this.seqRect.setLocation( this.getSequencePointAtPoint( (int)rect.getX(), (int)rect.getY() ) );
+		SequenceAlignmentPoint loc = getSequencePointAtPoint ( (int)(rect.getX() + rect.getWidth()), (int)(rect.getY() + rect.getHeight()) );
+		seqRect.setSize( loc.getX() - seqRect.getX(), loc.getY() - seqRect.getY() );
+		return seqRect;
+	}
+
+
+	public SequenceAlignmentPoint getSequencePointAtPoint( int x, int y ) {
+		// need to think about this. Is there a problem here with
+		// downwards rounding???
+
+		// also this ignores the insets issue for the moment, which is
+		// something else I need to think about. 
+		// ignore all the insets for the moment.
+
+		int sequencePos = (x / cellWidth) + 1;
+		int alignmentLoc = (y / cellHeight) + 1;
+
+		loc.setLocation
+		( sequencePos, alignmentLoc );
+		return loc;
+	}
+
+	public Point getPointAtSequencePoint( int x, int y )
+	{ 
+		return new Point
+				( (x - 1) * cellWidth, 
+						(y - 1) * cellHeight );
+	}
+
+	public Point getPointAtSequencePoint( SequenceAlignmentPoint point )
+	{
+		return getPointAtSequencePoint
+				( point.getX(), 
+						point.getY() );
+	}
+
+
+
+
+
+	public Rectangle getCellBounds( SequenceAlignmentPoint point ) {
+		return getCellBounds( point, null );
+	}
+
+	public Rectangle getCellBounds( SequenceAlignmentPoint point, Rectangle rect ) {
+		if( rect == null ) {	
+			rect = new Rectangle();
+		}
+		Point physPoint = getPointAtSequencePoint( point );
+		rect.setLocation( physPoint.x, physPoint.y );
+		rect.setSize( cellWidth, cellHeight );
+		return rect;
+	}
+
+
+
+
+	// implementation of java.beans.PropertyChangeListener interface
+	@Override
+	public void propertyChange( PropertyChangeEvent pce ) {
+		if( pce.getPropertyName().equals( "cellHeight" ) ){
+
+			Rectangle rectangle = this.getVisibleRect();
+			// this is the sequence point before we have changed the cellHeight.
+			SequenceAlignmentPoint seqPoint = getSequencePointAtPoint
+					( rectangle.getLocation() );
+
+			cellHeight = ((Integer)pce.getNewValue()).intValue();
+
+			// now get the new location of the old SequenceAlignmentPoint
+			Point newPoint = getPointAtSequencePoint( seqPoint );
+
+			// which is the point that we want to make the top left. The old
+			// size and so forth are correct. 
+			rectangle.setLocation( newPoint );
+
+			this.scrollRectToVisible( rectangle );
+		}
+
+		else if( pce.getPropertyName().equals( "cellWidth" ) ){
+
+			Rectangle rectangle = this.getVisibleRect();
+			// this is the sequence point before we have changed the cellHeight.
+			SequenceAlignmentPoint seqPoint = getSequencePointAtPoint
+					( rectangle.getLocation() );
+
+			cellWidth = ((Integer)pce.getNewValue()).intValue();
+
+			// now get the new location of the old SequenceAlignmentPoint
+			Point newPoint = getPointAtSequencePoint( seqPoint );
+
+			// which is the point that we want to make the top left. The old
+			// size and so forth are correct. 
+			rectangle.setLocation( newPoint );
+
+			this.scrollRectToVisible( rectangle );
+		}
+
+		else if( pce.getPropertyName().equals( "fastCellRenderer" ) ){
+
+			fastRenderer = (FastAlignmentViewerCellRenderer)pce.getNewValue();
+		}
+
+		else if( pce.getPropertyName().equals( "cellRenderer" ) ){
+
+			renderer = (AlignmentViewerCellRenderer)pce.getNewValue();
+		}
+
+		else if( pce.getPropertyName().equals( "alignmentSelectionRenderer" ) ){
+
+			selectionRenderer = (AlignmentSelectionRenderer)pce.getNewValue();
+		}
+
+		else if( pce.getPropertyName().equals( "sequenceAlignment" ) ){
+
+			alignment = (ISequenceAlignment)pce.getNewValue();
+		}
+
+		else if( pce.getPropertyName().equals( "alignmentSelectionModel" ) ){
+			selectionModel = (AlignmentSelectionModel)pce.getNewValue();
+		}
+
+		// if read-only change
+		else if (pce.getPropertyName().equals("readonly")) {
+			if (((Boolean)pce.getNewValue()).booleanValue()) {
+				// uninstall the mouse motion listener
+				//this.removeMouseMotionListener(this);
+			}
+			else {
+				// install the mouse motion listener
+				//this.addMouseMotionListener(this);
+			}
+		}
+	}
+
+
+
+	public Rectangle paintFocusRect( Graphics g, Rectangle rect ) {
+
+		g.setColor( Color.black );
+		g.drawRect( rect.x, rect.y, rect.width - 1, rect.height - 1 );
+		rect.x -= 1;
+		rect.y -= 1;
+		rect.height -= 2;
+		rect.width -= 2;
+
+		return rect;
+	}
+
+	public void paint( Graphics g, JComponent c ) {
+		Rectangle rect = g.getClipBounds();
+
+		if( c.hasFocus() ){
+			rect = paintFocusRect( g, rect );
+		}
+
+		paintCells( g, c );
+		paintSelection( g, c );
+	}
+
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	protected void paintCells( Graphics g, JComponent c ) {
+
+		Rectangle rect = g.getClipBounds();
+
+		// calculate where to start drawing. We need to draw 1 either side
+		// of the actuall clipping area though. 
+		int topLeftIndex = getSequencePointAtPoint( rect.x, rect.y ).getY() - 1;
+		topLeftIndex = (topLeftIndex < 1) ? 1: topLeftIndex;
+		int topLeftPosition = getSequencePointAtPoint( rect.x, rect.y ).getX() - 1;
+		topLeftPosition = ( topLeftPosition < 1 ) ? 1 : topLeftPosition;
+		int topRightPosition = getSequencePointAtPoint( rect.x + rect.width, rect.y ).getX() + 1;
+		int bottomLeftIndex = getSequencePointAtPoint( rect.x, rect.y + rect.height ).getY() + 1;
+
+		// calc the start Y position.. We substract 1 because we
+		// want cell number 1 to draw at position zero
+		int currY = (cellHeight * (topLeftIndex - 1)) + c.getInsets().top;
+
+		// iterate through all of the cells. 
+		for( int j = topLeftIndex; j < bottomLeftIndex; j++ ){
+
+			// we now iterate through the sequence elements in three
+			// steps. First the nulls at the
+			int startSeq = topLeftPosition;
+			int endSeq = topRightPosition;
+
+			// if we are off the bottom of the sequences then just pretend
+			// that we never get to the sequence
+
+			if( j >= alignment.getNumberSequences() + 1){
+				startSeq = topRightPosition;
+			}
+			/*
+			else{
+
+				int temp;
+				// else work out where the sequence starts at least if we are
+				// not already into it.
+				if( topLeftPosition < (temp = alignment.getInset( j ) + 1) ){
+					startSeq = temp;
+				}
+				// and then work out where the end of the sequence is at least
+				// if we get to it. 
+				if( topRightPosition > (temp = alignment.getInset( j ) + alignment.getSequenceAt( j ).getGappedLength() + 1) ){
+					endSeq = temp;
+				}
+			}
+			 */
+
+			for( int i = topLeftPosition; i < startSeq -1; i ++ ){
+
+				rendererLocation.setLocation( i, j );
+
+				// is code reuse really worth this????
+				renderCell( g,  (i - 1) * cellWidth, currY, cellWidth, cellHeight, rect, rendererLocation, null );
+			}
+
+			for( int i = startSeq; i < endSeq; i ++ ){
+
+				rendererLocation.setLocation( i, j );
+				//Element element =  alignment.getSequenceAt( j ).getGappedElementAt
+				//		( i - alignment.getInset( j ) );
+
+				// is code reuse really worth this????
+				//renderCell( g, (i - 1) * cellWidth, currY, cellWidth, cellHeight, rect, rendererLocation, element );
+			}
+
+			for( int i = endSeq + 1; i < topRightPosition; i++ ){
+
+				rendererLocation.setLocation( i, j );
+
+				// is code reuse really worth this????
+				renderCell( g, (i - 1) * cellWidth, currY, cellWidth, cellHeight, rect, rendererLocation, null );
+			}
+
+			currY += cellHeight;
+		}
+	}
+
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+	protected void paintSelection( Graphics g, JComponent c )
+	{
+		Rectangle rect = g.getClipBounds();
+		//g.setClip( rect.x, rect.y, rect.width, rect.height );
+		//g.clipRect( rect.x, rect.y, rect.width, rect.height );
+
+		SequenceAlignmentRectangle clipSeqRect = getSequenceAlignmentRectangleAtRectangle( rect );
+
+		for( int i = 0; i < selectionModel.getNumberSelections(); i++ ){
+			SequenceAlignmentRectangle selRect = selectionModel.getSelectionAt( i );
+			if( true ){ //selRect.intersects( clipSeqRect ) ){
+				Point leftTop = getPointAtSequencePoint( selRect.getX(), selRect.getY() );
+				Point bottomRight = getPointAtSequencePoint( (selRect.getWidth() + selRect.getX()),
+						(selRect.getHeight() + selRect.getY() ) );
+
+				// g.setClip( rect.x, rect.y, rect.width, rect.height );
+				//  g.setClip( leftTop.x, leftTop.y, (bottomRight.x - leftTop.x), (bottomRight.y - leftTop.y) );
+				//g.clipRect( rect.x, rect.y, rect.width, rect.height );
+				selectionRenderer.renderAlignmentSelection
+				( g, leftTop.x, leftTop.y, (bottomRight.x - leftTop.x), (bottomRight.y - leftTop.y),
+						this, selRect );
+			}
+		}
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+	protected void renderCell ( Graphics g, int currX, int currY, int cellWidth, int cellHeight,
+			Rectangle rect, SequenceAlignmentPoint rendererLocation, Element element ){
+		//if( true ) return ;
+		// not quite sure what this does, but it looks good. Hopefully
+		// though it should stop naughty renderers from doing evil
+		// things to the layout. 
+		//g.setClip( currX, currY, cellWidth, cellHeight );
+		//g.clipRect( rect.x, rect.y, rect.width, rect.height );
+
+		Color bgColor = this.getColorMap().getColorAt(alignment, element, rendererLocation);
+		boolean isSelected = selectionModel.isPointSelected( rendererLocation );
+		boolean hasFocus = this.hasFocus();
+		boolean isAtPoint = rendererLocation.equals( cursorLocation );
+
+		if( renderer == null ){
+			fastRenderer.renderAlignmentViewerCell
+			( g, currX, currY, cellWidth, cellHeight,
+					this, element, rendererLocation,
+					bgColor, isSelected, hasFocus, isAtPoint );
+		}
+		else{      
+			Component cell = renderer.getAlignmentViewerCellRendererComponent
+					( this,
+							element,
+							rendererLocation,
+							bgColor,
+							isSelected,
+							hasFocus, 
+							isAtPoint );
+
+			rendererPane.paintComponent( g, cell, this, currX, currY,
+					cellWidth, cellHeight, true );
+
+		}
+
+		// support for an XOR cursor blink. If the we are drawing the
+		// right cell just XOR it...
+		/* No blinking
+		if( getBlinkOn() && rendererLocation.equals( cursorBlinkPoint ) ){
+			// now that we have drawn do the XOR as the blink is on.
+			g.setXORMode( Color.white );
+			g.fillRect( currX, currY, cellWidth, cellHeight );
+			g.setPaintMode();
+		}
+		 */
+	}
+
+
+
+
+
+	public void mouseClicked(MouseEvent e)  {
+
+		this.moveCursor(getSequencePointAtPoint(e.getPoint()));
+	}
+
 
 	// rendering properties
 	public void setCellRenderer( AlignmentViewerCellRenderer renderer )
@@ -299,13 +716,7 @@ public class JAlignmentViewer extends JComponent {
 		setPoint(point.move(1,1));
 	}
 
-	public void moveCursorEndOfAlignment() 
-	{
-		SequenceAlignmentPoint point = cursor.getPoint();
-		setPoint(point.move
-				(alignment.getSequenceAt(alignment.getNumberSequences()).getGappedLength(),
-						alignment.getNumberSequences()));
-	}
+
 
 	public void moveCursorRight( int number )
 	{
@@ -370,21 +781,10 @@ public class JAlignmentViewer extends JComponent {
 		return cursor.getMark();
 	}
 
-	// methods delegated to UI
-	public SequenceAlignmentPoint getSequencePointAtPoint( int x, int y )
-	{
-		return viewerUI.getSequencePointAtPoint( x, y );
-	}
-
 	public SequenceAlignmentPoint getSequencePointAtPoint( Point point )
 	{
 		return getSequencePointAtPoint
 				( point.x, point.y );
-	}
-
-	public Point getPointAtSequencePoint( int x, int y )
-	{
-		return viewerUI.getPointAtSequencePoint( x, y );
 	}
 
 	private Rectangle cacheRect;
@@ -396,11 +796,6 @@ public class JAlignmentViewer extends JComponent {
 		cacheRect.setSize
 		( (seqRect.getWidth()) * getCellWidth(), (seqRect.getHeight()) * getCellHeight() );
 		return cacheRect;
-	}
-
-	public Rectangle getCellBounds( SequenceAlignmentPoint point )
-	{
-		return viewerUI.getCellBounds( point );
 	}
 
 	public void ensureSequencePointIsVisible( SequenceAlignmentPoint point )
@@ -485,13 +880,12 @@ public class JAlignmentViewer extends JComponent {
 		repaint();
 	}
 
-	public ISequenceAlignment getSequenceAlignment()
-	{
-		return alignment;
+
+	public ISequenceAlignment getSequenceAlignment() {
+		return this.alignment;
 	}
 
-	public void changeOccurred( AlignmentEvent event )
-	{
+	public void changeOccurred( AlignmentEvent event ) {
 		//   SequenceAlignmentRectangle visRect = getVisibleSequenceRect();
 
 		//      int start = event.getStart();
@@ -528,13 +922,13 @@ public class JAlignmentViewer extends JComponent {
 
 
 	// Scrollable interface
-	public Dimension getPreferredScrollableViewportSize()
-	{
+	public Dimension getPreferredScrollableViewportSize() {
 		return getPreferredSize();
 	}
 
-	public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction )
-	{
+
+
+	public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction ) {
 		if( orientation == SwingConstants.HORIZONTAL ){
 			if( direction > 0 ){
 				// scrolling right. 
@@ -546,9 +940,9 @@ public class JAlignmentViewer extends JComponent {
 			}
 		}
 		return 0;
-
 	}
 
+	/*  I think this is not needed
 	public int getScrollableBlockIncrement( Rectangle visibleRect, int orientation, int direction )
 	{
 		return 0;
@@ -563,35 +957,294 @@ public class JAlignmentViewer extends JComponent {
 	{
 		return false;
 	}
+	 */
 
 
 	// these methods tie the this class into its equivalent UI
 	// delegate.
+	/* I think this is not needed
 	public String getUIClassID()
 	{
 		return uiClassID;
 	}
+	 */
 
-	public void setUI( AlignmentViewerUI ui )
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////  Action and Event Listener
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	public class SelectionClearer implements ActionListener
 	{
-		super.setUI( ui );
-		viewerUI = (AlignmentViewerUI)ui;
+		public void actionPerformed( ActionEvent event ) {
+
+			JAlignmentViewer.this.clearSelection();
+			JAlignmentViewer.this.selectingToggle = false;
+		}
+	}
+
+	public class SelectionToggler implements ActionListener
+	{
+		public void actionPerformed( ActionEvent event )
+		{
+			if( JAlignmentViewer.this.selectingToggle ){
+				JAlignmentViewer.this.selectingToggle = false;
+			}
+			else{
+				JAlignmentViewer.this.selectingToggle = true;
+				JAlignmentViewer.this.extendSelection( JAlignmentViewer.this.getPoint());
+			}
+		}
+	}
+
+
+	public class KeyScroller implements ActionListener {
+
+		private JAlignmentViewer viewer;
+		private int direction;
+
+		public static final int UP = 1;
+		public static final int DOWN = 2;
+		public static final int RIGHT = 3;
+		public static final int LEFT = 4;
+
+
+
+		public KeyScroller( JAlignmentViewer viewer, int direction ) {
+
+			this.viewer = viewer;
+			this.direction = direction;
+		}
+
+		public void actionPerformed( ActionEvent event ) {
+
+			switch (direction){
+
+			case UP:
+				viewer.moveCursorUp( 1 );
+				break;
+			case DOWN:
+				viewer.moveCursorDown( 1 );
+				break;
+			case RIGHT:
+				viewer.moveCursorRight( 1 );
+				break;
+			case LEFT:
+				viewer.moveCursorLeft( 1 );
+				break;
+			}
+		}
+	}
+
+	public class PointListener implements ChangeListener {
+		public void stateChanged( ChangeEvent event ) {
+			JAlignmentViewer.this.cursorLocation = getPoint();
+
+			if( JAlignmentViewer.this.selectingToggle ){
+				JAlignmentViewer.this.extendSelection(getPoint() );
+			}
+			//setCursorBlink();  // No blinking currently
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////// Mouse events
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// if button 2 is down, then we want to extend the selection 
+		if( ( e.getModifiers() & InputEvent.BUTTON2_MASK ) == InputEvent.BUTTON2_MASK ){
+
+			// clear the selection model it is not selecting. 
+			if( ! this.selectionModel.isSelecting() ){
+
+				this.selectionModel.clearSelection();
+			}
+
+			// signal the change
+			this.selectionModel.extendSelection( new SequenceAlignmentPoint( getSequencePointAtPoint( e.getX(), e.getY() ) ) );
+
+			// and remember this point.
+			this.lastExtendedSelectionPoint.setLocation ( getSequencePointAtPoint( e.getX(), e.getY() ) );
+		}
+		else{
+			// set the original sequence point at mouse down
+			this.originalSequencePoint = new SequenceAlignmentPoint(getSequencePointAtPoint(e.getX(), e.getY()));
+			// store the Y location to prevent drifting
+			this.originalMouseY = e.getY();
+		}
+	}
+
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+
+		// if button 2 is down, then we want to stop the selection
+		if( ( e.getModifiers() & InputEvent.BUTTON2_MASK ) == InputEvent.BUTTON2_MASK ){
+			this.selectionModel.stopSelection( new SequenceAlignmentPoint ( getSequencePointAtPoint( e.getX(), e.getY() ) ) );
+		}
+		else {
+			// move the cursor to the current location
+			if (currentSequencePoint != null) {
+
+				this.moveCursor(currentSequencePoint);
+			}
+			// reset the variables
+			originalSequencePoint = null;
+			originalMouseY = 0;
+			currentSequencePoint = null;
+		}
 	}
 
 	@Override
-	public void updateUI()
-	{
-		setUI( (AlignmentViewerUI)UIManager.getUI( this ) );
+	public void mouseDragged(MouseEvent e) { 
+
+		// if button 2 is down, then we want to extend the selection 
+		if( ( e.getModifiers() & InputEvent.BUTTON2_MASK ) == InputEvent.BUTTON2_MASK ) {
+
+			// where have we dragged to. 
+			SequenceAlignmentPoint nowAtPoint = getSequencePointAtPoint( e.getX(), e.getY() );
+
+			// if drag has moved us into a new region signal an event
+			if( !nowAtPoint.equals( lastExtendedSelectionPoint ) ){
+
+				this.selectionModel.extendSelection( new SequenceAlignmentPoint( nowAtPoint ) );
+				this.lastExtendedSelectionPoint.setLocation( nowAtPoint );
+			}
+
+		} else {
+
+			// if we are still in the viewer
+			if ((this.contains(e.getPoint())) || (this.originalSequencePoint != null)) {
+
+				// get the current sequence point
+				this.currentSequencePoint = new SequenceAlignmentPoint(getSequencePointAtPoint(e.getX(), originalMouseY));
+
+				// the difference between the two points
+
+				// We are not inserting or deleting gaps here
+				//this.currentSequencePoint.getX() - this.originalSequencePoint.getX();
+			}
+		}
 	}
 
-	static
-	{
-		// ensure that UI delegates are known to swing. 
-		Class c = Install.class;
+
+	@Override
+	public void mouseMoved(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+
+	}
+	 */
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////// Cursor blinking stuff (currently not implemented)
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/* 
+	// (PENDING:- PL) These should be protected methods...
+	private Rectangle blinkedCursor = new Rectangle();
+	private SequenceAlignmentPoint cursorBlinkPoint;
+	private boolean blinkOn = false;
+	private CursorBlinkThread cursorThread;
+
+	// I've put these into private methods so that I could debug when
+	// the values were being changed
+	private synchronized void setBlinkOn( boolean on ) {
+
+		this.blinkOn = on;
 	}
 
-} // JAlignmentViewer
+	private boolean getBlinkOn() {
 
+		return this.blinkOn;
+	}
+
+	public synchronized void setCursorBlink() {
+
+		if( this.cursorThread == null ){
+
+			this.cursorThread = new CursorBlinkThread();
+			this.cursorThread.start();
+		}
+
+		// cache the current 
+		SequenceAlignmentPoint oldCursor = cursorBlinkPoint;
+
+		//get the cursor position
+		this.cursorBlinkPoint = this.getCursorModel().getPoint();
+
+		if( getBlinkOn() ){
+			// we do not want to unset the cursor again!
+			cursorThread.interrupt();
+			// need to wipe old blink. Do this by just painting over it. 
+			paintImmediately( oldCursor );
+		}
+
+
+		getCellBounds( cursorBlinkPoint, blinkedCursor );
+		setBlinkOn( true );
+		// this should repaint with XOR
+		repaint( cursorBlinkPoint );
+
+
+		cursorThread.notifyImpl();
+	}
+
+	public synchronized void unsetCursorBlink()
+	{
+		setBlinkOn( false );
+		paintImmediately( cursorBlinkPoint );
+	}
+
+
+
+	class CursorBlinkThread extends Thread {
+
+		public void run() {
+
+			while( true ){
+				try {
+					sleep( 75 );
+					unsetCursorBlink();
+					waitImpl();
+
+				} catch( InterruptedException t ){
+
+					// Not doing anything here
+				}
+			}
+		}
+
+		public synchronized void waitImpl() throws InterruptedException {
+			this.wait();
+		}
+
+		public synchronized void notifyImpl() {
+			this.notify();
+		}
+	}
+
+	 */
+
+}
 
 
 /*

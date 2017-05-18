@@ -29,6 +29,9 @@
 package org.proteinevolution.cinema; // Package name inserted by JPack
 import javax.swing.JSlider;
 import javax.swing.plaf.SliderUI;
+
+import org.proteinevolution.models.interfaces.ISequenceAlignment;
+
 import javax.swing.UIManager;
 import java.awt.Dimension;
 import uk.ac.man.bioinf.sequence.alignment.SequenceAlignment;

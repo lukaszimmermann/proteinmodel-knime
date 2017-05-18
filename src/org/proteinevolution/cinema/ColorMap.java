@@ -29,6 +29,8 @@ package org.proteinevolution.cinema; // Package name inserted by JPack
 
 import java.awt.Color;
 
+import org.proteinevolution.models.interfaces.ISequenceAlignment;
+
 
 
 // TODO This interface is very spurious (various things?)

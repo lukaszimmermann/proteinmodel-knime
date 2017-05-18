@@ -27,7 +27,6 @@
  */
 
 package org.proteinevolution.cinema; // Package name inserted by JPack
-import javax.swing.plaf.ComponentUI;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -42,7 +41,7 @@ import java.awt.Rectangle;
  * @version $Id: AlignmentViewerUI.java,v 1.4 2001/04/11 17:04:42 lord Exp $
  */
 
-public abstract class AlignmentViewerUI extends ComponentUI {
+public abstract class AlignmentViewerUI {
 	
 	
   public abstract SequenceAlignmentPoint getSequencePointAtPoint( int x, int y );

@@ -71,7 +71,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
         				"Row0",
         				 new DataCell[] {
         						 
-        						 IntCellFactory.create(in.getNumberOfSequences()),
+        						 IntCellFactory.create(in.getNumberSequences()),
         						 IntCellFactory.create(in.getLength()),
         						 StringCellFactory.create(in.getAlignmentFormat().toString())
         				 }));
