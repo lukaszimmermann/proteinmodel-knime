@@ -20,6 +20,7 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.port.image.ImagePortObjectSpec;
+import org.proteinevolution.models.knime.alignment.view.JAlignmentView;
 
 public class SequenceAlignmentPortObject extends AbstractPortObject {
 
@@ -85,7 +86,7 @@ public class SequenceAlignmentPortObject extends AbstractPortObject {
     public JComponent[] getViews() {
  	
     	return new JComponent[] {			
-    			new JAlignmentViewer(m_content)
+    			new JAlignmentView(this.m_content)
     	};
     }
 

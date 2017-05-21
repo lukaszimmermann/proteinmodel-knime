@@ -36,7 +36,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
 
 	private final String[] headers;
-	private final Character[][] sequences;
+	private final char[][] sequences;
 
 	// Specification of the alignment format
 	private final AlignmentFormat alignmentformat;
@@ -68,7 +68,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 	}
 
 
-	private SequenceAlignmentContent(final String[] headers, final Character[][] seqs) {
+	private SequenceAlignmentContent(final String[] headers, final char[][] seqs) {
 
 		this.headers = headers;
 		this.sequences = seqs;
@@ -96,7 +96,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 			out.write(">");
 			out.write(this.headers[i]);
 			out.write(linesep);
-			Character[] seq = this.sequences[i];
+			char[] seq = this.sequences[i];
 
 			// Write the reference sequence in 80 character chunks
 			int end = 80;
@@ -179,7 +179,8 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 		String[] type = new String[0];
 
 		// Write the strings to the char array
-		Character[][] content = new Character[sequences.size()][sequences.get(0).length()];
+		// TODO Simplify
+		char[][] content = new char[sequences.size()][sequences.get(0).length()];
 
 		for (int i = 0; i < sequences.size(); i++) {
 
@@ -194,7 +195,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 
 
 	@Override
-	public Character[] getSequenceAt(final int index)  {
+	public char[] getSequenceAt(final int index)  {
 
 		return this.sequences[index];
 	}
@@ -213,7 +214,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 
 
 	@Override
-	public Character[][] getAllUnsafe() {
+	public char[][] getAllUnsafe() {
 
 		return this.sequences;
 	}

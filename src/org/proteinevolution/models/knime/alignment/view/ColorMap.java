@@ -1,4 +1,4 @@
-package org.proteinevolution.models.knime.alignment;
+package org.proteinevolution.models.knime.alignment.view;
 
 import java.awt.Color;
 import java.util.HashMap;

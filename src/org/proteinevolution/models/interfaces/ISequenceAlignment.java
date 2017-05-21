@@ -56,7 +56,7 @@ public interface ISequenceAlignment {
    * @return      the sequence of interest
    * @throws      if index < 1 or index > getNumberSequences()
    */
-  public Character[] getSequenceAt(int index) throws NoSuchSequenceException;
+  public char[] getSequenceAt(int index) throws NoSuchSequenceException;
   
   /**
    * Returns the total number of sequences in the alignment.
@@ -88,7 +88,7 @@ public interface ISequenceAlignment {
    * 
    * @return
    */
-  public Character[][] getAllUnsafe();
+  public char[][] getAllUnsafe();
   
   
   
