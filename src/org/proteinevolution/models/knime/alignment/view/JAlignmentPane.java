@@ -28,9 +28,6 @@ public class JAlignmentPane extends JComponent {
 	private final int charWidth = 12;
 	private final int charHeight = 14;
 
-	// Font Case
-	private final int fontCase = 12; 
-
 	// Character Pixels
 	private CharPixels[] charPixels;
 
@@ -43,13 +40,14 @@ public class JAlignmentPane extends JComponent {
 		this.charPixels = new CharPixels[256];
 	}
 
-
 	public void setColorMap(final ColorMap colorMap) {
 
 		this.colorMap = colorMap;
 		this.repaint();
 	}
 
+		
+	
 	@Override
 	protected void paintComponent(final Graphics g) {
 
@@ -64,8 +62,7 @@ public class JAlignmentPane extends JComponent {
 					Color.BLACK,
 					this.colorMap.getColor((char) n), 
 					new Font(Font.MONOSPACED, Font.PLAIN, (int)charWidth), 
-					MAX_CHARSIZE_TO_DRAW,
-					fontCase);
+					MAX_CHARSIZE_TO_DRAW);
 		}
 		Graphics2D g2d = (Graphics2D) g;
 		Rectangle clip = g2d.getClipBounds();
@@ -114,17 +111,15 @@ public class JAlignmentPane extends JComponent {
 					1,      // normalCharSeqPerPix
 					charWidth, 
 					charHeight, 
-					1, 
 					clipRGB, 
 					this.charPixels);	
 			executor.execute(seqPainter);
 		}
-
 		executor.shutdown();
+		
 		try {
 			executor.awaitTermination(1000, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -166,9 +161,9 @@ public class JAlignmentPane extends JComponent {
 		g2d.setColor(this.getBackground());
 		g2d.fill(clip);
 
-
 		int clipRGBXPos = clip.x;
 		int clipRGBYPos = clip.y;
+		
 		// Adjust because we start always on exact char upp to one pos before
 		if(charWidth > 1){
 			clipRGBXPos = (int)(xMin * charWidth);

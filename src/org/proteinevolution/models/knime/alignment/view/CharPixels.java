@@ -27,9 +27,8 @@ public class CharPixels {
 	private Color fgColor;
 	private Font font;
 	private int minFontSize;
-	private int fontCase;
 
-	public CharPixels(char ch, int width, int height, Color fgColor, Color bgColor, Font font, int minFontSize, int fontCase){
+	public CharPixels(char ch, int width, int height, Color fgColor, Color bgColor, Font font, int minFontSize){
 
 		if(width < 1){
 			width = 1;
@@ -46,7 +45,6 @@ public class CharPixels {
 		this.fgColor = fgColor;
 		this.bgColor = bgColor;
 		this.minFontSize = minFontSize;
-		this.fontCase = fontCase;
 	}
 
 	public int[] getPixels() {
@@ -95,18 +93,13 @@ public class CharPixels {
 
 		// Only draw if font is a good size
 		if(width > minFontSize){
+			
 			g2.setColor(fgColor);	
 			int leftCharOffset = (int)(0.15 * width);
 			int bottomCharOffset = (int)(0.2 * height);
 
-			char displayChar = ch;
-			if(fontCase == CASE_UPPER){
-				displayChar = Character.toUpperCase(ch);
-			}else if(fontCase == CASE_LOWER){
-				displayChar = Character.toLowerCase(ch);
-			}
-
-			g2.drawString("" + displayChar, leftCharOffset, height - bottomCharOffset);
+			
+			g2.drawString("" + this.ch, leftCharOffset, height - bottomCharOffset);
 		}
 
 

@@ -9,7 +9,6 @@ public class SequencePainter implements Runnable {
 	private final double seqPerPix;
 	private final double charWidth;
 	private final double charHeight;
-	private final double highDPIScaleFactor;
 	private final RGBArray clipRGB;
 	private final CharPixels[] charPixels;
 
@@ -22,7 +21,6 @@ public class SequencePainter implements Runnable {
 			final double seqPerPix,
 			final double charWidth,
 			final double charHeight,
-			final double highDPIScaleFactor,
 			final RGBArray clipRGB,
 			final CharPixels[] charPixels) {
 
@@ -33,7 +31,6 @@ public class SequencePainter implements Runnable {
 		this.seqPerPix = seqPerPix;
 		this.charWidth = charWidth;
 		this.charHeight = charHeight;
-		this.highDPIScaleFactor = highDPIScaleFactor;
 		this.clipRGB = clipRGB;
 		this.charPixels = charPixels;
 	}
@@ -54,8 +51,8 @@ public class SequencePainter implements Runnable {
 
 				if(seqXPos >=0 && seqXPos < seqLength){
 
-					int pixelPosX = (int)(clipPosX*charWidth*highDPIScaleFactor);
-					int pixelPosY = (int)(clipPosY*charHeight*highDPIScaleFactor);
+					int pixelPosX = (int)(clipPosX*charWidth);
+					int pixelPosY = (int)(clipPosY*charHeight);
 
 					if(pixelPosX < clipRGB.getScanWidth() && pixelPosY < clipRGB.getHeight()){
 
