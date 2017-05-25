@@ -103,19 +103,18 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 		// Construct the commandLine call for this hhblits invocation
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 
-			cmd.withInput("-i", sequenceAlignment);
+			cmd.addInput("-i", sequenceAlignment);
 
 			for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
 
-				cmd.withOption("-d", hhsuitedb.getPrefix(dbname));
+				cmd.addOption("-d", hhsuitedb.getPrefix(dbname));
 			}
 
-			cmd
-			.withOption("-e", this.param_evalue.getDoubleValue())
-			.withOption("-qid", this.param_qid.getDoubleValue())
-			.withOption("-cov", this.param_cov.getDoubleValue())
-			.withOutput("-o")
-			.withOutput("-oa3m");
+			cmd.addOption("-e", this.param_evalue.getDoubleValue());
+			cmd.addOption("-qid", this.param_qid.getDoubleValue());
+			cmd.addOption("-cov", this.param_cov.getDoubleValue());
+			cmd.addOutput("-o");
+			cmd.addOutput("-oa3m");
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);

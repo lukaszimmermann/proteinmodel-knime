@@ -68,7 +68,7 @@ public final class CommandLine implements AutoCloseable {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public CommandLine withOption(String option, String value) throws IllegalArgumentException {
+	public void addOption(String option, String value) throws IllegalArgumentException {
 
 		option = this.checkOption(option);
 		value = value.trim();
@@ -80,8 +80,6 @@ public final class CommandLine implements AutoCloseable {
 		
 		this.optionsKeys.add(option);
 		this.optionsValues.add(value);
-		
-		return this;
 	}
 
 	public String getAbsoluteFilePath(final String key) {
@@ -100,7 +98,7 @@ public final class CommandLine implements AutoCloseable {
 	 * @return
 	 * @throws IOException
 	 */
-	public CommandLine withInput(String option, Writeable writeable) throws IOException  {
+	public void addInput(String option, Writeable writeable) throws IOException  {
 
 		option = this.checkOption(option);
 		
@@ -111,7 +109,6 @@ public final class CommandLine implements AutoCloseable {
 		writeable.write(fw);
 		fw.close(); 
 		this.files.put(option, tempFile);
-		return this;
 	}
 
 	/**
@@ -122,13 +119,13 @@ public final class CommandLine implements AutoCloseable {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public CommandLine withOption(String option, double value) throws IllegalArgumentException {
+	public void addOption(String option, double value) throws IllegalArgumentException {
 
-		return this.withOption(option, String.valueOf(value));
+		this.addOption(option, String.valueOf(value));
 	}
 
 
-	public CommandLine withOutput(String option) throws IOException {
+	public void addOutput(String option) throws IOException {
 
 		option = this.checkOption(option);
 		// Make a new temporary file and ask writeable to write into it
@@ -136,8 +133,7 @@ public final class CommandLine implements AutoCloseable {
 		tempFile.deleteOnExit();
 		
 		this.files.put(option, tempFile);
-		
-		return this;
+	
 	}
 
 	private String checkOption(final String option) throws IllegalArgumentException {

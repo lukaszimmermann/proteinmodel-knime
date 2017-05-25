@@ -2,13 +2,8 @@ package org.proteinevolution.nodes.hhsuite.hhfilter;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.proteinevolution.models.knime.hhsuitedb.DialogComponentHHsuiteDBSelection;
-import org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "HHfilter" Node.

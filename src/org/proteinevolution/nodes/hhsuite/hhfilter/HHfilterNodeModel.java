@@ -92,13 +92,12 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 		// Construct the commandLine call for this hhblits invocation
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 
-			cmd
-			.withInput("-i", sequenceAlignment)
-			.withOption("-qid", this.param_qid.getDoubleValue())
-			.withOption("-cov", this.param_cov.getDoubleValue())
-			.withOption("-id", this.param_id.getDoubleValue())
-			.withOption("-diff", this.param_diff.getIntValue())
-			.withOutput("-o");
+			cmd.addInput("-i", sequenceAlignment);
+			cmd.addOption("-qid", this.param_qid.getDoubleValue());
+			cmd.addOption("-cov", this.param_cov.getDoubleValue());
+			cmd.addOption("-id", this.param_id.getDoubleValue());
+			cmd.addOption("-diff", this.param_diff.getIntValue());
+			cmd.addOutput("-o");
 
 			String commandLineString = cmd.toString();
 			logger.warn(cmd);

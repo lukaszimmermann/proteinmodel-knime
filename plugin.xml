@@ -31,15 +31,16 @@
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.models.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.models.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
 </extension>
    
    
 <!-- Preference Page for setting the HH-suite build directory -->
 
  <extension point="org.eclipse.ui.preferencePages">
-      <page class="org.proteinevolution.preferences.hhsuite.HHSuitePreferencePage" id="org.proteinevolution.preferences.hhsuite.preferencespage" name="HH-Suite">
+      <page class="org.proteinevolution.preferences.PreferencePage" id="org.proteinevolution.preferences.preferencespage" name="Proteinevolution">
       </page>
-   </extension>
+ </extension>
    
    
   <extension point="org.knime.core.PortType">
