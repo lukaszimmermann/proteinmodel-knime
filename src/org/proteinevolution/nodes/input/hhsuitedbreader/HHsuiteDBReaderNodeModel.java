@@ -15,7 +15,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
-import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
+import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBContent;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec;
 
@@ -56,14 +56,14 @@ public class HHsuiteDBReaderNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
  
     
-     HHsuiteDB hhsuitedb = HHsuiteDB.fromDirectory(this.input.getStringValue());
+     HHsuiteDBContent hhsuitedb = HHsuiteDBContent.fromDirectory(this.input.getStringValue());
      String[] names = hhsuitedb.getNames();
     	
       return new HHsuiteDBPortObject[] {
     		  
     		  new HHsuiteDBPortObject(
     				  hhsuitedb,
-    				  new HHsuiteDBPortObjectSpec(HHsuiteDB.TYPE, names))};
+    				  new HHsuiteDBPortObjectSpec(HHsuiteDBContent.TYPE, names))};
     }
 
     /**

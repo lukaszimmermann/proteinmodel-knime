@@ -1,4 +1,4 @@
-package org.proteinevolution.models.knime.hhsuitedb;
+package org.proteinevolution.models.knime.structure;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,20 +13,20 @@ import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
 
-public class HHsuiteDBCell extends DataCell {
+public class StructureCell extends DataCell {
 
 	private static final long serialVersionUID = 2833266670643350235L;
 
 	/**
-	 * Serializer for {@link HHsuiteDBCell}.
+	 * Serializer for {@link StructureCell}.
 	 *
 	 * @since 0.1
 	 * @noreference This class is not intended to be referenced by clients.
 	 */
-	public static final class HHsuiteDBCellSerializer implements DataCellSerializer<HHsuiteDBCell> {
+	public static final class HHsuiteDBCellSerializer implements DataCellSerializer<StructureCell> {
 
 		@Override
-		public HHsuiteDBCell deserialize(final DataCellDataInput input) throws IOException {
+		public StructureCell deserialize(final DataCellDataInput input) throws IOException {
 
 			// Here we assume that the byte length of the hhsuiteDB object has been written to the output stream
 			int length = input.readInt();
@@ -34,21 +34,21 @@ public class HHsuiteDBCell extends DataCell {
 			input.readFully(bytes);
 			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 
-			HHsuiteDBCell sequenceAlignmentCell = null;
+			StructureCell sequenceAlignmentCell = null;
 			try(ObjectInput ois = new ObjectInputStream(bis)) {
 
-				sequenceAlignmentCell =  new HHsuiteDBCell((HHsuiteDBContent) ois.readObject());
+				sequenceAlignmentCell =  new StructureCell((StructureContent) ois.readObject());
 
 				// Rethrow as IO Exception
 			} catch (ClassNotFoundException e) {
 
-				throw new IOException("Class: HHsuiteDB could not be found");
+				throw new IOException("Class: StructureContent could not be found");
 			}
 			return sequenceAlignmentCell;
 		}
 
 		@Override
-		public void serialize(final HHsuiteDBCell cell, final DataCellDataOutput output) throws IOException {
+		public void serialize(final StructureCell cell, final DataCellDataOutput output) throws IOException {
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput objectOut = new ObjectOutputStream(bos);
@@ -64,11 +64,9 @@ public class HHsuiteDBCell extends DataCell {
 		}
 	}
 
-	private final HHsuiteDBContent m_content;
+	private final StructureContent m_content;
 
-
-
-	public HHsuiteDBCell(final HHsuiteDBContent content) {
+	public StructureCell(final StructureContent content) {
 
 		if (content == null) {
 
@@ -76,7 +74,6 @@ public class HHsuiteDBCell extends DataCell {
 		}
 		this.m_content = content;
 	}
-
 
 
 	@Override
@@ -88,10 +85,10 @@ public class HHsuiteDBCell extends DataCell {
 	@Override
 	protected boolean equalsDataCell(DataCell dc) {
 		
-		HHsuiteDBCell ic = (HHsuiteDBCell) dc;
+		StructureCell ic = (StructureCell) dc;
 		
-		// TODO Sequence Alignment does not yet implement 'equals;
-		return  this.m_content.equals(ic.m_content);
+		// TODO StructureContent does not yet implement 'equals;
+		return this.m_content.equals(ic.m_content);
 	}
 
 	// TODO Overriding equalContent necessary?
@@ -99,7 +96,7 @@ public class HHsuiteDBCell extends DataCell {
 	@Override
 	public int hashCode() {
 	
-		// TODO SequenceAlignment does not yet implement hashCode
+		// TODO StructureContent does not yet implement hashCode
 		return this.m_content.hashCode();
 	}
 }

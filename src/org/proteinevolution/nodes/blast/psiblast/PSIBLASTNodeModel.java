@@ -18,6 +18,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.models.util.CommandLine;
 import org.proteinevolution.nodes.blast.BLASTNodeModel;
 
 
@@ -90,10 +91,19 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 		// Get the alignment (TODO Should be multiple sequences)
 		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 
-
-			return null;
+		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
+			
+			cmd.addOption("-db", this.param_database.getStringValue());
+			cmd.addInput("-query", sequenceAlignment);
+			cmd.addOption("-inclusion_ethresh", this.param_inclusion_etresh.getDoubleValue());
+			cmd.addOption("-num_iterations", this.param_n_iterations.getIntValue());
+			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
+			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
+			cmd.addOutput("-out_pssm");	
 		}
-
+		
+		return null;
+	}
 		/**
 		 * {@inheritDoc}
 		 */

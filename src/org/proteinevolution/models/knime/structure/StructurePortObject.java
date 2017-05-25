@@ -1,4 +1,4 @@
-package org.proteinevolution.models.knime.hhsuitedb;
+package org.proteinevolution.models.knime.structure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,19 +21,19 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.port.image.ImagePortObjectSpec;
 
-public class HHsuiteDBPortObject extends AbstractPortObject {
+public class StructurePortObject extends AbstractPortObject {
 
-	public static final class Serializer extends AbstractPortObjectSerializer<HHsuiteDBPortObject> {}
+	public static final class Serializer extends AbstractPortObjectSerializer<StructurePortObject> {}
 	
     /** Convenience accessor for the port type. */
-    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(HHsuiteDBPortObject.class);
+    public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(StructurePortObject.class);
 	
-    private HHsuiteDBContent m_content;
+    private StructureContent m_content;
     
-    private HHsuiteDBPortObjectSpec m_spec;
+    private StructurePortObjectSpec m_spec;
     
     /** Empty framework constructor. <b>Do not use!</b> */
-    public HHsuiteDBPortObject() {
+    public StructurePortObject() {
     	    	
         // no op
     }
@@ -49,9 +49,9 @@ public class HHsuiteDBPortObject extends AbstractPortObject {
      * @param spec The spec.
      * @throws NullPointerException If either argument is null.
      */
-    public HHsuiteDBPortObject(
-    		final HHsuiteDBContent content,
-            final HHsuiteDBPortObjectSpec spec) {
+    public StructurePortObject(
+    		final StructureContent content,
+            final StructurePortObjectSpec spec) {
     	
         if (spec == null || content == null) {
             throw new NullPointerException("Argument must not be null.");
@@ -62,7 +62,7 @@ public class HHsuiteDBPortObject extends AbstractPortObject {
     }
     
     
-    public HHsuiteDBContent getHHsuiteDB() {
+    public StructureContent getHHsuiteDB() {
         	
     	return this.m_content;
     }
@@ -113,15 +113,15 @@ public class HHsuiteDBPortObject extends AbstractPortObject {
 	    ZipEntry nextEntry = in.getNextEntry();
 	    String contentClName = nextEntry.getName();
 
-	    Class<HHsuiteDBContent> contentCl;
+	    Class<StructureContent> contentCl;
 	    try {
-	        contentCl = (Class<HHsuiteDBContent>) Class.forName(contentClName);
+	        contentCl = (Class<StructureContent>) Class.forName(contentClName);
 	        
 	    } catch (ClassNotFoundException ex) {
 	        throw new IOException("Error converting to HHsuiteDB Class", ex);
 	    }
 	    
-	    Constructor<HHsuiteDBContent> cons;
+	    Constructor<StructureContent> cons;
 	    try {
 	        cons = contentCl.getConstructor(InputStream.class);
 	    } catch (Exception ex) {
@@ -136,9 +136,8 @@ public class HHsuiteDBPortObject extends AbstractPortObject {
 	                + contentClName + "'", ex);
 	    }
 	    in.close();
-	    this.m_spec = (HHsuiteDBPortObjectSpec) spec;
-	    
-
+	    this.m_spec = (StructurePortObjectSpec) spec;
+	  
 	}
 }
 

@@ -1,4 +1,4 @@
-package org.proteinevolution.models.util.databaseidmapper;
+package org.proteinevolution.nodes.util.databaseidmapper;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

@@ -25,7 +25,7 @@ import org.knime.core.node.port.PortType;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentContent;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec;
-import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDB;
+import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBContent;
 import org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.util.CommandLine;
@@ -92,7 +92,7 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 
 		// Get the alignment and the hhsuite database
 		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-		HHsuiteDB hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
+		HHsuiteDBContent hhsuitedb = ((HHsuiteDBPortObject) inData[1]).getHHsuiteDB();
 
 		// Make container for HHR result table
 		BufferedDataContainer container = exec.createDataContainer(getHHRDataTableSpec());

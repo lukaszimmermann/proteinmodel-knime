@@ -30,7 +30,7 @@
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.models.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.models.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
 </extension>
    

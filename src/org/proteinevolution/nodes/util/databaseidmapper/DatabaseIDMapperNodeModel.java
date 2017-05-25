@@ -1,4 +1,4 @@
-package org.proteinevolution.models.util.databaseidmapper;
+package org.proteinevolution.nodes.util.databaseidmapper;
 
 import java.io.File;
 import java.io.IOException;

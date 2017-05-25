@@ -24,7 +24,7 @@ import org.knime.core.util.FileUtil;
  * @author lzimmermann
  *
  */
-public final class HHsuiteDB implements Serializable {
+public final class HHsuiteDBContent implements Serializable {
 
 	private static final long serialVersionUID = -6977340626626226386L;
 	public static final DataType TYPE = DataType.getType(HHsuiteDBCell.class);
@@ -34,9 +34,9 @@ public final class HHsuiteDB implements Serializable {
 	
     // the logger instance
     private static final NodeLogger logger = NodeLogger
-            .getLogger(HHsuiteDB.class);
+            .getLogger(HHsuiteDBContent.class);
 
-	public HHsuiteDB(final InputStream in) throws IOException  {
+	public HHsuiteDBContent(final InputStream in) throws IOException  {
 
 		// Warning: in is not allowed to be closed here
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -44,11 +44,11 @@ public final class HHsuiteDB implements Serializable {
 		out.flush();
 		out.close();
 		ByteArrayInputStream bis = new ByteArrayInputStream(out.toByteArray());
-		HHsuiteDB hhsuitedb = null;
+		HHsuiteDBContent hhsuitedb = null;
 		
 		try(ObjectInput ois = new ObjectInputStream(bis)) {
 
-			hhsuitedb = (HHsuiteDB) ois.readObject();
+			hhsuitedb = (HHsuiteDBContent) ois.readObject();
 
 			// Rethrow as IO Exception
 		} catch (ClassNotFoundException e) {
@@ -60,7 +60,7 @@ public final class HHsuiteDB implements Serializable {
 	}
 
 
-	private HHsuiteDB(final Map<String, String> prefixes) {
+	private HHsuiteDBContent(final Map<String, String> prefixes) {
 
 		this.prefixes = prefixes;
 	}
@@ -78,7 +78,7 @@ public final class HHsuiteDB implements Serializable {
 	}
 
 	
-	public static HHsuiteDB fromDirectory(final String filePath)  {
+	public static HHsuiteDBContent fromDirectory(final String filePath)  {
 		
 		File input = new File(filePath);
 		String identificationString = "_a3m.ffdata";
@@ -123,6 +123,6 @@ public final class HHsuiteDB implements Serializable {
 			}
 			
 		}
-		return new HHsuiteDB(result);	
+		return new HHsuiteDBContent(result);	
 	}
 }
