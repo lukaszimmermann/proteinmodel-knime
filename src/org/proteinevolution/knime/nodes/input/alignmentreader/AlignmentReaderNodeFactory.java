@@ -35,7 +35,8 @@ public class AlignmentReaderNodeFactory
     @Override
     public NodeView<AlignmentReaderNodeModel> createNodeView(final int viewIndex,
             final AlignmentReaderNodeModel nodeModel) {
-        return new AlignmentReaderNodeView(nodeModel);
+    	
+        return null;
     }
 
     /**
