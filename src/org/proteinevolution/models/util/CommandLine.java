@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.proteinevolution.models.interfaces.Writeable;
+
 /**
  * Helper method to construct a command line call. Some error checking for the option and argument
  * strings is also provided.

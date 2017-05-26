@@ -15,25 +15,26 @@
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
-<node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
-<node category-path="/protevo/viz" factory-class="org.proteinevolution.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
-<node category-path="/protevo/idx" factory-class="org.proteinevolution.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
-<node category-path="/protevo/output" factory-class="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
+<node category-path="/protevo/idx" factory-class="org.proteinevolution.knime.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
+<node category-path="/protevo/viz" factory-class="org.proteinevolution.knime.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
+<node category-path="/protevo/idx" factory-class="org.proteinevolution.knime.nodes.index.gridbuilder.GridBuilderNodeFactory" id="org.proteinevolution.nodes.input.pdb.gridbuilder.GridBuilderNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
+<node category-path="/protevo/output" factory-class="org.proteinevolution.knime.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
+<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.pdbinfo.PDBInfoNodeFactory" id="org.proteinevolution.nodes.analysis.pdbinfo.PDBInfoNodeFactory"/>
 </extension>
    
    
@@ -46,28 +47,28 @@
    
    
   <extension point="org.knime.core.PortType">
-  <portType color="#FF0000" hidden="false" name="Sequence Alignment" objectClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject" objectSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObject$Serializer" specClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec" specSerializer="org.proteinevolution.models.knime.alignment.SequenceAlignmentPortObjectSpec$Serializer"/>
+  <portType color="#FF0000" hidden="false" name="Sequence Alignment" objectClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject" objectSerializer="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject$Serializer" specClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec" specSerializer="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec$Serializer"/>
   
-  <portType color="#0000FF" hidden="false" name="HHsuite Databases" objectClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject" objectSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject$Serializer" specClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec" specSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
+  <portType color="#0000FF" hidden="false" name="HHsuite Databases" objectClass="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObject" objectSerializer="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObject$Serializer" specClass="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObjectSpec" specSerializer="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
   
-  <portType color="#00FF00" hidden="false" name="Structure" objectClass="org.proteinevolution.models.knime.structure.StructurePortObject" objectSerializer="org.proteinevolution.models.knime.structure.StructurePortObject$Serializer" specClass="org.proteinevolution.models.knime.structure.StructurePortObjectSpec" specSerializer="org.proteinevolution.models.knime.structure.StructurePortObjectSpec$Serializer"/>
+  <portType color="#00FF00" hidden="false" name="Structure" objectClass="org.proteinevolution.knime.porttypes.structure.StructurePortObject" objectSerializer="org.proteinevolution.knime.porttypes.structure.StructurePortObject$Serializer" specClass="org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec" specSerializer="org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec$Serializer"/>
   
   
   </extension> 
    
   <extension point="org.knime.core.DataType">
   
-  <DataType cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell">
-  <serializer cellClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell" serializerClass="org.proteinevolution.models.knime.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"/>
+  <DataType cellClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentCell">
+  <serializer cellClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentCell" serializerClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"/>
   </DataType>   
 
 
- <DataType cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell">
-  <serializer cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell" serializerClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell$HHsuiteDBCellSerializer"/>
+ <DataType cellClass="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBCell">
+  <serializer cellClass="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBCell" serializerClass="org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBCell$HHsuiteDBCellSerializer"/>
   </DataType>  
   
-   <DataType cellClass="org.proteinevolution.models.knime.structure.StructureCell">
-  <serializer cellClass="org.proteinevolution.models.knime.structure.StructureCell" serializerClass="org.proteinevolution.models.knime.structure.StructureCell$StructureCellSerializer"/>
+   <DataType cellClass="org.proteinevolution.knime.porttypes.structure.StructureCell">
+  <serializer cellClass="org.proteinevolution.knime.porttypes.structure.StructureCell" serializerClass="org.proteinevolution.knime.porttypes.structure.StructureCell$StructureCellSerializer"/>
   </DataType>  
   
 
