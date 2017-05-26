@@ -3,7 +3,7 @@
     <name>PDBReader</name>
     
     <shortDescription>
-        
+        This node loads a PDB file into the StructurePortObject. Support of CIF files is is planned.
     </shortDescription>
     
     <fullDescription>

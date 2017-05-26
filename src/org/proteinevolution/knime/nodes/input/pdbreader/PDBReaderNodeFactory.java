@@ -5,7 +5,7 @@ import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "PDBFetcher" Node.
+ * <code>NodeFactory</code> for the "PDBReader" Node.
  * 
  *
  * @author Lukas Zimmermann
@@ -35,7 +35,8 @@ public class PDBReaderNodeFactory
     @Override
     public NodeView<PDBReaderNodeModel> createNodeView(final int viewIndex,
             final PDBReaderNodeModel nodeModel) {
-        return new PDBReaderNodeView(nodeModel);
+    	
+        return null;
     }
 
     /**
@@ -53,6 +54,4 @@ public class PDBReaderNodeFactory
     public NodeDialogPane createNodeDialogPane() {
         return new PDBReaderNodeDialog();
     }
-
 }
-
