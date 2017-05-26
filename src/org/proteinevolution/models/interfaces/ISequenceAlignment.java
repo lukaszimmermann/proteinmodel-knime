@@ -28,8 +28,6 @@
 
 package org.proteinevolution.models.interfaces; // Package name inserted by JPack
 
-import org.proteinevolution.cinema.GappedSequence;
-import org.proteinevolution.cinema.NoSuchSequenceException;
 
 /**
  * SequenceAlignment.java
@@ -56,7 +54,7 @@ public interface ISequenceAlignment {
    * @return      the sequence of interest
    * @throws      if index < 1 or index > getNumberSequences()
    */
-  public char[] getSequenceAt(int index) throws NoSuchSequenceException;
+  public char[] getSequenceAt(final int index);
   
   /**
    * Returns the total number of sequences in the alignment.

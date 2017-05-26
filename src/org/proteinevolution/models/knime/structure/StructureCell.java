@@ -23,7 +23,7 @@ public class StructureCell extends DataCell {
 	 * @since 0.1
 	 * @noreference This class is not intended to be referenced by clients.
 	 */
-	public static final class HHsuiteDBCellSerializer implements DataCellSerializer<StructureCell> {
+	public static final class StructureCellSerializer implements DataCellSerializer<StructureCell> {
 
 		@Override
 		public StructureCell deserialize(final DataCellDataInput input) throws IOException {

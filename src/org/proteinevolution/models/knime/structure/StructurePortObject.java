@@ -62,7 +62,7 @@ public class StructurePortObject extends AbstractPortObject {
     }
     
     
-    public StructureContent getHHsuiteDB() {
+    public StructureContent getStructure() {
         	
     	return this.m_content;
     }

@@ -32,6 +32,8 @@
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
 </extension>
    
    
@@ -48,6 +50,9 @@
   
   <portType color="#0000FF" hidden="false" name="HHsuite Databases" objectClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject" objectSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObject$Serializer" specClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec" specSerializer="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBPortObjectSpec$Serializer"/>
   
+  <portType color="#00FF00" hidden="false" name="Structure" objectClass="org.proteinevolution.models.knime.structure.StructurePortObject" objectSerializer="org.proteinevolution.models.knime.structure.StructurePortObject$Serializer" specClass="org.proteinevolution.models.knime.structure.StructurePortObjectSpec" specSerializer="org.proteinevolution.models.knime.structure.StructurePortObjectSpec$Serializer"/>
+  
+  
   </extension> 
    
   <extension point="org.knime.core.DataType">
@@ -60,8 +65,12 @@
  <DataType cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell">
   <serializer cellClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell" serializerClass="org.proteinevolution.models.knime.hhsuitedb.HHsuiteDBCell$HHsuiteDBCellSerializer"/>
   </DataType>  
-
   
+   <DataType cellClass="org.proteinevolution.models.knime.structure.StructureCell">
+  <serializer cellClass="org.proteinevolution.models.knime.structure.StructureCell" serializerClass="org.proteinevolution.models.knime.structure.StructureCell$StructureCellSerializer"/>
+  </DataType>  
+  
+
   </extension> 
    
    

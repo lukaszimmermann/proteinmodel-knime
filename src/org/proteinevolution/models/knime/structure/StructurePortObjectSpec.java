@@ -22,9 +22,9 @@ public final class StructurePortObjectSpec extends AbstractSimplePortObjectSpec 
 	
 	private DataType m_type;
     	
-	public StructurePortObjectSpec(final DataType type, final String[] names) {
+	public StructurePortObjectSpec(final DataType type) {
 		
-		if (type == null || names == null) {
+		if (type == null) {
 			
 			throw new NullPointerException("Argument must not be null.");
 		}

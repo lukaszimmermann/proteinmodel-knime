@@ -7,11 +7,13 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.io.Writer;
 
-import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.StructureImpl;
 import org.knime.core.data.DataType;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
+import org.proteinevolution.models.util.Writeable;
+
 
 /**
  * Objects of this class represent lists of hhsuite databases that can be selected.
@@ -19,17 +21,13 @@ import org.knime.core.util.FileUtil;
  * @author lzimmermann
  *
  */
-public final class StructureContent implements Serializable {
+public final class StructureContent implements Serializable, Writeable {
 
 	private static final long serialVersionUID = -6977340626626226386L;
 	public static final DataType TYPE = DataType.getType(StructureCell.class);
 
-	private final Structure structure;
+	private final StructureImpl structure;
 	
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(StructureContent.class);
-
 	public StructureContent(final InputStream in) throws IOException  {
 
 		// Warning: in is not allowed to be closed here
@@ -52,21 +50,16 @@ public final class StructureContent implements Serializable {
 		this.structure = structureContent.structure;
 	}
 
-	private StructureContent(final Structure structure) {
+	public StructureContent(final StructureImpl structure) {
 
 		this.structure = structure;
 	}
-	
-	
-	public Structure getStructure() {
+
+
+	@Override
+	public void write(final Writer out) throws IOException {
 		
-		return this.structure;
-	}
-	
-	// Retrieves A Structure content from the PDB ID
-	public static StructureContent fromPDBID(final String pdbid)  {
-		
-		// TODO Implement me
-		return null;
+		// TODO Only writing PDB format supported
+		out.write(this.structure.toPDB());
 	}
 }

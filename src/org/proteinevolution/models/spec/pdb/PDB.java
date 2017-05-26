@@ -4,5 +4,5 @@ public final class PDB {
 
 	private PDB() {}
 	
-	public static String extensions = "pdb";
+	public static final String extensions = "pdb";
 }
