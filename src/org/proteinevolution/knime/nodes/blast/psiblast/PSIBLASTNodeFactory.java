@@ -43,7 +43,8 @@ extends NodeFactory<PSIBLASTNodeModel> {
 	@Override
 	public NodeView<PSIBLASTNodeModel> createNodeView(final int viewIndex,
 			final PSIBLASTNodeModel nodeModel) {
-		return new PSIBLASTNodeView(nodeModel);
+		
+		return null;
 	}
 
 	/**
