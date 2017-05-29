@@ -190,6 +190,17 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 				content[i][j] = symbols[j];
 			}
 		}
+		
+		// Check if single sequence contains gaps (not allowed)
+		if (headersSize == 1) {			
+			for (char c : sequences.get(0).toCharArray()) {
+				
+				if (c == '-') {
+			
+					throw new NotAnAlignmentException("Single sequence in alignment, but gap encountered");
+				}
+			}
+		}	
 		return new SequenceAlignmentContent(headers.toArray(type), content);
 	}
 
