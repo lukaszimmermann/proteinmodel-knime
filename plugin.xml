@@ -12,6 +12,7 @@
       <category description="Nodes for indexing against databases" level-id="idx" name="Index" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/protevo"/>
       <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
+      <category description="Nodes for PSIPRED" level-id="psipred" name="PSI-PRED" path="/protevo"/>
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
@@ -35,6 +36,7 @@
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.pdbinfo.PDBInfoNodeFactory" id="org.proteinevolution.nodes.analysis.pdbinfo.PDBInfoNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
 </extension>
    
    
