@@ -1,14 +1,16 @@
 package org.proteinevolution.knime.nodes.blast.psiblast;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
+import org.knime.core.data.uri.URIPortObjectSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -26,6 +28,7 @@ import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.nodes.blast.BLASTNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.util.CommandLine;
 
 
@@ -98,25 +101,23 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
-		// Get the alignment (TODO Should be multiple sequences)
+		// Get the alignment
 		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-
+		
+		List<URIContent> urics = new ArrayList<URIContent>(1);
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 			
 			// The .pal extension has to be removed from the filename
 			String db = this.param_database.getStringValue();
 			db = db.substring(0, db.length() - 4);
-			
 			cmd.addOption("-db", db);
-			cmd.addInput("-in_msa", sequenceAlignment);
+			cmd.addInput(sequenceAlignment.getAlignmentFormat() == AlignmentFormat.SingleSequence ? "-query" : "-in_msa", sequenceAlignment);
 			cmd.addOption("-inclusion_ethresh", this.param_inclusion_etresh.getDoubleValue());
 			cmd.addOption("-num_iterations", this.param_n_iterations.getIntValue());
 			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
 			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
 			cmd.addOutput("-out_pssm", ".chk");	
 				
-			File fs = exec.createFileStore("psiblast").getFile();
-		
 			String commandlineString = cmd.toString();
 			logger.warn(commandlineString);
 			
@@ -124,54 +125,32 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			builder.redirectErrorStream(true);
 			Process process = builder.start();
 			
-			String line;
-			BufferedReader reader = new BufferedReader (new InputStreamReader(process.getInputStream ()));
-			while ((line = reader.readLine ()) != null) {
-			    System.out.println ("Stdout: " + line);
-			}
-			
-			
 			// TODO Might not work on the cluster
 			while( process.isAlive() ) {
 				
 				try {	
-					while ((line = reader.readLine ()) != null) {
-					    System.out.println ("Stdout: " + line);
-					}
 					exec.checkCanceled();
 				}  catch(CanceledExecutionException e) {
 
 					process.destroy();
 				}
 			}
-			// Execute HHBlits, nodes throws exception if this fails.
 			if ( process.waitFor() != 0) {
 
 				throw new ExecutionException("Execution of PSI-BLAST failed.");
 			}
 			
-			logger.warn("execution success!!");
+			// Collect the output file and set to the output port
+			File tempOutput = cmd.getFile("-out_pssm"); // File is deleted when cmd closes
+			File child = new File(exec.createFileStore("psiblast").getFile(), tempOutput.getName());
 			
-			
-			
-		}
-		
-		/*
-	     // register the URIContent
-		       File child = new File(getFileStoreRootDirectory(), filename);
-		         URIContent uric = new URIContent(child.toURI(),
-		              MIMETypeHelper.getMIMEtypeExtension(filename));
-		
-		       // update content and spec accordingly
-	        m_uriContents.add(uric);
-		        m_uriPortObjectSpec = URIPortObjectSpec.create(m_uriContents);
-		        m_relPaths.add(filename);
-		
-	       // give the fil
-		*/
-		
-		
-		return null;
+			// Copy temp output file to file storage
+			FileUtils.copyFile(tempOutput, child);
+			urics.add(new URIContent(child.toURI(), ".chk"));	
+		}		
+		return new URIPortObject[] {
+				
+				new URIPortObject(new URIPortObjectSpec(".chk"), urics)};
 	}
 		/**
 		 * {@inheritDoc}

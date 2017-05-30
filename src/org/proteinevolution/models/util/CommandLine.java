@@ -84,16 +84,17 @@ public final class CommandLine implements AutoCloseable {
 		this.optionsValues.add(value);
 	}
 
-	public String getAbsoluteFilePath(final String key) {
-
-		return this.files.get(key).getAbsolutePath();
+	/**
+	 * Returns the file object associated with this key. <em>Note: </em> The file
+	 * will be deleted once this instance of CommandLine is closed 
+	 * 
+	 * @param key The key which is associated with the returned file
+	 * @return
+	 */
+	public File getFile(final String key) {
+		
+		return this.files.get(key);
 	}
-
-	public String getFileName(final String key) {
-
-		return this.files.get(key).getName();
-	}
-
 
 	/**
 	 * Adds a new option to the CommandLine invocation, where the argument will be written
@@ -135,7 +136,6 @@ public final class CommandLine implements AutoCloseable {
 
 		this.addOption(option, String.valueOf(value));
 	}
-
 
 
 	public void addOutput(String option) throws IOException {

@@ -139,13 +139,13 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 				throw new ExecutionException("Execution of HHblits failed.");
 			}
 
-			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getAbsoluteFilePath("-oa3m"));
+			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getFile("-oa3m").getAbsolutePath());
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 
 			// Read HHR output file
 			byte state = 0;
 			int rowCounter = 0;			
-			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getAbsoluteFilePath("-o")))) {
+			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getFile("-o").getAbsolutePath()))) {
 
 
 				String line;

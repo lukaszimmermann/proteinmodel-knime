@@ -120,7 +120,7 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 
 				throw new ExecutionException("Execution of HHfilter failed.");
 			}
-			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getAbsoluteFilePath("-o"));
+			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getFile("-o").getAbsolutePath());
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 		}
 		return new PortObject[]{
