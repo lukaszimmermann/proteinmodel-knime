@@ -31,7 +31,7 @@ public final class CommandLine implements AutoCloseable {
 	// Temporary files used for IO
 	private final Map<String, File> files;
 
-	private static final Pattern optionPattern = Pattern.compile("(-){1,2}[0-9a-zA-Z_]+");
+	private static final Pattern optionPattern = Pattern.compile("((-){1,2}[0-9a-zA-Z_]+)?");
 	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
 
 

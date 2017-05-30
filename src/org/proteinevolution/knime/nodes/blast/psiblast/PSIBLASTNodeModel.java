@@ -41,9 +41,9 @@ import org.proteinevolution.models.util.CommandLine;
 public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(PSIBLASTNodeModel.class);
-	
+	private static final NodeLogger logger = NodeLogger
+			.getLogger(PSIBLASTNodeModel.class);
+
 	// Database
 	public static final String DATABASE_CFGKEY = "DATABASE";
 	public static final String DATABASE_DEFAULT = "";
@@ -103,10 +103,10 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 		// Get the alignment
 		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-		
+
 		List<URIContent> urics = new ArrayList<URIContent>(1);
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
-			
+
 			// The .pal extension has to be removed from the filename
 			String db = this.param_database.getStringValue();
 			db = db.substring(0, db.length() - 4);
@@ -117,17 +117,17 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
 			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
 			cmd.addOutput("-out_pssm", ".chk");	
-				
+
 			String commandlineString = cmd.toString();
 			logger.warn(commandlineString);
-			
+
 			ProcessBuilder builder = new ProcessBuilder(cmd.toStringList());
 			builder.redirectErrorStream(true);
 			Process process = builder.start();
-			
+
 			// TODO Might not work on the cluster
 			while( process.isAlive() ) {
-				
+
 				try {	
 					exec.checkCanceled();
 				}  catch(CanceledExecutionException e) {
@@ -139,123 +139,123 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 				throw new ExecutionException("Execution of PSI-BLAST failed.");
 			}
-			
+
 			// Collect the output file and set to the output port
 			File tempOutput = cmd.getFile("-out_pssm"); // File is deleted when cmd closes
 			File child = new File(exec.createFileStore("psiblast").getFile(), tempOutput.getName());
-			
+
 			// Copy temp output file to file storage
 			FileUtils.copyFile(tempOutput, child);
 			urics.add(new URIContent(child.toURI(), ".chk"));	
 		}		
 		return new URIPortObject[] {
-				
+
 				new URIPortObject(new URIPortObjectSpec(".chk"), urics)};
 	}
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void reset() {
-			// TODO Code executed on reset.
-			// Models build during execute are cleared here.
-			// Also data handled in load/saveInternals will be erased here.
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
-				throws InvalidSettingsException {
-
-			// TODO: check if user settings are available, fit to the incoming
-			// table structure, and the incoming types are feasible for the node
-			// to execute. If the node can execute in its current state return
-			// the spec of its output data table(s) (if you can, otherwise an array
-			// with null elements), or throw an exception with a useful user message
-
-			return new DataTableSpec[]{null};
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-			this.param_database.saveSettingsTo(settings);
-			this.param_inclusion_etresh.saveSettingsTo(settings);
-			this.param_n_iterations.saveSettingsTo(settings);
-			this.param_n_alignments.saveSettingsTo(settings);
-			this.param_n_descriptions.saveSettingsTo(settings);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-				throws InvalidSettingsException {
-
-			this.param_database.loadSettingsFrom(settings);
-			this.param_inclusion_etresh.loadSettingsFrom(settings);
-			this.param_n_iterations.loadSettingsFrom(settings);
-			this.param_n_alignments.loadSettingsFrom(settings);
-			this.param_n_descriptions.loadSettingsFrom(settings);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void validateSettings(final NodeSettingsRO settings)
-				throws InvalidSettingsException {
-
-			this.param_database.validateSettings(settings);
-			this.param_inclusion_etresh.validateSettings(settings);
-			this.param_n_iterations.validateSettings(settings);
-			this.param_n_alignments.validateSettings(settings);
-			this.param_n_descriptions.validateSettings(settings);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void loadInternals(final File internDir,
-				final ExecutionMonitor exec) throws IOException,
-		CanceledExecutionException {
-
-			// TODO load internal data. 
-			// Everything handed to output ports is loaded automatically (data
-			// returned by the execute method, models loaded in loadModelContent,
-			// and user settings set through loadSettingsFrom - is all taken care 
-			// of). Load here only the other internals that need to be restored
-			// (e.g. data used by the views).
-
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected void saveInternals(final File internDir,
-				final ExecutionMonitor exec) throws IOException,
-		CanceledExecutionException {
-
-			// TODO save internal models. 
-			// Everything written to output ports is saved automatically (data
-			// returned by the execute method, models saved in the saveModelContent,
-			// and user settings saved through saveSettingsTo - is all taken care 
-			// of). Save here only the other internals that need to be preserved
-			// (e.g. data used by the views).
-
-		}
-
-		@Override
-		protected String getExecutableName() {
-
-			return "psiblast";
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void reset() {
+		// TODO Code executed on reset.
+		// Models build during execute are cleared here.
+		// Also data handled in load/saveInternals will be erased here.
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
+			throws InvalidSettingsException {
+
+		// TODO: check if user settings are available, fit to the incoming
+		// table structure, and the incoming types are feasible for the node
+		// to execute. If the node can execute in its current state return
+		// the spec of its output data table(s) (if you can, otherwise an array
+		// with null elements), or throw an exception with a useful user message
+
+		return new DataTableSpec[]{null};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveSettingsTo(final NodeSettingsWO settings) {
+
+		this.param_database.saveSettingsTo(settings);
+		this.param_inclusion_etresh.saveSettingsTo(settings);
+		this.param_n_iterations.saveSettingsTo(settings);
+		this.param_n_alignments.saveSettingsTo(settings);
+		this.param_n_descriptions.saveSettingsTo(settings);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+			throws InvalidSettingsException {
+
+		this.param_database.loadSettingsFrom(settings);
+		this.param_inclusion_etresh.loadSettingsFrom(settings);
+		this.param_n_iterations.loadSettingsFrom(settings);
+		this.param_n_alignments.loadSettingsFrom(settings);
+		this.param_n_descriptions.loadSettingsFrom(settings);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void validateSettings(final NodeSettingsRO settings)
+			throws InvalidSettingsException {
+
+		this.param_database.validateSettings(settings);
+		this.param_inclusion_etresh.validateSettings(settings);
+		this.param_n_iterations.validateSettings(settings);
+		this.param_n_alignments.validateSettings(settings);
+		this.param_n_descriptions.validateSettings(settings);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadInternals(final File internDir,
+			final ExecutionMonitor exec) throws IOException,
+	CanceledExecutionException {
+
+		// TODO load internal data. 
+		// Everything handed to output ports is loaded automatically (data
+		// returned by the execute method, models loaded in loadModelContent,
+		// and user settings set through loadSettingsFrom - is all taken care 
+		// of). Load here only the other internals that need to be restored
+		// (e.g. data used by the views).
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveInternals(final File internDir,
+			final ExecutionMonitor exec) throws IOException,
+	CanceledExecutionException {
+
+		// TODO save internal models. 
+		// Everything written to output ports is saved automatically (data
+		// returned by the execute method, models saved in the saveModelContent,
+		// and user settings saved through saveSettingsTo - is all taken care 
+		// of). Save here only the other internals that need to be preserved
+		// (e.g. data used by the views).
+
+	}
+
+	@Override
+	protected String getExecutableName() {
+
+		return "psiblast";
+	}
+}
