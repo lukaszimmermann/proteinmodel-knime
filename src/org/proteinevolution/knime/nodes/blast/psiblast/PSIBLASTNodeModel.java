@@ -1,8 +1,10 @@
 package org.proteinevolution.knime.nodes.blast.psiblast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
@@ -71,7 +73,7 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			new SettingsModelIntegerBounded(N_ALIGNMENTS_CFGKEY, N_ALIGNMENTS_DEFAULT, N_ALIGNMENTS_MIN, N_ALIGNMENTS_MAX);
 
 	// N Descriptions
-	public static final String N_DESCRIPTIONS_CFGKEY = "N_ALIGNMENTS";
+	public static final String N_DESCRIPTIONS_CFGKEY = "N_DESCRIPTIONS";
 	public static final int N_DESCRIPTIONS_DEFAULT = 250;
 	public static final int N_DESCRIPTIONS_MIN = 0;
 	public static final int N_DESCRIPTIONS_MAX = 5000;
@@ -101,8 +103,12 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 			
-			cmd.addOption("-db", this.param_database.getStringValue());
-			cmd.addInput("-query", sequenceAlignment);
+			// The .pal extension has to be removed from the filename
+			String db = this.param_database.getStringValue();
+			db = db.substring(0, db.length() - 4);
+			
+			cmd.addOption("-db", db);
+			cmd.addInput("-in_msa", sequenceAlignment);
 			cmd.addOption("-inclusion_ethresh", this.param_inclusion_etresh.getDoubleValue());
 			cmd.addOption("-num_iterations", this.param_n_iterations.getIntValue());
 			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
@@ -114,24 +120,33 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			String commandlineString = cmd.toString();
 			logger.warn(commandlineString);
 			
-			Process p = Runtime.getRuntime().exec(commandlineString);
+			ProcessBuilder builder = new ProcessBuilder(cmd.toStringList());
+			builder.redirectErrorStream(true);
+			Process process = builder.start();
+			
+			String line;
+			BufferedReader reader = new BufferedReader (new InputStreamReader(process.getInputStream ()));
+			while ((line = reader.readLine ()) != null) {
+			    System.out.println ("Stdout: " + line);
+			}
+			
 			
 			// TODO Might not work on the cluster
-			while( p.isAlive() ) {
-				
-				
+			while( process.isAlive() ) {
 				
 				try {	
+					while ((line = reader.readLine ()) != null) {
+					    System.out.println ("Stdout: " + line);
+					}
 					exec.checkCanceled();
 				}  catch(CanceledExecutionException e) {
 
-					p.destroy();
+					process.destroy();
 				}
 			}
 			// Execute HHBlits, nodes throws exception if this fails.
-			if ( p.waitFor() != 0) {
+			if ( process.waitFor() != 0) {
 
-				logger.warn("Execution unsucessful");
 				throw new ExecutionException("Execution of PSI-BLAST failed.");
 			}
 			

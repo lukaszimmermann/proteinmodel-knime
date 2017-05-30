@@ -30,7 +30,7 @@ public final class CommandLine implements AutoCloseable {
 
 	// Temporary files used for IO
 	private final Map<String, File> files;
-	
+
 	private static final Pattern optionPattern = Pattern.compile("(-){1,2}[0-9a-zA-Z_]+");
 	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
 
@@ -57,7 +57,7 @@ public final class CommandLine implements AutoCloseable {
 		this.executable = executable;
 		this.optionsKeys = new ArrayList<String>();
 		this.optionsValues = new ArrayList<String>();
-		
+
 		this.files = new HashMap<String, File>();
 	}
 
@@ -79,21 +79,21 @@ public final class CommandLine implements AutoCloseable {
 
 			throw new IllegalArgumentException("Provided value for option is not a valid value string");
 		}
-		
+
 		this.optionsKeys.add(option);
 		this.optionsValues.add(value);
 	}
 
 	public String getAbsoluteFilePath(final String key) {
-		
+
 		return this.files.get(key).getAbsolutePath();
 	}
-	
+
 	public String getFileName(final String key) {
-		
+
 		return this.files.get(key).getName();
 	}
-	
+
 
 	/**
 	 * Adds a new option to the CommandLine invocation, where the argument will be written
@@ -108,7 +108,7 @@ public final class CommandLine implements AutoCloseable {
 	public void addInput(String option, Writeable writeable) throws IOException  {
 
 		option = this.checkOption(option);
-		
+
 		// Make a new temporary file and ask writeable to write into it
 		File tempFile = File.createTempFile("commandLine", "");
 		tempFile.deleteOnExit();
@@ -130,19 +130,19 @@ public final class CommandLine implements AutoCloseable {
 
 		this.addOption(option, String.valueOf(value));
 	}
-	
+
 	public void addOption(String option, int value) throws IllegalArgumentException {
 
 		this.addOption(option, String.valueOf(value));
 	}
-	
+
 
 
 	public void addOutput(String option) throws IOException {
 
 		this.addOutput(option, "");
 	}
-	
+
 	public void addOutput(String option, final String ext ) throws IOException {
 
 		option = this.checkOption(option);
@@ -174,13 +174,33 @@ public final class CommandLine implements AutoCloseable {
 		}
 	}	
 
+	public List<String> toStringList() {
+
+		List<String> result = new ArrayList<String>(1 + this.optionsKeys.size() + this.files.size());
+		result.add(this.executable.getAbsolutePath());
+		
+		for (int i = 0; i < this.optionsKeys.size(); ++i) {
+
+			result.add(optionsKeys.get(i));
+			result.add(optionsValues.get(i));	
+		}
+
+		for (String option : this.files.keySet()) {
+
+			result.add(option);
+			result.add(this.files.get(option).getAbsolutePath());	
+		}
+		return result;
+	}
+
+
 	@Override
 	public String toString() {
 
 		StringBuilder sb = new StringBuilder(this.executable.getAbsolutePath());
 
 		for (int i = 0; i < this.optionsKeys.size(); ++i) {
-			
+
 			sb.append(" ");
 			sb.append(optionsKeys.get(i));
 			sb.append(" ");
