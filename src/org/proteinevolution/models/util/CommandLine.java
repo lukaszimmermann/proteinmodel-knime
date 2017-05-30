@@ -31,7 +31,7 @@ public final class CommandLine implements AutoCloseable {
 	// Temporary files used for IO
 	private final Map<String, File> files;
 	
-	private static final Pattern optionPattern = Pattern.compile("(-){1,2}[0-9a-zA-Z]+");
+	private static final Pattern optionPattern = Pattern.compile("(-){1,2}[0-9a-zA-Z_]+");
 	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
 
 
@@ -89,6 +89,11 @@ public final class CommandLine implements AutoCloseable {
 		return this.files.get(key).getAbsolutePath();
 	}
 	
+	public String getFileName(final String key) {
+		
+		return this.files.get(key).getName();
+	}
+	
 
 	/**
 	 * Adds a new option to the CommandLine invocation, where the argument will be written
@@ -125,17 +130,26 @@ public final class CommandLine implements AutoCloseable {
 
 		this.addOption(option, String.valueOf(value));
 	}
+	
+	public void addOption(String option, int value) throws IllegalArgumentException {
+
+		this.addOption(option, String.valueOf(value));
+	}
+	
 
 
 	public void addOutput(String option) throws IOException {
 
+		this.addOutput(option, "");
+	}
+	
+	public void addOutput(String option, final String ext ) throws IOException {
+
 		option = this.checkOption(option);
 		// Make a new temporary file and ask writeable to write into it
-		File tempFile = File.createTempFile("commandLine", "");
+		File tempFile = File.createTempFile("commandLine", ext);
 		tempFile.deleteOnExit();
-		
 		this.files.put(option, tempFile);
-	
 	}
 
 	private String checkOption(final String option) throws IllegalArgumentException {

@@ -2,12 +2,16 @@ package org.proteinevolution.knime.nodes.blast.psiblast;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
+import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.uri.URIPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
@@ -16,6 +20,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.nodes.blast.BLASTNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
@@ -31,6 +36,9 @@ import org.proteinevolution.models.util.CommandLine;
 public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 
+    private static final NodeLogger logger = NodeLogger
+            .getLogger(PSIBLASTNodeModel.class);
+	
 	// Database
 	public static final String DATABASE_CFGKEY = "DATABASE";
 	public static final String DATABASE_DEFAULT = "";
@@ -78,7 +86,7 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 		super(
 				new PortType[] {SequenceAlignmentPortObject.TYPE},
-				new PortType[] {});
+				new PortType[] {PortTypeRegistry.getInstance().getPortType(URIPortObject.class)});
 	}
 
 	/**
@@ -99,8 +107,54 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			cmd.addOption("-num_iterations", this.param_n_iterations.getIntValue());
 			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
 			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
-			cmd.addOutput("-out_pssm");	
+			cmd.addOutput("-out_pssm", ".chk");	
+				
+			File fs = exec.createFileStore("psiblast").getFile();
+		
+			String commandlineString = cmd.toString();
+			logger.warn(commandlineString);
+			
+			Process p = Runtime.getRuntime().exec(commandlineString);
+			
+			// TODO Might not work on the cluster
+			while( p.isAlive() ) {
+				
+				
+				
+				try {	
+					exec.checkCanceled();
+				}  catch(CanceledExecutionException e) {
+
+					p.destroy();
+				}
+			}
+			// Execute HHBlits, nodes throws exception if this fails.
+			if ( p.waitFor() != 0) {
+
+				logger.warn("Execution unsucessful");
+				throw new ExecutionException("Execution of PSI-BLAST failed.");
+			}
+			
+			logger.warn("execution success!!");
+			
+			
+			
 		}
+		
+		/*
+	     // register the URIContent
+		       File child = new File(getFileStoreRootDirectory(), filename);
+		         URIContent uric = new URIContent(child.toURI(),
+		              MIMETypeHelper.getMIMEtypeExtension(filename));
+		
+		       // update content and spec accordingly
+	        m_uriContents.add(uric);
+		        m_uriPortObjectSpec = URIPortObjectSpec.create(m_uriContents);
+		        m_relPaths.add(filename);
+		
+	       // give the fil
+		*/
+		
 		
 		return null;
 	}

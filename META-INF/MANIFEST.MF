@@ -13,7 +13,8 @@ Bundle-ClassPath: proteinevolution.jar,
 Bundle-Activator: org.proteinevolution.ProteinevolutionNodePlugin
 Bundle-Vendor: Lukas Zimmermann
 Require-Bundle: org.knime.workbench.core,
- org.knime.base
+ org.knime.base,
+ org.knime.core.data.uritype;bundle-version="3.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: chemcomp,
  javax.vecmath,
