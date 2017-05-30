@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.nodes.psipred.chkparse;
+package org.proteinevolution.knime.nodes.psipred.psipred;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,41 +32,53 @@ import org.proteinevolution.models.util.CommandLine;
  *
  * @author Lukas Zimmermann
  */
-public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
+public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 
 	// the logger instance
 	private static final NodeLogger logger = NodeLogger
-			.getLogger(ChkparseNodeModel.class);
+			.getLogger(PSIPREDNodeModel.class);
 
 
 
 	/**
 	 * Constructor for the node model.
 	 */
-	protected ChkparseNodeModel() throws InvalidSettingsException {
+	protected PSIPREDNodeModel() throws InvalidSettingsException {
 
 		super(new PortType[] {PortTypeRegistry.getInstance().getPortType(URIPortObject.class)},
 				new PortType[] {PortTypeRegistry.getInstance().getPortType(URIPortObject.class)});
 	}
 
+	
+	
+	// MUST execute: $execdir/psipred $tmproot.mtx $datadir/weights.dat $datadir/weights.dat2 $datadir/weights.dat3 > $rootname.ss
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
-
-		// Fetch input properties
-		URIPortObject in = (URIPortObject) inData[0];
-
+		
 		File child = null;
 		List<URIContent> urics = new ArrayList<URIContent>(1);
+		
+		File executable = this.getExecutable();
+	
+		// Make assumption on location of datadir (TODO maybe not optimal)
+		File datadir = new File(executable.getParentFile().getParent(), "data");
+		
+		try(CommandLine cmd = new CommandLine(executable)) {
 
-		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
+			cmd.addOption("", ((URIPortObject) inData[0]).getURIContents().get(0).getURI().getPath());
+			
+			// add weights
+			cmd.addOption("", new File(datadir, "weights.dat").getAbsolutePath());
+			cmd.addOption("", new File(datadir, "weights.dat2").getAbsolutePath());
+			cmd.addOption("", new File(datadir, "weights.dat3").getAbsolutePath());
+			
 
-			cmd.addOption("", in.getURIContents().get(0).getURI().getPath());
-
-			child = new File(exec.createFileStore("chkparse").getFile(), "out");
+			child = new File(exec.createFileStore("psipred").getFile(), "out");
 			Process process = Runtime.getRuntime().exec(cmd.toString());
 			logger.warn(cmd.toString());
 			
@@ -83,14 +95,14 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			}
 			if ( process.waitFor() != 0) {
 
-				throw new ExecutionException("Execution of Chkparse failed.");
+				throw new ExecutionException("Execution of psipred failed.");
 			}			
 			FileUtils.copyInputStreamToFile(process.getInputStream(), child);
-			urics.add(new URIContent(child.toURI(), ".mtx"));	
+			urics.add(new URIContent(child.toURI(), ".ss"));	
 		}
 		return new URIPortObject[] {
 
-				new URIPortObject(new URIPortObjectSpec(".mtx"), urics)};
+				new URIPortObject(new URIPortObjectSpec(".ss"), urics)};
 	}
 
 	/**
@@ -115,11 +127,11 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 
 		if (extensions.size() != 1) {
 
-			throw new InvalidSettingsException("Chkparse node only expects exactly one file, but either none or multiple extensions were encountered.");
+			throw new InvalidSettingsException("psipred node only expects exactly one file, but either none or multiple extensions were encountered.");
 		}
-		if ( ! extensions.get(0).equals(".chk")) {
+		if ( ! extensions.get(0).equals(".mtx")) {
 
-			throw new InvalidSettingsException("Chkparse expects file with extension .chk, but extension was: " + extensions.get(0));
+			throw new InvalidSettingsException("psipred expects file with extension .mtx, but extension was: " + extensions.get(0));
 		}
 
 		return new DataTableSpec[]{null};
@@ -161,13 +173,6 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO load internal data. 
-		// Everything handed to output ports is loaded automatically (data
-		// returned by the execute method, models loaded in loadModelContent,
-		// and user settings set through loadSettingsFrom - is all taken care 
-		// of). Load here only the other internals that need to be restored
-		// (e.g. data used by the views).
-
 	}
 
 	/**
@@ -178,19 +183,12 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO save internal models. 
-		// Everything written to output ports is saved automatically (data
-		// returned by the execute method, models saved in the saveModelContent,
-		// and user settings saved through saveSettingsTo - is all taken care 
-		// of). Save here only the other internals that need to be preserved
-		// (e.g. data used by the views).
-
 	}
 
 	@Override
 	protected String getExecutableName() {
 
-		return "chkparse";
+		return "psipred";
 	}
 }
 

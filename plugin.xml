@@ -12,7 +12,9 @@
       <category description="Nodes for indexing against databases" level-id="idx" name="Index" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/protevo"/>
       <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
+      <category description="Nodes for the BLAST" level-id="blast" name="BLAST" path="/protevo"/>
       <category description="Nodes for PSIPRED" level-id="psipred" name="PSI-PRED" path="/protevo"/>
+      <category description="Utility nodes" level-id="util" name="Utils" path="/protevo"/>
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
@@ -31,12 +33,13 @@
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory" id="org.proteinevolution.nodes.input.hhsuitedbreader.HHsuiteDBReaderNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.pdbinfo.PDBInfoNodeFactory" id="org.proteinevolution.nodes.analysis.pdbinfo.PDBInfoNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
+<node category-path="/protevo/util" factory-class="org.proteinevolution.knime.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
+<node category-path="/protevo/blast" factory-class="org.proteinevolution.knime.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
+<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
+<node category-path="/protevo/output" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbinfo.PDBInfoNodeFactory" id="org.proteinevolution.nodes.analysis.pdbinfo.PDBInfoNodeFactory"/>
+<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
+<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory"/>
 </extension>
    
    

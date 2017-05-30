@@ -8,14 +8,14 @@ import org.proteinevolution.ProteinevolutionNodePlugin;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.preferences.PreferencePage;
 
-public abstract class PSIPREDNodeModel extends ExecutableNodeModel {
+public abstract class PSIPREDBaseNodeModel extends ExecutableNodeModel {
 
-	protected PSIPREDNodeModel(int nrInDataPorts, int nrOutDataPorts) throws InvalidSettingsException {
+	protected PSIPREDBaseNodeModel(int nrInDataPorts, int nrOutDataPorts) throws InvalidSettingsException {
 
 		super(nrInDataPorts, nrOutDataPorts);
 	}
 
-	protected PSIPREDNodeModel(PortType[] inPortTypes, PortType[] outPortTypes) throws InvalidSettingsException {
+	protected PSIPREDBaseNodeModel(PortType[] inPortTypes, PortType[] outPortTypes) throws InvalidSettingsException {
 
 		super(inPortTypes, outPortTypes);
 	}
