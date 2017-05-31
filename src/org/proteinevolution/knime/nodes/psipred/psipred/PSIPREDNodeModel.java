@@ -78,7 +78,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 			cmd.addOption("", new File(datadir, "weights.dat3").getAbsolutePath());
 			
 
-			child = new File(exec.createFileStore("psipred").getFile(), "out");
+			child = new File(exec.createFileStore("psipred").getFile(), "out.ss");
 			Process process = Runtime.getRuntime().exec(cmd.toString());
 			logger.warn(cmd.toString());
 			

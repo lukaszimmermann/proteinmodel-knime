@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.knime.core.data.DataType;
 import org.knime.core.util.FileUtil;
-import org.proteinevolution.models.interfaces.ISequenceAlignment;
+import org.proteinevolution.models.interfaces.ISequenceAlignmentAnnotated;
 import org.proteinevolution.models.interfaces.Writeable;
 import org.proteinevolution.models.spec.AlignmentFormat;
 
@@ -30,7 +30,7 @@ import org.proteinevolution.models.spec.AlignmentFormat;
  * @author lzimmermann
  *
  */
-public final class SequenceAlignmentContent implements Serializable, Writeable, ISequenceAlignment {
+public final class SequenceAlignmentContent implements Serializable, Writeable, ISequenceAlignmentAnnotated {
 
 	private static final long serialVersionUID = -4773393149609106987L;
 	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
@@ -38,9 +38,22 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 	private final String[] headers;
 	private final char[][] sequences;
 
+	// Annotations for the alignment (such as secondary structure)
+	private final List<char[]> annotations;
+
 	// Specification of the alignment format
 	private final AlignmentFormat alignmentformat;
 
+
+	/**
+	 * Adds an annotation to this alignment
+	 * 
+	 * @param annotation
+	 */
+	public void addAnnotation(final char[] annotation) {
+
+		this.annotations.add(annotation);
+	}
 
 	public SequenceAlignmentContent(final InputStream in) throws IOException  {
 
@@ -65,13 +78,14 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 		this.headers = sequenceAlignment.headers;
 		this.sequences = sequenceAlignment.sequences;
 		this.alignmentformat = sequenceAlignment.alignmentformat;
+		this.annotations = sequenceAlignment.annotations;
 	}
-
 
 	private SequenceAlignmentContent(final String[] headers, final char[][] seqs) {
 
 		this.headers = headers;
 		this.sequences = seqs;
+		this.annotations = new ArrayList<char[]>();
 		this.alignmentformat = headers.length == 1 ? AlignmentFormat.SingleSequence : AlignmentFormat.FASTA;
 	}
 
@@ -190,13 +204,13 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 				content[i][j] = symbols[j];
 			}
 		}
-		
+
 		// Check if single sequence contains gaps (not allowed)
 		if (headersSize == 1) {			
 			for (char c : sequences.get(0).toCharArray()) {
-				
+
 				if (c == '-') {
-			
+
 					throw new NotAnAlignmentException("Single sequence in alignment, but gap encountered");
 				}
 			}
@@ -217,16 +231,16 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 		return this.sequences.length;
 	}
 
-	@Override
-	public char get(final int i, final int j) {
 
-		return this.sequences[i][j];
+	@Override
+	public char[] getAnnotationAt(final int index) {
+
+		return this.annotations.get(index);
 	}
 
-
 	@Override
-	public char[][] getAllUnsafe() {
+	public int getNumAnnotations() {
 
-		return this.sequences;
+		return this.annotations.size();
 	}
 }

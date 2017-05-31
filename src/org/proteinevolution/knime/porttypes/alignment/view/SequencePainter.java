@@ -1,7 +1,13 @@
 package org.proteinevolution.knime.porttypes.alignment.view;
 
+import org.knime.core.node.NodeLogger;
+
 public class SequencePainter implements Runnable {
 
+	private static final NodeLogger logger = NodeLogger
+			.getLogger(SequencePainter.class);
+
+	
 	private final char[] seq;
 	private final int clipPosY;
 	private final int xMinSeqPos;
@@ -38,8 +44,8 @@ public class SequencePainter implements Runnable {
 
 
 	public void run() {
-
-		if (seq != null){
+	
+ 		if (seq != null){
 
 			// Make sure not outside length of seq
 			int seqLength = seq.length;

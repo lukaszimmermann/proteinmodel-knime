@@ -41,20 +41,4 @@ public interface ISequenceAlignment {
    * @return The length of the alignment.
    */
   public int getLength();
-  
-  /**
-   * Returns in the ith sequence the character at position j.
-   * 
-   * @param i Sequence to look at
-   * @param j Column to look at
-   * @return Character in the ith sequence at position j.
-   */
-  public char get(final int i, final int j);  
-  
-  /**
-   * Returns the complete alignment as char matrix.
-   * 
-   * @return The complete alignment as char matrix.
-   */
-  public char[][] getAllUnsafe();
 } 

@@ -8,14 +8,14 @@ import javax.swing.JComboBox;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
-import org.proteinevolution.models.interfaces.ISequenceAlignment;
+import org.proteinevolution.models.interfaces.ISequenceAlignmentAnnotated;
 
 public class JAlignmentView extends JPanel {
 
 	
 	private static final long serialVersionUID = -5119543171206109624L;
 
-	public JAlignmentView(final ISequenceAlignment alignment) {
+	public JAlignmentView(final ISequenceAlignmentAnnotated alignment) {
 		
 		this.setLayout(new BorderLayout());
 		

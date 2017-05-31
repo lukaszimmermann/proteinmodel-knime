@@ -40,6 +40,7 @@
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbinfo.PDBInfoNodeFactory" id="org.proteinevolution.nodes.analysis.pdbinfo.PDBInfoNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
 </extension>
    
    
