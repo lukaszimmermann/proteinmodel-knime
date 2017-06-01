@@ -5,11 +5,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.uri.URIPortObject;
-import org.knime.core.data.uri.URIPortObjectSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -25,6 +26,8 @@ import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
+import org.proteinevolution.models.spec.FileExtensions;
+import org.proteinevolution.models.util.URIUtils;
 
 
 /**
@@ -56,21 +59,28 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
-
 		// Load SS file and sequence
 		SequenceAlignmentContent alignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
 		String urc = ((URIPortObject) inData[1]).getURIContents().get(0).getURI().getPath();
 
 		List<Character> chars = new ArrayList<Character>();
-		char[] result;
-		if (urc.endsWith("ss")) {
+		char[] result = null;
+		
+		// Configure must guaruantee that no other filetypes are encountered here
+		if (urc.endsWith(FileExtensions.SS) || urc.endsWith(FileExtensions.SS2)) {
 
 			try(BufferedReader bufferedReader = new BufferedReader(new FileReader(urc))) {
 
 				String line;
 				while ( (line = bufferedReader.readLine()) != null) {
 
-					chars.add(line.split("\\s+")[3].toCharArray()[0]);
+					line = line.trim();
+					
+					// Ignore comment and empty lines
+					if (line.startsWith("#") || line.isEmpty()) {
+						continue;
+					}
+					chars.add(line.split("\\s+")[2].toCharArray()[0]);
 				}
 			}
 			result = new char[chars.size()];
@@ -79,9 +89,6 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 
 				result[i] = chars.get(i).charValue();
 			}
-		} else {
-
-			throw new InvalidSettingsException("Unsupported file extension for annotation file");
 		}
 		alignment.addAnnotation(result);
 		
@@ -98,9 +105,7 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void reset() {
-		// TODO Code executed on reset.
-		// Models build during execute are cleared here.
-		// Also data handled in load/saveInternals will be erased here.
+
 	}
 
 	/**
@@ -110,14 +115,12 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		// Validate some properties
-		List<String> extensions = ((URIPortObjectSpec) inSpecs[1]).getFileExtensions();
-
-		if (extensions.size() != 1) {
-
-			throw new InvalidSettingsException("AnnotateAlignment node only expects exactly one file, but either none or multiple extensions were encountered.");
-		}
-
+		Set<String> allowedExtensions = new HashSet<String>(2);
+		allowedExtensions.add(FileExtensions.SS);
+		allowedExtensions.add(FileExtensions.SS2);
+		
+		URIUtils.checkURIExtension(inSpecs[1], allowedExtensions);
+		
 		return new DataTableSpec[]{null};
 	}
 
@@ -126,8 +129,6 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-		// TODO save user settings to the config object.
 
 	}
 

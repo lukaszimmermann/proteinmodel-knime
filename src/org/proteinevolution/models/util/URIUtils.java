@@ -1,6 +1,8 @@
 package org.proteinevolution.models.util;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.knime.core.data.uri.URIPortObjectSpec;
 import org.knime.core.node.InvalidSettingsException;
@@ -20,7 +22,14 @@ public final class URIUtils {
 		throw new AssertionError();
 	}
 	
-	public static void checkURIExtension(final PortObjectSpec inSpec, final String extension) throws InvalidSettingsException {
+	public static void checkURIExtension(final PortObjectSpec inSpec, final String validExtension) throws InvalidSettingsException {
+	
+		Set<String> validExtensions = new HashSet<String>(1);
+		validExtensions.add(validExtension);
+		URIUtils.checkURIExtension(inSpec, validExtensions);
+	}
+	
+	public static void checkURIExtension(final PortObjectSpec inSpec, final Set<String> validExtensions) throws InvalidSettingsException {
 		
 		if ( ! (inSpec instanceof URIPortObjectSpec)) {
 			
@@ -33,9 +42,9 @@ public final class URIUtils {
 			throw new InvalidSettingsException("Only one extension allowed for the port object!");
 		}
 		
-		if ( ! extensions.get(0).equals(extension)) {
+		if ( ! validExtensions.contains(extensions.get(0))) {
 			
-			throw new InvalidSettingsException("Node expects extension " + extension + " but " + extensions.get(0) + " given!");
+			throw new InvalidSettingsException("Invalid file extension for node: " + extensions.get(0));
 		}
 	}
 }
