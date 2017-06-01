@@ -26,7 +26,7 @@ public class AlignmentInfoNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,8 @@ public class AlignmentInfoNodeFactory
     @Override
     public NodeView<AlignmentInfoNodeModel> createNodeView(final int viewIndex,
             final AlignmentInfoNodeModel nodeModel) {
-        return new AlignmentInfoNodeView(nodeModel);
+    	
+        return null;
     }
 
     /**
@@ -43,7 +44,7 @@ public class AlignmentInfoNodeFactory
      */
     @Override
     public boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -51,7 +52,8 @@ public class AlignmentInfoNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new AlignmentInfoNodeDialog();
+    	
+        return null;
     }
 
 }

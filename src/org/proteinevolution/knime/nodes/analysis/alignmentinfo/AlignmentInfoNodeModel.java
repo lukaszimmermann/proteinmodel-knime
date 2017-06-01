@@ -26,6 +26,7 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
 
 
 /**
@@ -61,16 +62,13 @@ public class AlignmentInfoNodeModel extends NodeModel {
         		new DataColumnSpecCreator("length", IntCell.TYPE).createSpec(),
         		new DataColumnSpecCreator("format", StringCell.TYPE).createSpec()
         };
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
-
+        BufferedDataContainer container = exec.createDataContainer(new DataTableSpec(allColSpecs));
         SequenceAlignmentContent in = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
              
         container.addRowToTable(
         		new DefaultRow(
         				"Row0",
         				 new DataCell[] {
-        						 
         						 IntCellFactory.create(in.getNumberSequences()),
         						 IntCellFactory.create(in.getLength()),
         						 StringCellFactory.create(in.getAlignmentFormat().toString())
@@ -84,9 +82,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
+
     }
 
     /**
@@ -96,6 +92,10 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
         
+    	if ( ! (inSpecs[0] instanceof SequenceAlignmentPortObjectSpec)) {
+    		
+    		throw new InvalidSettingsException("Port object for node AlignmentInfo must be SequenceAlignment.");
+    	}
         return new DataTableSpec[]{null};
     }
 
@@ -105,9 +105,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-       
-        
-
+    	// No settings for this node
     }
 
     /**
@@ -117,11 +115,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        // TODO load (valid) settings from the config object.
-        // It can be safely assumed that the settings are valided by the 
-        // method below.
-        
-
+    	// No settings for this node
     }
 
     /**
@@ -131,12 +125,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
-        // TODO check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
-
-
+    	// No settings for this  node
     }
     
     /**
@@ -147,13 +136,7 @@ public class AlignmentInfoNodeModel extends NodeModel {
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
         
-        // TODO load internal data. 
-        // Everything handed to output ports is loaded automatically (data
-        // returned by the execute method, models loaded in loadModelContent,
-        // and user settings set through loadSettingsFrom - is all taken care 
-        // of). Load here only the other internals that need to be restored
-        // (e.g. data used by the views).
-
+    	// No internals for this node
     }
     
     /**
@@ -164,14 +147,6 @@ public class AlignmentInfoNodeModel extends NodeModel {
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
        
-        // TODO save internal models. 
-        // Everything written to output ports is saved automatically (data
-        // returned by the execute method, models saved in the saveModelContent,
-        // and user settings saved through saveSettingsTo - is all taken care 
-        // of). Save here only the other internals that need to be preserved
-        // (e.g. data used by the views).
-
+    	// No internals for this node
     }
-
 }
-
