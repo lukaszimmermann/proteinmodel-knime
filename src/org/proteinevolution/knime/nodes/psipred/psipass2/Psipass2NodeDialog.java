@@ -1,6 +1,10 @@
 package org.proteinevolution.knime.nodes.psipred.psipass2;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
+import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 
 /**
  * <code>NodeDialog</code> for the "Psipass2" Node.
@@ -23,5 +27,22 @@ public class Psipass2NodeDialog extends DefaultNodeSettingsPane {
     protected Psipass2NodeDialog() {
         super();
                     
+        this.addDialogComponent(
+        		new DialogComponentNumber(
+        				new SettingsModelInteger(
+        						Psipass2NodeModel.ITERCOUNT_CFGKEY,
+        						1),
+        				"No. of iterations",
+        				1));
+        
+        this.addDialogComponent(
+        		new DialogComponentNumberEdit(
+        				new SettingsModelDouble(Psipass2NodeModel.DCA_CFGKEY, 1.0),
+        				"DCA"));
+        
+        this.addDialogComponent(
+        		new DialogComponentNumberEdit(
+        				new SettingsModelDouble(Psipass2NodeModel.DCB_CFGKEY, 1.0),
+        				"DCB"));
     }
 }

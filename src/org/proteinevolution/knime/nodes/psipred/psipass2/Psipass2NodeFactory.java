@@ -1,5 +1,6 @@
 package org.proteinevolution.knime.nodes.psipred.psipass2;
 
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
@@ -18,7 +19,13 @@ public class Psipass2NodeFactory
      */
     @Override
     public Psipass2NodeModel createNodeModel() {
+    	
+    	try {
         return new Psipass2NodeModel();
+    	} catch (InvalidSettingsException e) {
+    		
+    		throw new RuntimeException(e.getMessage());
+    	}
     }
 
     /**
