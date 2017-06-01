@@ -61,6 +61,5 @@ public class Psipass2NodeFactory
     public NodeDialogPane createNodeDialogPane() {
         return new Psipass2NodeDialog();
     }
-
 }
 

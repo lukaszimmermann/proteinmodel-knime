@@ -23,7 +23,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
+import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
+import org.proteinevolution.models.util.URIUtils;
 
 
 /**
@@ -37,8 +39,6 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	// the logger instance
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(ChkparseNodeModel.class);
-
-
 
 	/**
 	 * Constructor for the node model.
@@ -86,11 +86,11 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 				throw new ExecutionException("Execution of Chkparse failed.");
 			}			
 			FileUtils.copyInputStreamToFile(process.getInputStream(), child);
-			urics.add(new URIContent(child.toURI(), ".mtx"));	
+			urics.add(new URIContent(child.toURI(), FileExtensions.MTX));	
 		}
 		return new URIPortObject[] {
 
-				new URIPortObject(new URIPortObjectSpec(".mtx"), urics)};
+				new URIPortObject(new URIPortObjectSpec(FileExtensions.MTX), urics)};
 	}
 
 	/**
@@ -98,9 +98,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	 */
 	@Override
 	protected void reset() {
-		// TODO Code executed on reset.
-		// Models build during execute are cleared here.
-		// Also data handled in load/saveInternals will be erased here.
+
 	}
 
 	/**
@@ -110,18 +108,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		// Validate some properties
-		List<String> extensions = ((URIPortObjectSpec) inSpecs[0]).getFileExtensions();
-
-		if (extensions.size() != 1) {
-
-			throw new InvalidSettingsException("Chkparse node only expects exactly one file, but either none or multiple extensions were encountered.");
-		}
-		if ( ! extensions.get(0).equals(".chk")) {
-
-			throw new InvalidSettingsException("Chkparse expects file with extension .chk, but extension was: " + extensions.get(0));
-		}
-
+		URIUtils.checkURIExtension(inSpecs[0], FileExtensions.CHK);
 		return new DataTableSpec[]{null};
 	}
 
@@ -131,6 +118,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
+		// Node has no settings.
 	}
 
 	/**
@@ -140,7 +128,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-
+		// Node has no settings.
 	}
 
 	/**
@@ -150,7 +138,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-
+		// Node has no settings
 	}
 
 	/**
@@ -161,13 +149,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO load internal data. 
-		// Everything handed to output ports is loaded automatically (data
-		// returned by the execute method, models loaded in loadModelContent,
-		// and user settings set through loadSettingsFrom - is all taken care 
-		// of). Load here only the other internals that need to be restored
-		// (e.g. data used by the views).
-
+		// Node has no internals
 	}
 
 	/**
@@ -178,13 +160,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO save internal models. 
-		// Everything written to output ports is saved automatically (data
-		// returned by the execute method, models saved in the saveModelContent,
-		// and user settings saved through saveSettingsTo - is all taken care 
-		// of). Save here only the other internals that need to be preserved
-		// (e.g. data used by the views).
-
+		// Node has no internals
 	}
 
 	@Override
@@ -193,4 +169,3 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 		return "chkparse";
 	}
 }
-

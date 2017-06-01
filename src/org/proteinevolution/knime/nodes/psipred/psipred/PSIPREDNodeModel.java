@@ -23,7 +23,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
+import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
+import org.proteinevolution.models.util.URIUtils;
 
 
 /**
@@ -38,8 +40,6 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(PSIPREDNodeModel.class);
 
-
-
 	/**
 	 * Constructor for the node model.
 	 */
@@ -49,10 +49,6 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 				new PortType[] {PortTypeRegistry.getInstance().getPortType(URIPortObject.class)});
 	}
 
-	
-	
-	// MUST execute: $execdir/psipred $tmproot.mtx $datadir/weights.dat $datadir/weights.dat2 $datadir/weights.dat3 > $rootname.ss
-	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -98,11 +94,11 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 				throw new ExecutionException("Execution of psipred failed.");
 			}			
 			FileUtils.copyInputStreamToFile(process.getInputStream(), child);
-			urics.add(new URIContent(child.toURI(), ".ss"));	
+			urics.add(new URIContent(child.toURI(), FileExtensions.SS));	
 		}
 		return new URIPortObject[] {
 
-				new URIPortObject(new URIPortObjectSpec(".ss"), urics)};
+				new URIPortObject(new URIPortObjectSpec(FileExtensions.SS), urics)};
 	}
 
 	/**
@@ -110,9 +106,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	 */
 	@Override
 	protected void reset() {
-		// TODO Code executed on reset.
-		// Models build during execute are cleared here.
-		// Also data handled in load/saveInternals will be erased here.
+		
 	}
 
 	/**
@@ -122,18 +116,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		// Validate some properties
-		List<String> extensions = ((URIPortObjectSpec) inSpecs[0]).getFileExtensions();
-
-		if (extensions.size() != 1) {
-
-			throw new InvalidSettingsException("psipred node only expects exactly one file, but either none or multiple extensions were encountered.");
-		}
-		if ( ! extensions.get(0).equals(".mtx")) {
-
-			throw new InvalidSettingsException("psipred expects file with extension .mtx, but extension was: " + extensions.get(0));
-		}
-
+		URIUtils.checkURIExtension(inSpecs[0], FileExtensions.MTX);
 		return new DataTableSpec[]{null};
 	}
 
@@ -143,6 +126,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
+		// Node has no settings
 	}
 
 	/**
@@ -152,7 +136,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-
+		// Node has no settings
 	}
 
 	/**
@@ -162,7 +146,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-
+		// Node has no settings
 	}
 
 	/**
@@ -173,6 +157,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
+		// Node has no internals
 	}
 
 	/**
@@ -183,6 +168,7 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
+		// Node has no internals
 	}
 
 	@Override

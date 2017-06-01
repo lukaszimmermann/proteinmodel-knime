@@ -29,6 +29,7 @@ import org.proteinevolution.knime.nodes.blast.BLASTNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.spec.AlignmentFormat;
+import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
 
 
@@ -146,11 +147,11 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 
 			// Copy temp output file to file storage
 			FileUtils.copyFile(tempOutput, child);
-			urics.add(new URIContent(child.toURI(), ".chk"));	
+			urics.add(new URIContent(child.toURI(), FileExtensions.CHK));	
 		}		
 		return new URIPortObject[] {
 
-				new URIPortObject(new URIPortObjectSpec(".chk"), urics)};
+				new URIPortObject(new URIPortObjectSpec(FileExtensions.CHK), urics)};
 	}
 	/**
 	 * {@inheritDoc}
@@ -243,13 +244,6 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 	protected void saveInternals(final File internDir,
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
-
-		// TODO save internal models. 
-		// Everything written to output ports is saved automatically (data
-		// returned by the execute method, models saved in the saveModelContent,
-		// and user settings saved through saveSettingsTo - is all taken care 
-		// of). Save here only the other internals that need to be preserved
-		// (e.g. data used by the views).
 
 	}
 

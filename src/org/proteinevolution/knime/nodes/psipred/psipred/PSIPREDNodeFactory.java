@@ -22,6 +22,7 @@ public class PSIPREDNodeFactory
     	
     	try {
         return new PSIPREDNodeModel();
+        
     	} catch (InvalidSettingsException e) {
     		
     		throw new RuntimeException(e.getMessage());

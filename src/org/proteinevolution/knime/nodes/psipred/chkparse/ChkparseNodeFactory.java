@@ -11,55 +11,56 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class ChkparseNodeFactory 
-        extends NodeFactory<ChkparseNodeModel> {
+public class ChkparseNodeFactory extends NodeFactory<ChkparseNodeModel> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ChkparseNodeModel createNodeModel() {
-    	
-    	try {
-        return new ChkparseNodeModel();
-    	} catch (InvalidSettingsException e) {
-    		
-    		throw new RuntimeException(e.getMessage());
-    	}
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ChkparseNodeModel createNodeModel() {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNrNodeViews() {
-        return 0;
-    }
+		try {
+			return new ChkparseNodeModel();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<ChkparseNodeModel> createNodeView(final int viewIndex,
-            final ChkparseNodeModel nodeModel) {
-    	
-        return null;
-    }
+		} catch (InvalidSettingsException e) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasDialog() {
-        return true;
-    }
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeDialogPane createNodeDialogPane() {
-    	
-        return null;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getNrNodeViews() {
+		return 0;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public NodeView<ChkparseNodeModel> createNodeView(final int viewIndex,
+			final ChkparseNodeModel nodeModel) {
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean hasDialog() {
+		
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public NodeDialogPane createNodeDialogPane() {
+
+		return null;
+	}
 }

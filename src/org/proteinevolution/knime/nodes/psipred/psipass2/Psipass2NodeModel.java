@@ -25,7 +25,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
+import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
+import org.proteinevolution.models.util.URIUtils;
 
 
 /**
@@ -87,6 +89,7 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 		
 		try(CommandLine cmd = new CommandLine(executable)) {
 
+			
 			cmd.addOption("", new File(datadir, "weights_p2.dat").getAbsolutePath());
 			cmd.addOption("", this.param_itercount.getIntValue());
 			cmd.addOption("", this.param_dca.getDoubleValue());
@@ -94,6 +97,7 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 			
 			// Create output files in filestore
 			File storeFile = exec.createFileStore("psipass2").getFile();
+			storeFile.mkdirs();
 			
 			ss2_file = new File(storeFile, "out.ss2");
 			horiz_file = new File(storeFile, "out.horiz");
@@ -102,7 +106,6 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 			
 			// SS input file
 			cmd.addOption("", ((URIPortObject) inData[0]).getURIContents().get(0).getURI().getPath());
-			
 			
 			Process process = Runtime.getRuntime().exec(cmd.toString());
 			logger.warn(cmd.toString());
@@ -124,17 +127,17 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 			}			
 			
 			// Add uric of ss2 file
-			ss2_urics.add(new URIContent(ss2_file.toURI(), ".ss2"));
+			ss2_urics.add(new URIContent(ss2_file.toURI(), FileExtensions.SS2));
 			
 			// Add uric of horiz file
 			FileUtils.copyInputStreamToFile(process.getInputStream(), horiz_file);
-			horiz_urics.add(new URIContent(horiz_file.toURI(), ".horiz"));	
+			horiz_urics.add(new URIContent(horiz_file.toURI(), FileExtensions.HORIZ));	
 		}
 		
 		return new URIPortObject[] {
 
-				new URIPortObject(new URIPortObjectSpec(".ss2"), ss2_urics),
-				new URIPortObject(new URIPortObjectSpec(".horiz"), horiz_urics)
+				new URIPortObject(new URIPortObjectSpec(FileExtensions.SS2), ss2_urics),
+				new URIPortObject(new URIPortObjectSpec(FileExtensions.HORIZ), horiz_urics)
 		};
 	}
 
@@ -153,13 +156,8 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		// Validate input ports
-		if ( ! (inSpecs[0] instanceof URIPortObjectSpec)) {
-
-			throw new InvalidSettingsException("Inport 0 of Psipass2 must be a URIPortObject!");
-		}
-
-		return new DataTableSpec[]{null};
+		URIUtils.checkURIExtension(inSpecs[0], FileExtensions.SS);
+		return new DataTableSpec[]{null, null};
 	}
 
 	/**

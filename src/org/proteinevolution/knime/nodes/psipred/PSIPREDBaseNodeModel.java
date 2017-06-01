@@ -19,7 +19,6 @@ public abstract class PSIPREDBaseNodeModel extends ExecutableNodeModel {
 
 		super(inPortTypes, outPortTypes);
 	}
-
 	
 	@Override
 	protected final File getExecutable() {
