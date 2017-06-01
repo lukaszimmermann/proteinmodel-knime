@@ -1,8 +1,6 @@
 package org.proteinevolution.knime.nodes.rosetta.fragmentpicker;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
 /**
  * <code>NodeDialog</code> for the "FragmentPicker" Node.
@@ -24,13 +22,6 @@ public class FragmentPickerNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FragmentPickerNodeDialog() {
         super();
-        
-        addDialogComponent(new DialogComponentNumber(
-                new SettingsModelIntegerBounded(
-                    FragmentPickerNodeModel.CFGKEY_COUNT,
-                    FragmentPickerNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE),
-                    "Counter:", /*step*/ 1, /*componentwidth*/ 5));
                     
     }
 }

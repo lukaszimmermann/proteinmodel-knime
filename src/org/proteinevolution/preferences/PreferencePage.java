@@ -3,6 +3,7 @@ package org.proteinevolution.preferences;
 
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -13,10 +14,9 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 	public static final String BLAST_EXECUTABLE_PATH = "BLAST_EXECUTABLE_PATH";
 	public static final String HHSUITE_EXECUTABLE_PATH = "HHSUITE_EXECUTABLE_PATH";
 	public static final String PSIPRED_EXECUTABLE_PATH = "PSIPRED_EXECUTABLE_PATH";
+	public static final String ROSETTA_FRAGMENTPICKER_EXECUTABLE = "ROSETTA_FRAGMENTPICKER_EXECUTABLE";
 	
-	// The rosetta root directory
-	public static final String ROSETTA_ROOT = "ROSETTA_ROOT_PATH";
-	
+
 	@Override
 	public void init(final IWorkbench workbench) {
 
@@ -35,17 +35,18 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 
 		this.addField(new DirectoryFieldEditor(
 				HHSUITE_EXECUTABLE_PATH,
-				"HH-Suite Executable Path",			// Where the HH-suite binaries are located
+				"HH-Suite Executable Path",			// Where the HH-suite executables are located
 				parent));
 
 		this.addField(new DirectoryFieldEditor(
 				PSIPRED_EXECUTABLE_PATH,
-				"PSIPRED Executable Path",			// Where the HH-suite binaries are located
+				"PSIPRED Executable Path",			// Where the PSIPRED executables are located
 				parent));
 		
-		this.addField(new DirectoryFieldEditor(
-				ROSETTA_ROOT,
-				"PSIPRED Executable Path",			// Where the HH-suite binaries are located
+		this.addField(new FileFieldEditor(
+				ROSETTA_FRAGMENTPICKER_EXECUTABLE,
+				"ROSETTA Fragmentpicker Executable", // Location of the Fragmentpicker executable from ROSETTA
+				true,   // File path to executable must be absolute
 				parent));
 	}
 }

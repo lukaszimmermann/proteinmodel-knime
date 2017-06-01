@@ -22,6 +22,8 @@ public final class SequenceAlignmentPortObjectSpec extends AbstractSimplePortObj
      */
     public static final class Serializer extends AbstractSimplePortObjectSpecSerializer<SequenceAlignmentPortObjectSpec> {}
 	
+    private static final String CFG_SEQUENCEALIGNMENT_FORMAT = "CFG_SEQUENCEALIGNMENT_FORMAT";
+    
 	private DataType m_type;
     
 	// Specification of the alignmentFormat
@@ -30,7 +32,7 @@ public final class SequenceAlignmentPortObjectSpec extends AbstractSimplePortObj
 	
 	public SequenceAlignmentPortObjectSpec(final DataType type, final AlignmentFormat alignmentFormat) {
 		
-		if (type == null) {
+		if (type == null || alignmentFormat == null) {
 			
 			throw new NullPointerException("Argument must not be null.");
 		}
@@ -62,12 +64,14 @@ public final class SequenceAlignmentPortObjectSpec extends AbstractSimplePortObj
 	protected void load(final ModelContentRO model) throws InvalidSettingsException {
 		
 		this.m_type = DataType.load(model);
+		this.alignmentFormat = AlignmentFormat.valueOf(model.getString(CFG_SEQUENCEALIGNMENT_FORMAT));
 	}
 	
 	 /** {@inheritDoc} */
     @Override
     protected void save(final ModelContentWO model) {
         this.m_type.save(model);
+        model.addString(CFG_SEQUENCEALIGNMENT_FORMAT, this.alignmentFormat.toString());
     }
 }
  
