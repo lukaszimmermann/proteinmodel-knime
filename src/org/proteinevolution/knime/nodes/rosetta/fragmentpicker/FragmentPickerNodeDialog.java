@@ -1,6 +1,8 @@
 package org.proteinevolution.knime.nodes.rosetta.fragmentpicker;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * <code>NodeDialog</code> for the "FragmentPicker" Node.
@@ -22,7 +24,15 @@ public class FragmentPickerNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FragmentPickerNodeDialog() {
         super();
-                    
+                
+        this.addDialogComponent(
+        		new DialogComponentString(
+        				new SettingsModelString(
+        						FragmentPickerNodeModel.CFG_SSNAME,
+        						"predA"),
+        				"Name of Secondary Structure", 
+        				true,
+        				20));
     }
 }
 
