@@ -41,7 +41,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
-import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
 import org.proteinevolution.models.structure.Grid;
@@ -257,7 +256,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				PDBAtom atom = PDBAtom.toAtom(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim());
 
 				// Skip hydrogen
-				if (atom.element == Element.H) {
+				if (atom.element.isHydrogen()) {
 
 					continue;
 				}

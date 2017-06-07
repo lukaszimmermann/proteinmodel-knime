@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import org.biojava.nbio.structure.Element;
 
 import org.proteinevolution.models.spec.pdb.PDBAtom;
-import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /*
@@ -468,7 +468,7 @@ public final class Grid implements Serializable {
 	private void occupyVDW(final double x, final double y, final double z, Element element) {
 
 		// Space to block is determined by the VDW radius of the atom
-		double radius = element.vdWRadius;
+		double radius = element.getVDWRadius();
 
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
@@ -577,7 +577,7 @@ public final class Grid implements Serializable {
 			this.atoms.add(atom);
 			this.atomIdentIndex++;
 			// Could also be inlined
-			this.makeAccessible(x, y, z, atomIdentification.getAtom().element.vdWRadius);
+			this.makeAccessible(x, y, z, atomIdentification.getAtom().element.getVDWRadius());
 		}
 	}
 
@@ -650,7 +650,7 @@ public final class Grid implements Serializable {
 			final Element element) {
 
 
-		double radius = element.vdWRadius + 1;
+		double radius = element.getVDWRadius() + 1;
 
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
@@ -753,7 +753,7 @@ public final class Grid implements Serializable {
 			final Residue residue,
 			final Element element) {
 
-		double radius = element.vdWRadius + 1;
+		double radius = element.getVDWRadius() + 1;
 
 		double numerator = 0;
 		double denominator = 0;

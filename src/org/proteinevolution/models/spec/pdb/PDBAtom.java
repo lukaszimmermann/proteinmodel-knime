@@ -1,8 +1,10 @@
 package org.proteinevolution.models.spec.pdb;
 
+
+import org.biojava.nbio.structure.Element;
+
 public enum PDBAtom {
 
-	
 	// Carbon
 	CA(Element.C),
 	CB(Element.C),
