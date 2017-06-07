@@ -47,7 +47,7 @@ public final class Grid implements Serializable {
 	private final Map<Residue, Set<PDBAtom>> acceptors;
 
 	// List all the donors and acceptors that we have encountered during addAtom
-	private final List<LocalAtom> localAtoms; 
+	private final List<LocalAtom> atoms; 
 	private final List<Byte> donor_acceptor;
 	private byte atomIdentIndex = -1;
 	private final Map<UnorderedAtomPair, Integer> sasd_distances;
@@ -84,7 +84,7 @@ public final class Grid implements Serializable {
 			final Map<Residue, Set<PDBAtom>> acceptors) {
 
 		this.flags = new HashSet<Integer>();
-		this.localAtoms = new ArrayList<LocalAtom>();
+		this.atoms = new ArrayList<LocalAtom>();
 		this.donor_acceptor = new ArrayList<Byte>();
 		this.sasd_distances = new HashMap<UnorderedAtomPair, Integer>();
 
@@ -205,7 +205,7 @@ public final class Grid implements Serializable {
 		// The BFS is repeated for all localAtoms stored in the grid, we go from right to left
 		for (byte sourceIndex = this.atomIdentIndex; sourceIndex > -1; --sourceIndex) {
 
-			LocalAtom atom = this.localAtoms.get(sourceIndex);
+			LocalAtom atom = this.atoms.get(sourceIndex);
 			int[] start = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getAtomIdentification().getAtom().element);
 
 			// Make sure that the Atom is 
@@ -293,7 +293,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 					}
 
@@ -316,7 +316,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 					} 
 
@@ -341,7 +341,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 
 					} 
@@ -366,7 +366,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 
 					} 
@@ -392,7 +392,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 					}
 
@@ -416,7 +416,7 @@ public final class Grid implements Serializable {
 						this.sasd_distances.put(
 								new UnorderedAtomPair(
 										atom.getAtomIdentification(),
-										this.localAtoms.get(current_dir).getAtomIdentification()), current_length);
+										this.atoms.get(current_dir).getAtomIdentification()), current_length);
 						found.add(current_dir);
 					}
 				
@@ -544,37 +544,37 @@ public final class Grid implements Serializable {
 	 * @param residue
 	 * @param atom
 	 */
-	public void addAtom(final LocalAtom localAtom) {
+	public void addAtom(final LocalAtom atom) {
 
-		AtomIdentification atomIdentification = localAtom.getAtomIdentification();
-		double x = localAtom.getX();
-		double y = localAtom.getY();
-		double z = localAtom.getZ();		
-		PDBAtom atom = atomIdentification.getAtom();
+		AtomIdentification atomIdentification = atom.getAtomIdentification();
+		double x = atom.getX();
+		double y = atom.getY();
+		double z = atom.getZ();		
+		PDBAtom pdbatom = atomIdentification.getAtom();
 
 		// Ignore hydrogen
-		if (atom.element.equals(Element.H)) {
+		if (pdbatom.element.equals(Element.H)) {
 			return;
 		}
 
 		Residue residue = atomIdentification.getResidue();
 
-		boolean isDonor = this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
-		boolean isAcceptor = this.acceptors.containsKey(residue) && this.acceptors.get(residue).contains(atom);
+		boolean isDonor = this.donors.containsKey(residue) && this.donors.get(residue).contains(pdbatom);
+		boolean isAcceptor = this.acceptors.containsKey(residue) && this.acceptors.get(residue).contains(pdbatom);
 
 		// occupy the vdW volume of the atom (Might be inlined)
-		this.occupyVDW(x, y, z, atom.element);
+		this.occupyVDW(x, y, z, pdbatom.element);
 
 		// If the current atom is donor or acceptor, the 
 		if (isDonor || isAcceptor) {
 
-			if (this.localAtoms.contains(localAtom)) {
+			if (this.atoms.contains(atom)) {
 
 				throw new IllegalArgumentException("Atom has already been inserted.");
 			}
 
 			this.donor_acceptor.add(isDonor && isAcceptor ? Grid.DONOR_ACCEPTOR : (isDonor ? Grid.DONOR : Grid.ACCEPTOR));
-			this.localAtoms.add(localAtom);
+			this.atoms.add(atom);
 			this.atomIdentIndex++;
 			// Could also be inlined
 			this.makeAccessible(x, y, z, atomIdentification.getAtom().element.vdWRadius);
