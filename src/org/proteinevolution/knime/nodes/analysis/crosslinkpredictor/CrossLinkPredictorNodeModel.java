@@ -40,7 +40,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
@@ -224,19 +224,19 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		// Figure out which atoms we care about
 		//////////////////////////////////////////////////////////////////////////////////////////////
-		Set<Atom> atoms_sasd = new HashSet<Atom>();
-		for (Set<Atom> atoms : grid.copyDonors().values()) {
+		Set<PDBAtom> atoms_sasd = new HashSet<PDBAtom>();
+		for (Set<PDBAtom> atoms : grid.copyDonors().values()) {
 
 			atoms_sasd.addAll(atoms);
 		}
-		for (Set<Atom> atoms : grid.copyAcceptors().values()) {
+		for (Set<PDBAtom> atoms : grid.copyAcceptors().values()) {
 
 			atoms_sasd.addAll(atoms);
 		}
 
 		// CB atom currently hard coded (TODO)
-		Set<Atom> atoms_euclidean = new HashSet<Atom>();
-		atoms_euclidean.add(Atom.CB);
+		Set<PDBAtom> atoms_euclidean = new HashSet<PDBAtom>();
+		atoms_euclidean.add(PDBAtom.CB);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -249,12 +249,12 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			while( ( line = br.readLine()) != null  ) {
 
 				// Skip non-ATOM line
-				if ( ! Atom.isRecord(line)) {
+				if ( ! PDBAtom.isRecord(line)) {
 
 					continue;
 				}
 				// Determine current Atom and residue name
-				Atom atom = Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim());
+				PDBAtom atom = PDBAtom.toAtom(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim());
 
 				// Skip hydrogen
 				if (atom.element == Element.H) {
@@ -268,12 +268,12 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				}
 
 				// Get required attributes of the atom
-				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-				double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-				double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));
-				int resid = Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
-				String chain = line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END);
-				String residueName = line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim();
+				double x = Double.parseDouble(line.substring(PDBAtom.FIELD_X_START, PDBAtom.FIELD_X_END));
+				double y = Double.parseDouble(line.substring(PDBAtom.FIELD_Y_START, PDBAtom.FIELD_Y_END));
+				double z = Double.parseDouble(line.substring(PDBAtom.FIELD_Z_START, PDBAtom.FIELD_Z_END));
+				int resid = Integer.parseInt(line.substring(PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_START, PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
+				String chain = line.substring(PDBAtom.FIELD_CHAIN_IDENTIFIER_START, PDBAtom.FIELD_CHAIN_IDENTIFIER_END);
+				String residueName = line.substring(PDBAtom.FIELD_RESIDUE_NAME_START, PDBAtom.FIELD_RESIDUE_NAME_END).trim();
 
 
 				//  Type (Donor/Acceptor) for Euclidean

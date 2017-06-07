@@ -14,26 +14,26 @@ import org.knime.core.node.util.StringIconOption;
 public enum Residue implements StringIconOption {
 	
 	// Amino acids
-	ALA(Atom.CB),
-	ARG(Atom.CB, Atom.CG, Atom.CD, Atom.NE, Atom.CZ, Atom.NH1, Atom.NH2),
-	ASN(Atom.CB, Atom.CG, Atom.OD1, Atom.ND2),
-	ASP(Atom.CB, Atom.CG, Atom.OD1, Atom.OD2),
-	CYS(Atom.CB, Atom.SG),
-	GLN(Atom.CB, Atom.CG, Atom.CD, Atom.OE1, Atom.NE2),
-	GLU(Atom.CB, Atom.CG, Atom.CD, Atom.OE1, Atom.OE2),
+	ALA(PDBAtom.CB),
+	ARG(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD, PDBAtom.NE, PDBAtom.CZ, PDBAtom.NH1, PDBAtom.NH2),
+	ASN(PDBAtom.CB, PDBAtom.CG, PDBAtom.OD1, PDBAtom.ND2),
+	ASP(PDBAtom.CB, PDBAtom.CG, PDBAtom.OD1, PDBAtom.OD2),
+	CYS(PDBAtom.CB, PDBAtom.SG),
+	GLN(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD, PDBAtom.OE1, PDBAtom.NE2),
+	GLU(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD, PDBAtom.OE1, PDBAtom.OE2),
 	GLY,
-	HIS(Atom.CB, Atom.CG,  Atom.ND1, Atom.CD2, Atom.CE1, Atom.NE2),
-	ILE(Atom.CB, Atom.CG1, Atom.CG2, Atom.CD1),
-	LEU(Atom.CB, Atom.CG,  Atom.CD1, Atom.CD2),
-	LYS(Atom.CB, Atom.CG, Atom.CD, Atom.CE, Atom.NZ),
-	MET(Atom.CB, Atom.CG, Atom.SD, Atom.CE),
-	PHE(Atom.CB, Atom.CG, Atom.CD1, Atom.CD2, Atom.CE1, Atom.CE2, Atom.CZ),
-	PRO(Atom.CB, Atom.CG, Atom.CD),
-	SER(Atom.CB, Atom.OG),
-	THR(Atom.CB, Atom.OG1, Atom.CG2),
-	TRP(Atom.CB, Atom.CG, Atom.CD1, Atom.CD2, Atom.NE1, Atom.CE2, Atom.CE3, Atom.CZ2, Atom.CZ3, Atom.CH2),
-	TYR(Atom.CB, Atom.CG, Atom.CD1, Atom.CD2, Atom.CE1, Atom.CE2, Atom.CZ, Atom.OH),
-	VAL(Atom.CB, Atom.CG1, Atom.CG2),
+	HIS(PDBAtom.CB, PDBAtom.CG,  PDBAtom.ND1, PDBAtom.CD2, PDBAtom.CE1, PDBAtom.NE2),
+	ILE(PDBAtom.CB, PDBAtom.CG1, PDBAtom.CG2, PDBAtom.CD1),
+	LEU(PDBAtom.CB, PDBAtom.CG,  PDBAtom.CD1, PDBAtom.CD2),
+	LYS(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD, PDBAtom.CE, PDBAtom.NZ),
+	MET(PDBAtom.CB, PDBAtom.CG, PDBAtom.SD, PDBAtom.CE),
+	PHE(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD1, PDBAtom.CD2, PDBAtom.CE1, PDBAtom.CE2, PDBAtom.CZ),
+	PRO(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD),
+	SER(PDBAtom.CB, PDBAtom.OG),
+	THR(PDBAtom.CB, PDBAtom.OG1, PDBAtom.CG2),
+	TRP(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD1, PDBAtom.CD2, PDBAtom.NE1, PDBAtom.CE2, PDBAtom.CE3, PDBAtom.CZ2, PDBAtom.CZ3, PDBAtom.CH2),
+	TYR(PDBAtom.CB, PDBAtom.CG, PDBAtom.CD1, PDBAtom.CD2, PDBAtom.CE1, PDBAtom.CE2, PDBAtom.CZ, PDBAtom.OH),
+	VAL(PDBAtom.CB, PDBAtom.CG1, PDBAtom.CG2),
 
 	// Nucleotides
 	U,
@@ -51,26 +51,26 @@ public enum Residue implements StringIconOption {
 	UNK;
 	
 	
-	public static Atom[] getBackbone() {
+	public static PDBAtom[] getBackbone() {
 		
-		return new Atom[] {
-			Atom.N,
-			Atom.CA,
-			Atom.C,
-			Atom.O
+		return new PDBAtom[] {
+			PDBAtom.N,
+			PDBAtom.CA,
+			PDBAtom.C,
+			PDBAtom.O
 		};
 	}
 	
 	
-	private final Atom[] sidechain;
+	private final PDBAtom[] sidechain;
 	
-	private Residue(Atom... sideChainAtoms) {
+	private Residue(PDBAtom... sideChainAtoms) {
 		
 		this.sidechain = sideChainAtoms;
 	}
 	
 
-	public Atom[] getSidechain() {
+	public PDBAtom[] getSidechain() {
 		return Arrays.copyOf(this.sidechain, this.sidechain.length);
 	}
 	

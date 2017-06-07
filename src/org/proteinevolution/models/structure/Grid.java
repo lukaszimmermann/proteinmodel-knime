@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
-import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Element;
 import org.proteinevolution.models.spec.pdb.Residue;
 
@@ -43,8 +43,8 @@ public final class Grid implements Serializable {
 	private byte[][][] grid;
 
 	// which residues are considered as donors and acceptors in this commit
-	private final Map<Residue, Set<Atom>> donors;
-	private final Map<Residue, Set<Atom>> acceptors;
+	private final Map<Residue, Set<PDBAtom>> donors;
+	private final Map<Residue, Set<PDBAtom>> acceptors;
 
 	// List all the donors and acceptors that we have encountered during addAtom
 	private final List<LocalAtom> localAtoms; 
@@ -80,8 +80,8 @@ public final class Grid implements Serializable {
 			final double upper_x, 
 			final double upper_y, 
 			final double upper_z,
-			final Map<Residue, Set<Atom>> donors,
-			final Map<Residue, Set<Atom>> acceptors) {
+			final Map<Residue, Set<PDBAtom>> donors,
+			final Map<Residue, Set<PDBAtom>> acceptors) {
 
 		this.flags = new HashSet<Integer>();
 		this.localAtoms = new ArrayList<LocalAtom>();
@@ -160,9 +160,9 @@ public final class Grid implements Serializable {
 	 * 
 	 * @return Copy of the donors
 	 */
-	public Map<Residue, Set<Atom>> copyDonors() {
+	public Map<Residue, Set<PDBAtom>> copyDonors() {
 
-		return new HashMap<Residue, Set<Atom>>(this.donors);
+		return new HashMap<Residue, Set<PDBAtom>>(this.donors);
 	}
 
 	/**
@@ -171,9 +171,9 @@ public final class Grid implements Serializable {
 	 * 
 	 * @return Copy of the acceptors
 	 */
-	public Map<Residue, Set<Atom>> copyAcceptors() {
+	public Map<Residue, Set<PDBAtom>> copyAcceptors() {
 
-		return new HashMap<Residue, Set<Atom>>(this.acceptors);
+		return new HashMap<Residue, Set<PDBAtom>>(this.acceptors);
 	}
 
 	/**
@@ -183,7 +183,7 @@ public final class Grid implements Serializable {
 	 * @param atom Atom name
 	 * @return true if the atom_name is acceptor, false otherwise
 	 */
-	public boolean isAcceptor(Residue residue, Atom atom) {
+	public boolean isAcceptor(Residue residue, PDBAtom atom) {
 
 		return this.acceptors.containsKey(residue) && this.acceptors.get(residue).contains(atom);
 	}
@@ -195,7 +195,7 @@ public final class Grid implements Serializable {
 	 * @param atom Atom name
 	 * @return true if the atom_name is donor, false otherwise
 	 */
-	public boolean isDonor(Residue residue, Atom atom) {
+	public boolean isDonor(Residue residue, PDBAtom atom) {
 
 		return this.donors.containsKey(residue) && this.donors.get(residue).contains(atom);
 	}
@@ -550,7 +550,7 @@ public final class Grid implements Serializable {
 		double x = localAtom.getX();
 		double y = localAtom.getY();
 		double z = localAtom.getZ();		
-		Atom atom = atomIdentification.getAtom();
+		PDBAtom atom = atomIdentification.getAtom();
 
 		// Ignore hydrogen
 		if (atom.element.equals(Element.H)) {

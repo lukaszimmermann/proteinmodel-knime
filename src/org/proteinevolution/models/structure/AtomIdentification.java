@@ -3,7 +3,7 @@ package org.proteinevolution.models.structure;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /**
@@ -15,13 +15,13 @@ import org.proteinevolution.models.spec.pdb.Residue;
 public final class AtomIdentification implements Serializable {
 
 	private static final long serialVersionUID = -433456703706419607L;
-	private Atom atom;
+	private PDBAtom atom;
 	private Residue residue;
 	private int resi;
 	private String chain;
 
 
-	public AtomIdentification(final Atom atom, final Residue residue, final int resi, final String chain) {
+	public AtomIdentification(final PDBAtom atom, final Residue residue, final int resi, final String chain) {
 
 		this.atom = atom;
 		this.residue = residue;
@@ -29,7 +29,7 @@ public final class AtomIdentification implements Serializable {
 		this.chain = chain;
 	}
 
-	public Atom getAtom() {
+	public PDBAtom getAtom() {
 
 		return this.atom;
 	}

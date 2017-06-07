@@ -1,6 +1,6 @@
 package org.proteinevolution.models.spec.pdb;
 
-public enum Atom {
+public enum PDBAtom {
 
 	
 	// Carbon
@@ -186,20 +186,20 @@ public enum Atom {
 	public final String repr;
 	
 	
-	public static Atom toAtom(final String value) {
+	public static PDBAtom toAtom(final String value) {
 		
-		return Character.isDigit(value.charAt(0)) ? Atom.valueOf("_" + value) 
-			: (value.charAt(value.length() - 1) == '\'' ? Atom.valueOf(value.replace('\'', '_')) :  Atom.valueOf(value));
+		return Character.isDigit(value.charAt(0)) ? PDBAtom.valueOf("_" + value) 
+			: (value.charAt(value.length() - 1) == '\'' ? PDBAtom.valueOf(value.replace('\'', '_')) :  PDBAtom.valueOf(value));
 	}
 	
 	
-	private Atom(final Element element, final String repr) {
+	private PDBAtom(final Element element, final String repr) {
 	
 		this.element = element;
 		this.repr = repr;
 	}
 	
-	private Atom(final Element element) {
+	private PDBAtom(final Element element) {
 		
 		this.element = element;
 		this.repr = this.name();
@@ -254,6 +254,6 @@ public enum Atom {
 
 	public static boolean isRecord(String line) {
 
-		return line.startsWith(Atom.name);
+		return line.startsWith(PDBAtom.name);
 	}
 }

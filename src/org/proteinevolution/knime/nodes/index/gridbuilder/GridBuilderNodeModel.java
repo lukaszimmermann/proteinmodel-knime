@@ -31,7 +31,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.proteinevolution.models.spec.pdb.Atom;
+import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
 import org.proteinevolution.models.structure.Grid;
@@ -96,11 +96,11 @@ public class GridBuilderNodeModel extends NodeModel {
 
 		// TODO Donor and acceptor residues (should be parameterized)
 		///// TODO -BLOCK
-		Map<Residue, Set<Atom>> donors = new HashMap<Residue, Set<Atom>>();
-		Map<Residue, Set<Atom>> acceptors = new HashMap<Residue, Set<Atom>>();
+		Map<Residue, Set<PDBAtom>> donors = new HashMap<Residue, Set<PDBAtom>>();
+		Map<Residue, Set<PDBAtom>> acceptors = new HashMap<Residue, Set<PDBAtom>>();
 
-		Set<Atom> lys_atoms = new HashSet<Atom>();
-		lys_atoms.add(Atom.NZ);
+		Set<PDBAtom> lys_atoms = new HashSet<PDBAtom>();
+		lys_atoms.add(PDBAtom.NZ);
 
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
@@ -123,12 +123,12 @@ public class GridBuilderNodeModel extends NodeModel {
 		while ( (line = br.readLine()) != null ) {
 
 			// Only care about atom records
-			if (Atom.isRecord(line)) {
+			if (PDBAtom.isRecord(line)) {
 
 				// Atom coordinates
-				double x = Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END));
-				double y = Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END));
-				double z = Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END));    			
+				double x = Double.parseDouble(line.substring(PDBAtom.FIELD_X_START, PDBAtom.FIELD_X_END));
+				double y = Double.parseDouble(line.substring(PDBAtom.FIELD_Y_START, PDBAtom.FIELD_Y_END));
+				double z = Double.parseDouble(line.substring(PDBAtom.FIELD_Z_START, PDBAtom.FIELD_Z_END));    			
 
 				lower_x = x < lower_x ? x : lower_x;
 				lower_y = y < lower_y ? y : lower_y;
@@ -156,17 +156,17 @@ public class GridBuilderNodeModel extends NodeModel {
 		while ( (line = br.readLine()) != null ) {
 
 			// Only care about atom records
-			if (Atom.isRecord(line)) {
+			if (PDBAtom.isRecord(line)) {
 				grid.addAtom(
 						new LocalAtom(
-								Double.parseDouble(line.substring(Atom.FIELD_X_START, Atom.FIELD_X_END)),
-								Double.parseDouble(line.substring(Atom.FIELD_Y_START, Atom.FIELD_Y_END)),
-								Double.parseDouble(line.substring(Atom.FIELD_Z_START, Atom.FIELD_Z_END)),
+								Double.parseDouble(line.substring(PDBAtom.FIELD_X_START, PDBAtom.FIELD_X_END)),
+								Double.parseDouble(line.substring(PDBAtom.FIELD_Y_START, PDBAtom.FIELD_Y_END)),
+								Double.parseDouble(line.substring(PDBAtom.FIELD_Z_START, PDBAtom.FIELD_Z_END)),
 										new AtomIdentification(
-												Atom.toAtom(line.substring(Atom.FIELD_ATOM_NAME_START, Atom.FIELD_ATOM_NAME_END).trim()),
-												Residue.valueOf(line.substring(Atom.FIELD_RESIDUE_NAME_START, Atom.FIELD_RESIDUE_NAME_END).trim()),
-												Integer.parseInt(line.substring(Atom.FIELD_RESIDUE_SEQ_NUMBER_START, Atom.FIELD_RESIDUE_SEQ_NUMBER_END).trim()),
-												line.substring(Atom.FIELD_CHAIN_IDENTIFIER_START, Atom.FIELD_CHAIN_IDENTIFIER_END).trim())));;
+												PDBAtom.toAtom(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim()),
+												Residue.valueOf(line.substring(PDBAtom.FIELD_RESIDUE_NAME_START, PDBAtom.FIELD_RESIDUE_NAME_END).trim()),
+												Integer.parseInt(line.substring(PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_START, PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_END).trim()),
+												line.substring(PDBAtom.FIELD_CHAIN_IDENTIFIER_START, PDBAtom.FIELD_CHAIN_IDENTIFIER_END).trim())));;
 			}
 		} 
 		
