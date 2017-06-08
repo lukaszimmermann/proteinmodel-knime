@@ -1,6 +1,5 @@
 package org.proteinevolution.models.spec.pdb;
 
-
 import org.biojava.nbio.structure.Element;
 
 public enum PDBAtom {
@@ -187,11 +186,10 @@ public enum PDBAtom {
 	public final Element element;
 	public final String repr;
 	
-	
-	public static PDBAtom toAtom(final String value) {
+	public static PDBAtom of(final String name) {
 		
-		return Character.isDigit(value.charAt(0)) ? PDBAtom.valueOf("_" + value) 
-			: (value.charAt(value.length() - 1) == '\'' ? PDBAtom.valueOf(value.replace('\'', '_')) :  PDBAtom.valueOf(value));
+		return Character.isDigit(name.charAt(0)) ? PDBAtom.valueOf("_" + name) 
+			: (name.charAt(name.length() - 1) == '\'' ? PDBAtom.valueOf(name.replace('\'', '_')) :  PDBAtom.valueOf(name));
 	}
 	
 	
@@ -254,7 +252,7 @@ public enum PDBAtom {
 	public static final int FIELD_ELEMENT_SYMBOL_START = 76;
 	public static final int FIELD_ELEMENT_SYMBOL_END = 78;
 
-	public static boolean isRecord(String line) {
+	public static boolean isRecord(final String line) {
 
 		return line.startsWith(PDBAtom.name);
 	}

@@ -253,7 +253,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 					continue;
 				}
 				// Determine current Atom and residue name
-				PDBAtom atom = PDBAtom.toAtom(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim());
+				PDBAtom atom = PDBAtom.of(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim());
 
 				// Skip hydrogen
 				if (atom.element.isHydrogen()) {

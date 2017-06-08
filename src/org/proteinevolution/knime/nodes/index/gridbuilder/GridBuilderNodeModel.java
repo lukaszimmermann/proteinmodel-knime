@@ -163,7 +163,7 @@ public class GridBuilderNodeModel extends NodeModel {
 								Double.parseDouble(line.substring(PDBAtom.FIELD_Y_START, PDBAtom.FIELD_Y_END)),
 								Double.parseDouble(line.substring(PDBAtom.FIELD_Z_START, PDBAtom.FIELD_Z_END)),
 										new AtomIdentification(
-												PDBAtom.toAtom(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim()),
+												PDBAtom.of(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim()),
 												Residue.valueOf(line.substring(PDBAtom.FIELD_RESIDUE_NAME_START, PDBAtom.FIELD_RESIDUE_NAME_END).trim()),
 												Integer.parseInt(line.substring(PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_START, PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_END).trim()),
 												line.substring(PDBAtom.FIELD_CHAIN_IDENTIFIER_START, PDBAtom.FIELD_CHAIN_IDENTIFIER_END).trim())));;
