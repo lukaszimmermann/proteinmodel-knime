@@ -116,14 +116,14 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 				AtomIdentification atomIdent1 = atom1.getAtomIdentification();
 				String resname1 = atomIdent1.getResidue().name();
-				int resi1 = atomIdent1.getResi();
-				String chain1 = atomIdent1.getChain();
+				int resi1 = atomIdent1.getResidueSeqNum();
+				String chain1 = atomIdent1.getChainId();
 				String atomname1 = atomIdent1.getAtom().repr;
 				
 				AtomIdentification atomIdent2 = atom2.getAtomIdentification();
 				String resname2 = atomIdent2.getResidue().name();
-				int resi2 = atomIdent2.getResi();
-				String chain2 = atomIdent2.getChain();
+				int resi2 = atomIdent2.getResidueSeqNum();
+				String chain2 = atomIdent2.getChainId();
 				String atomname2 = atomIdent2.getAtom().repr;
 				
 				String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);
@@ -319,14 +319,14 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			
 			AtomIdentification atomIdent1 = atomPair.getFirst();
 			String resname1 = atomIdent1.getResidue().name();
-			int resi1 = atomIdent1.getResi();
-			String chain1 = atomIdent1.getChain();
+			int resi1 = atomIdent1.getResidueSeqNum();
+			String chain1 = atomIdent1.getChainId();
 			String atomname1 = atomIdent1.getAtom().repr;
 			
 			AtomIdentification atomIdent2 = atomPair.getSecond();
 			String resname2 = atomIdent2.getResidue().name();
-			int resi2 = atomIdent2.getResi();
-			String chain2 = atomIdent2.getChain();
+			int resi2 = atomIdent2.getResidueSeqNum();
+			String chain2 = atomIdent2.getChainId();
 			String atomname2 = atomIdent2.getAtom().repr;
 			
 			String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);

@@ -3,6 +3,9 @@ package org.proteinevolution.models.structure;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.biojava.nbio.structure.AminoAcid;
+import org.biojava.nbio.structure.Atom;
+import org.biojava.nbio.structure.ResidueNumber;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 
@@ -15,63 +18,71 @@ import org.proteinevolution.models.spec.pdb.Residue;
 public final class AtomIdentification implements Serializable {
 
 	private static final long serialVersionUID = -433456703706419607L;
-	private PDBAtom atom;
-	private Residue residue;
-	private int resi;
-	private String chain;
-
-
-	public AtomIdentification(final PDBAtom atom, final Residue residue, final int resi, final String chain) {
-
-		this.atom = atom;
+	
+	private final PDBAtom pdbatom;
+	private final Residue residue;
+	private final ResidueNumber residueNumber;
+	
+	public AtomIdentification(final Atom atom) {
+		
+		this.pdbatom = PDBAtom.of(atom.getName());
+		AminoAcid aa = (AminoAcid) atom.getGroup();
+		this.residue = Residue.aaOf(aa.getAminoType());
+		this.residueNumber = aa.getResidueNumber();
+	}
+	
+	public AtomIdentification(final PDBAtom pdbatom, final Residue residue, final int resid, final String chain) {
+		
+		this.pdbatom = pdbatom;
 		this.residue = residue;
-		this.resi = resi;
-		this.chain = chain;
+		this.residueNumber = new ResidueNumber();
+		this.residueNumber.setChainId(chain);
+		this.residueNumber.setSeqNum(resid);
 	}
 
+	
 	public PDBAtom getAtom() {
 
-		return this.atom;
+		return this.pdbatom;
 	}
 
 	public Residue getResidue() {
 
 		return this.residue;
 	}
-
-	public int getResi() {
-
-		return this.resi;
+	
+	public String getChainId() {
+		
+		return this.residueNumber.getChainId();
 	}
-
-	public String getChain() {
-
-		return this.chain;
+	
+	public int getResidueSeqNum() {
+		
+		return this.residueNumber.getSeqNum();
 	}
-
+	
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 
 		if (o == this) {
 
 			return true;
 		}
 
-		if (o == null || ! (o instanceof AtomIdentification)) {
+		if (o == null || o.getClass() != this.getClass()) {
 
 			return false;
 		}
 		AtomIdentification other = (AtomIdentification) o;
 
-		return     other.atom == this.atom
+		return     other.pdbatom == this.pdbatom
 				&& other.residue == this.residue
-				&& other.resi == this.resi
-				&& other.chain.equals(this.chain);
+				&& other.residueNumber.equals(this.residueNumber);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(this.atom, this.residue, this.resi, this.chain);
+		return Objects.hash(this.pdbatom, this.residue, this.residueNumber);
 	}
 }
