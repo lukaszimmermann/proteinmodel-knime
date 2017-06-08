@@ -2,6 +2,9 @@ package org.proteinevolution.models.spec.pdb;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.Icon;
 import org.knime.core.node.util.StringIconOption;
 
@@ -51,6 +54,32 @@ public enum Residue implements StringIconOption {
 	UNK('U');
 	
 	
+	private static final Map<Character, Residue> aminoAcids = new HashMap<Character, Residue>();
+	static {
+		aminoAcids.put('A', Residue.ALA);
+		aminoAcids.put('R', Residue.ARG);
+		aminoAcids.put('N', Residue.ASN);
+		aminoAcids.put('D', Residue.ASP);
+		aminoAcids.put('C', Residue.CYS);
+		aminoAcids.put('Q', Residue.GLN);
+		aminoAcids.put('E', Residue.GLU);
+		aminoAcids.put('G', Residue.GLY);
+		aminoAcids.put('H', Residue.HIS);
+		aminoAcids.put('I', Residue.ILE);
+		aminoAcids.put('L', Residue.LEU);
+		aminoAcids.put('K', Residue.LYS);
+		aminoAcids.put('M', Residue.MET);
+		aminoAcids.put('F', Residue.PHE);
+		aminoAcids.put('P', Residue.PRO);
+		aminoAcids.put('S', Residue.SER);
+		aminoAcids.put('T', Residue.THR);
+		aminoAcids.put('W', Residue.TRP);
+		aminoAcids.put('Y', Residue.TYR);
+		aminoAcids.put('V', Residue.VAL);	
+	}
+	
+	
+	
 	public static PDBAtom[] getBackbone() {
 		
 		return new PDBAtom[] {
@@ -79,6 +108,20 @@ public enum Residue implements StringIconOption {
 		return Arrays.copyOf(this.sidechain, this.sidechain.length);
 	}
 	
+	/**
+	 * Converts the OLC of the amino acid character to the corresponding Residue instance.
+	 * @param c
+	 * @return
+	 */
+	public static Residue aaOf(final Character c) {
+		
+		Residue result = aminoAcids.get(c);
+		if (result == null) {
+			
+			throw new IllegalArgumentException("Character " + c + " does not denote a valid Amino Acid");
+		}
+		return result;
+	}
 
 	@Override
 	public String getText() {
