@@ -20,6 +20,7 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.knime.core.node.port.image.ImagePortObjectSpec;
+import org.proteinevolution.knime.porttypes.structure.view.JmolPanel;
 
 public class StructurePortObject extends AbstractPortObject {
 
@@ -82,8 +83,13 @@ public class StructurePortObject extends AbstractPortObject {
 
 	@Override
 	public JComponent[] getViews() {
-		// TODO Auto-generated method stub
-		return null;
+				
+		JmolPanel jmolPanel = new JmolPanel();
+		jmolPanel.getViewer().openStringInline(this.m_content.getStructureImpl().toPDB());
+		
+		return new JComponent[] {
+				jmolPanel
+		};
 	}
 
     /** {@inheritDoc} */

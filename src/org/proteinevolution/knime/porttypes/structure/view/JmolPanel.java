@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.nodes.visualization.structureviewer.components;
+package org.proteinevolution.knime.porttypes.structure.view;
 
 import javax.swing.JPanel;
 import java.awt.Dimension;

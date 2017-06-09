@@ -8,7 +8,6 @@
       <category description="Nodes for Data input" level-id="input" name="Input" path="/protevo"/>
       <category description="Nodes for Data output" level-id="output" name="Output" path="/protevo"/>
       
-      <category description="Nodes for visualization" level-id="viz" name="Visualization" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="idx" name="Index" path="/protevo"/>
       <category description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/protevo"/>
       <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
@@ -20,7 +19,6 @@
    <extension point="org.knime.workbench.repository.nodes">
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.knime.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
-<node category-path="/protevo/viz" factory-class="org.proteinevolution.knime.nodes.visualization.structureviewer.StructureViewerNodeFactory" id="org.proteinevolution.structureviewer.StructureViewerNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
