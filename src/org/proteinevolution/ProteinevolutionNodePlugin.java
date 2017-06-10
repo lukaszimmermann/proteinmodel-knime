@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
  *
  * @author Lukas Zimmermann
  */
-public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
+public final class ProteinevolutionNodePlugin extends AbstractUIPlugin {
     // The shared instance.
     private static ProteinevolutionNodePlugin plugin;
 
@@ -24,7 +24,8 @@ public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
      * The constructor.
      */
     public ProteinevolutionNodePlugin() {
-        super();
+        
+    	super();
         plugin = this;
     }
 
@@ -36,8 +37,8 @@ public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
      */
     @Override
     public void start(final BundleContext context) throws Exception {
-        super.start(context);
-
+       
+    	super.start(context);
     }
 
     /**
@@ -48,7 +49,8 @@ public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
      */
     @Override
     public void stop(final BundleContext context) throws Exception {
-        super.stop(context);
+        
+    	super.stop(context);
         plugin = null;
     }
 
@@ -58,8 +60,7 @@ public class ProteinevolutionNodePlugin extends AbstractUIPlugin {
      * @return Singleton instance of the Plugin
      */
     public static ProteinevolutionNodePlugin getDefault() {
-        return plugin;
+        
+    	return plugin;
     }
-
 }
-
