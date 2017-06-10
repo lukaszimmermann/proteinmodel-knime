@@ -25,15 +25,14 @@ public final class CommandLine implements AutoCloseable {
 	private final File executable;
 
 	// Option/value pairs
-	private List<String> optionsKeys;
-	private List<String> optionsValues;
+	private final List<String> optionsKeys;
+	private final List<String> optionsValues;
 
 	// Temporary files used for IO
 	private final Map<String, File> files;
 
 	private static final Pattern optionPattern = Pattern.compile("((-){1,2}[0-9a-zA-Z_]+)?");
 	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
-
 
 	/**
 	 * Creates a new CommandLine invocation with the provided executable.
@@ -57,10 +56,8 @@ public final class CommandLine implements AutoCloseable {
 		this.executable = executable;
 		this.optionsKeys = new ArrayList<String>();
 		this.optionsValues = new ArrayList<String>();
-
 		this.files = new HashMap<String, File>();
 	}
-
 
 	/**
 	 * Adds a new option to the CommandLine invocation.
@@ -162,7 +159,6 @@ public final class CommandLine implements AutoCloseable {
 		}
 		return result;
 	}
-
 
 	@Override
 	public void close() throws IOException {
