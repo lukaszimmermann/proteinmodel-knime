@@ -26,7 +26,7 @@ public class AlignmentWriterNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class AlignmentWriterNodeFactory
     @Override
     public NodeView<AlignmentWriterNodeModel> createNodeView(final int viewIndex,
             final AlignmentWriterNodeModel nodeModel) {
-        return new AlignmentWriterNodeView(nodeModel);
+        return null;
     }
 
     /**

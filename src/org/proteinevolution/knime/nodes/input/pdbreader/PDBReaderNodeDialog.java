@@ -3,7 +3,7 @@ package org.proteinevolution.knime.nodes.input.pdbreader;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.proteinevolution.models.spec.pdb.PDB;
+import org.proteinevolution.models.spec.FileExtensions;
 
 /**
  * <code>NodeDialog</code> for the "PDBReader" Node.
@@ -28,6 +28,6 @@ public class PDBReaderNodeDialog extends DefaultNodeSettingsPane {
         						PDBReaderNodeModel.INPUT_CFGKEY,
         						PDBReaderNodeModel.DEFAULT),
         				PDBReaderNodeModel.INPUT_HISTORY,
-        				PDB.extensions));
+        				FileExtensions.PDB));
     }
 }

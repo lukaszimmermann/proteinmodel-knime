@@ -3,7 +3,7 @@ package org.proteinevolution.knime.nodes.index.gridbuilder;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.proteinevolution.models.spec.pdb.PDB;
+import org.proteinevolution.models.spec.FileExtensions;
 
 /**
  * <code>NodeDialog</code> for the "GridBuilder" Node.
@@ -32,7 +32,7 @@ public class GridBuilderNodeDialog extends DefaultNodeSettingsPane {
         				GridBuilderNodeModel.INPUT_CFGKEY,
         				GridBuilderNodeModel.INPUT_DEFAULT),
         		GridBuilderNodeModel.INPUT_HISTORY,
-        		PDB.extensions));            
+        		FileExtensions.PDB));            
         
         //
         

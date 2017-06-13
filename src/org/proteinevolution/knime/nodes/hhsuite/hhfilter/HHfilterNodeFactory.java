@@ -33,7 +33,7 @@ extends NodeFactory<HHfilterNodeModel> {
 	 */
 	@Override
 	public int getNrNodeViews() {
-		return 1;
+		return 0;
 	}
 
 	/**
@@ -42,7 +42,7 @@ extends NodeFactory<HHfilterNodeModel> {
 	@Override
 	public NodeView<HHfilterNodeModel> createNodeView(final int viewIndex,
 			final HHfilterNodeModel nodeModel) {
-		return new HHfilterNodeView(nodeModel);
+		return null;
 	}
 
 	/**

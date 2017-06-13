@@ -26,7 +26,7 @@ public class PDBATOMReaderNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PDBATOMReaderNodeFactory
     @Override
     public NodeView<PDBATOMReaderNodeModel> createNodeView(final int viewIndex,
             final PDBATOMReaderNodeModel nodeModel) {
-        return new PDBATOMReaderNodeView(nodeModel);
+        return null;
     }
 
     /**

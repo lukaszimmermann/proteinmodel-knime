@@ -26,7 +26,7 @@ public class DatabaseIDMapperNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class DatabaseIDMapperNodeFactory
     @Override
     public NodeView<DatabaseIDMapperNodeModel> createNodeView(final int viewIndex,
             final DatabaseIDMapperNodeModel nodeModel) {
-        return new DatabaseIDMapperNodeView(nodeModel);
+        return null;
     }
 
     /**

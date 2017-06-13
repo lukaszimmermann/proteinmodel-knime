@@ -26,7 +26,7 @@ public class PLinkReaderNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PLinkReaderNodeFactory
     @Override
     public NodeView<PLinkReaderNodeModel> createNodeView(final int viewIndex,
             final PLinkReaderNodeModel nodeModel) {
-        return new PLinkReaderNodeView(nodeModel);
+        return null;
     }
 
     /**

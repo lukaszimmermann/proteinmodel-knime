@@ -26,7 +26,7 @@ public class PDBDirectoryReaderNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PDBDirectoryReaderNodeFactory
     @Override
     public NodeView<PDBDirectoryReaderNodeModel> createNodeView(final int viewIndex,
             final PDBDirectoryReaderNodeModel nodeModel) {
-        return new PDBDirectoryReaderNodeView(nodeModel);
+        return null;
     }
 
     /**

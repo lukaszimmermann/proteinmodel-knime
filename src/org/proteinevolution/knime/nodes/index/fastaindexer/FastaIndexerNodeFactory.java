@@ -26,7 +26,7 @@ public class FastaIndexerNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class FastaIndexerNodeFactory
     @Override
     public NodeView<FastaIndexerNodeModel> createNodeView(final int viewIndex,
             final FastaIndexerNodeModel nodeModel) {
-        return new FastaIndexerNodeView(nodeModel);
+        return null;
     }
 
     /**

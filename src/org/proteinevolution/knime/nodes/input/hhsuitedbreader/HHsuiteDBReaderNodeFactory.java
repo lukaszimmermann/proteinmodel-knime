@@ -26,7 +26,7 @@ public class HHsuiteDBReaderNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class HHsuiteDBReaderNodeFactory
     @Override
     public NodeView<HHsuiteDBReaderNodeModel> createNodeView(final int viewIndex,
             final HHsuiteDBReaderNodeModel nodeModel) {
-        return new HHsuiteDBReaderNodeView(nodeModel);
+        return null;
     }
 
     /**

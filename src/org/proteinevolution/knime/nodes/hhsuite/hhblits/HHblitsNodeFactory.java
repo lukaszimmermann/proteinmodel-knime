@@ -43,7 +43,7 @@ public class HHblitsNodeFactory
     @Override
     public NodeView<HHblitsNodeModel> createNodeView(final int viewIndex,
             final HHblitsNodeModel nodeModel) {
-        return new HHblitsNodeView(nodeModel);
+        return null;
     }
 
     /**

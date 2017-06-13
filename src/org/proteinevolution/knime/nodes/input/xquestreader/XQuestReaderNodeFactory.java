@@ -26,7 +26,7 @@ public class XQuestReaderNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class XQuestReaderNodeFactory
     @Override
     public NodeView<XQuestReaderNodeModel> createNodeView(final int viewIndex,
             final XQuestReaderNodeModel nodeModel) {
-        return new XQuestReaderNodeView(nodeModel);
+        return null;
     }
 
     /**

@@ -26,7 +26,7 @@ public class PDBWriterNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PDBWriterNodeFactory
     @Override
     public NodeView<PDBWriterNodeModel> createNodeView(final int viewIndex,
             final PDBWriterNodeModel nodeModel) {
-        return new PDBWriterNodeView(nodeModel);
+        return null;
     }
 
     /**
