@@ -2,17 +2,15 @@ package org.proteinevolution.models.structure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import org.biojava.nbio.structure.Element;
 
+import org.biojava.nbio.structure.Element;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 
@@ -36,8 +34,6 @@ public final class Grid implements Serializable {
 
 
 	// End of STATIC //////////////////////////////////////////////////////////////////////////////////////////
-	//  Flag-like attribute of the grid
-	private Set<Integer> flags;
 
 	// the actual grid
 	private byte[][][] grid;
@@ -83,7 +79,6 @@ public final class Grid implements Serializable {
 			final Map<Residue, Set<PDBAtom>> donors,
 			final Map<Residue, Set<PDBAtom>> acceptors) {
 
-		this.flags = new HashSet<Integer>();
 		this.atoms = new ArrayList<LocalAtom>();
 		this.donor_acceptor = new ArrayList<Byte>();
 		this.sasd_distances = new HashMap<UnorderedAtomPair, Integer>();
@@ -104,7 +99,6 @@ public final class Grid implements Serializable {
 
 		this.donors = donors;
 		this.acceptors = acceptors;
-		this.flags.add(GridFlag.SASD_CALCULATION);
 
 
 		// Set the border region of the grid to BORDER, to prevent 'falling off' the grid
@@ -839,57 +833,5 @@ public final class Grid implements Serializable {
 		denominator += 2;
 
 		return ((double) numerator) / ((double) denominator);
-	}
-
-
-	/**
-	 * Adds a new flag to the grid. Setting the flag multiple times has further effect.
-	 * 
-	 * @param flag Which flag to set.
-	 */
-	public void setFlag(final int flag) {
-
-		this.flags.add(flag);
-	}
-
-	/**
-	 * Removes flag from the grid.
-	 * 
-	 * @param flag Removes flag from the set
-	 */
-	public void unsetFlag(final int flag) {
-
-		this.flags.remove(flag);
-	}
-
-	/**
-	 * Checks whether the grid flag is set
-	 * 
-	 * @param flag Which flag to check
-	 * @return Whether the flag is set
-	 */
-	public boolean isFlagSet(final int flag) {
-
-		return this.flags.contains(flag);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-
-		if (o == null || ! (o instanceof Grid)) {
-
-			return false;
-		}
-		Grid grid = (Grid) o;
-
-
-		// TODO Implement me (Compare grid settings and the minimum values)
-		return false;
-	}	
-
-	@Override
-	public int hashCode() {
-
-		return Objects.hash(Arrays.deepHashCode(this.grid), this.x_min, this.y_min, this.z_min);
 	}
 }

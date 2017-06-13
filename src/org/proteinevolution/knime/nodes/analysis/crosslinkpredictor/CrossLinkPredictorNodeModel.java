@@ -44,7 +44,6 @@ import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
 import org.proteinevolution.models.structure.Grid;
-import org.proteinevolution.models.structure.GridFlag;
 import org.proteinevolution.models.structure.LocalAtom;
 import org.proteinevolution.models.structure.UnorderedAtomPair;
 
@@ -194,10 +193,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			ObjectInputStream ois = new ObjectInputStream(cell.openInputStream());
 			grid = (Grid) ois.readObject();
 			ois.close();   			
-		}
-		if ( ! grid.isFlagSet(GridFlag.SASD_CALCULATION)) {
-
-			throw new IllegalArgumentException("This Grid cannot be used for SASD calculation. Check GridBuilder settings.");
 		}
 
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
