@@ -69,7 +69,7 @@ public final class AtomIdentification implements Serializable {
 			return true;
 		}
 
-		if (o == null || o.getClass() != this.getClass()) {
+		if ( ! (o instanceof AtomIdentification)) {
 
 			return false;
 		}

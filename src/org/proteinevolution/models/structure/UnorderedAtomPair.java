@@ -46,7 +46,7 @@ public class UnorderedAtomPair {
 			
 			return true;
 		}
-		if (o == null || ! ( o instanceof UnorderedAtomPair)) {
+		if ( ! ( o instanceof UnorderedAtomPair)) {
 			
 			return false;
 		}
