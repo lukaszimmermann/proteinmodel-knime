@@ -43,7 +43,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
-import org.proteinevolution.models.structure.Grid;
 import org.proteinevolution.models.structure.LocalAtom;
 import org.proteinevolution.models.structure.UnorderedAtomPair;
 

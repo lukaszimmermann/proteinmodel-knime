@@ -31,10 +31,10 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.Grid;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
-import org.proteinevolution.models.structure.Grid;
 import org.proteinevolution.models.structure.LocalAtom;
 
 
