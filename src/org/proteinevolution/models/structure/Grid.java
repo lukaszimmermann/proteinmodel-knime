@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.nodes.analysis.crosslinkpredictor;
+package org.proteinevolution.models.structure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,16 +13,13 @@ import java.util.Set;
 import org.biojava.nbio.structure.Element;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
-import org.proteinevolution.models.structure.AtomIdentification;
-import org.proteinevolution.models.structure.LocalAtom;
-import org.proteinevolution.models.structure.UnorderedAtomPair;
 
 /*
  *  Class which is used to calculate an orthogonal grid of a 3D structure by adding atoms successively
  *   
  *  @author: lzimmermann
  */
-final class Grid implements Serializable {
+public final class Grid implements Serializable {
 
 	private static final long serialVersionUID = 6931511384915737370L;
 
