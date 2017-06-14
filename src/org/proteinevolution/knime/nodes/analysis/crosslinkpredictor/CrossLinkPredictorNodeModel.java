@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +15,8 @@ import java.util.Set;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.MissingCell;
-import org.knime.core.data.blob.BinaryObjectFileStoreDataCell;
 import org.knime.core.data.container.DataContainer;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
@@ -40,6 +38,11 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
+import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
+import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
@@ -159,42 +162,41 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	 */
 	protected CrossLinkPredictorNodeModel() {
 
-		super(1, 1);
+		super(new PortType[] {StructurePortObject.TYPE},
+			  new PortType[] {BufferedDataTable.TYPE});
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
+	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
 		// Euclidean Init (Use String here, because we cannot easily convert to Residue here
 		Set<String> euc_donors_arg = new HashSet<String>(Arrays.asList(this.euc_donors.getStringArrayValue()));
 		Set<String> euc_acceptors_arg = new HashSet<String>(Arrays.asList(this.euc_acceptors.getStringArrayValue()));
 
-		// SASD Init
-		Grid grid = null;
-		BufferedDataTable intable = inData[0];
-		int grid_index = intable.getSpec().findColumnIndex(this.grid.getStringValue());
+		// TODO Donor and acceptor residues (should be parameterized)
+		///// TODO -BLOCK
+		Map<Residue, Set<PDBAtom>> donors = new HashMap<Residue, Set<PDBAtom>>();
+		Map<Residue, Set<PDBAtom>> acceptors = new HashMap<Residue, Set<PDBAtom>>();
 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if (intable.size() != 1) {
+		Set<PDBAtom> lys_atoms = new HashSet<PDBAtom>();
+		lys_atoms.add(PDBAtom.NZ);
 
-			throw new IllegalArgumentException("Only one input row allowed for CrossLinkPredictor");
-		}
-
-		// Only one row here
-		for (DataRow row : intable) {
-
-			// Set the grid
-			BinaryObjectFileStoreDataCell cell = (BinaryObjectFileStoreDataCell) row.getCell(grid_index);
-
-			ObjectInputStream ois = new ObjectInputStream(cell.openInputStream());
-			grid = (Grid) ois.readObject();
-			ois.close();   			
-		}
-
+		donors.put(Residue.LYS, lys_atoms);
+		acceptors.put(Residue.LYS, lys_atoms);
+		// END- TODO Block
+		
+		
+		// Initialize Grid
+		Grid grid = new Grid(
+				((StructurePortObject) inData[0]).getStructure().getStructureImpl(),
+				donors,
+				acceptors);
+		
+		
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
 				new DataColumnSpecCreator("atom_pair_identification", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
@@ -355,23 +357,21 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void reset() {
-		// TODO Code executed on reset.
-		// Models build during execute are cleared here.
-		// Also data handled in load/saveInternals will be erased here.
+
+		// Nothing to do here
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
+	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		// TODO: check if user settings are available, fit to the incoming
-		// table structure, and the incoming types are feasible for the node
-		// to execute. If the node can execute in its current state return
-		// the spec of its output data table(s) (if you can, otherwise an array
-		// with null elements), or throw an exception with a useful user message
+		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
+			
+			throw new InvalidSettingsException("Inport Type of CrossLinkPredictor must be Structure");
+		}
 
 		return new DataTableSpec[]{null};
 	}
