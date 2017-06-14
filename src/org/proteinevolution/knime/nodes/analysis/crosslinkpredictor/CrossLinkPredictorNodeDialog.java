@@ -2,13 +2,10 @@ package org.proteinevolution.knime.nodes.analysis.crosslinkpredictor;
 
 import javax.swing.ListSelectionModel;
 
-import org.knime.core.data.blob.BinaryObjectDataValue;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.proteinevolution.models.spec.pdb.Residue;
 
@@ -36,7 +33,6 @@ public class CrossLinkPredictorNodeDialog extends DefaultNodeSettingsPane {
      * This is just a suggestion to demonstrate possible default dialog
      * components.
      */
-    @SuppressWarnings("unchecked")
 	protected CrossLinkPredictorNodeDialog() {
         super();
         
@@ -77,22 +73,7 @@ public class CrossLinkPredictorNodeDialog extends DefaultNodeSettingsPane {
         		true, 
         		visibleRowCount));
     
-        
-    
-        this.createNewTab("SASD");
-     
-        
-        // Distance to be calculated are determined by the grid
-        this.addDialogComponent(new DialogComponentColumnNameSelection(
-        		new SettingsModelString(
-        				CrossLinkPredictorNodeModel.GRID_SELECTION_CFGKEY,
-        				CrossLinkPredictorNodeModel.GRID_SELECTION_DEFAULT), 
-        		CrossLinkPredictorNodeModel.GRID_SELECTION_LABEL, 
-        		0,
-        		true, 
-        		false,
-        		BinaryObjectDataValue.class));
-        
-           
+
+        this.createNewTab("SASD");           
     }
 }

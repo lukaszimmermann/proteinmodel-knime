@@ -11,9 +11,10 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.biojava.nbio.structure.Atom;
-import org.biojava.nbio.structure.AtomIterator;
 import org.biojava.nbio.structure.Element;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.StructureTools;
+import org.knime.core.node.NodeLogger;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
@@ -28,7 +29,7 @@ import org.proteinevolution.models.structure.UnorderedAtomPair;
 final class Grid implements Serializable {
 
 	private static final long serialVersionUID = 6931511384915737370L;
-
+	private static final NodeLogger logger = NodeLogger.getLogger(Grid.class);
 
 	private static final int margin = 5; // No. of columns of solvent at the edge of the grid
 
@@ -96,11 +97,10 @@ final class Grid implements Serializable {
 		double upper_y = Double.MIN_VALUE;
 		double upper_z = Double.MIN_VALUE;
 
-		// Iterator structure to find bounds for grid
-		AtomIterator atomIterator = new AtomIterator(structure);
-		while (atomIterator.hasNext()) {
+		// The atoms of the structure that we are interested in for the grid
+		Atom[] gridAtoms = StructureTools.getAllNonHAtomArray(structure, false);
 
-			Atom atom = (Atom) atomIterator.next();
+		for (Atom atom : gridAtoms) {
 
 			// Atom coordinates
 			double x = atom.getX();
@@ -161,19 +161,10 @@ final class Grid implements Serializable {
 				this.grid[this.x_dim - 1][j][k] = Grid.OCCUPIED;
 			}
 		}
-		
-		
-		// Iteratively add all Atoms of the structure
-		atomIterator = new AtomIterator(structure);
-		while (atomIterator.hasNext()) {
-			
-			Atom atom = (Atom) atomIterator.next();
-			
-			// Skip hydrogen
-			if ( ! atom.getElement().isHydrogen()) {
-				
-				this.addAtom(new LocalAtom(atom.getX(), atom.getY(), atom.getZ(), new AtomIdentification(atom)));
-			}
+
+		for (Atom atom : gridAtoms) {
+
+			this.addAtom(new LocalAtom(atom.getX(), atom.getY(), atom.getZ(), new AtomIdentification(atom)));
 		}		
 	}
 

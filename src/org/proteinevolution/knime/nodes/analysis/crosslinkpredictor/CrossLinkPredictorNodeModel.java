@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.biojava.nbio.structure.AminoAcid;
 import org.biojava.nbio.structure.Atom;
-import org.biojava.nbio.structure.AtomIterator;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.StructureTools;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -37,7 +37,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -73,13 +72,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	public static final String[] EUC_ACCEPTORS_DEFAULT = new String[] {Residue.LYS.toString()};
 	public static final String EUC_ACCEPTORS_LABEL = "Acceptor amino acid residue to cross link";
 	private SettingsModelStringArray euc_acceptors = new SettingsModelStringArray(EUC_ACCEPTORS_CFGKEY, EUC_ACCEPTORS_DEFAULT);
-
-
-	// Column selection for the Grid for SASD calculation
-	public static final String GRID_SELECTION_CFGKEY = "GRID_SELECTION_CFGKEY";
-	public static final String GRID_SELECTION_DEFAULT = "";
-	public static final String GRID_SELECTION_LABEL = "Select column with protein grid";
-	private final SettingsModelString grid = new SettingsModelString(GRID_SELECTION_CFGKEY, GRID_SELECTION_DEFAULT);
 
 	private static int addRow(
 			final List<LocalAtom> atomList1,
@@ -171,7 +163,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		Map<Residue, Set<PDBAtom>> acceptors = new HashMap<Residue, Set<PDBAtom>>();
 
 		Set<PDBAtom> lys_atoms = new HashSet<PDBAtom>();
-		lys_atoms.add(PDBAtom.NZ);
+		lys_atoms.add(PDBAtom.CA);
 
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
@@ -223,15 +215,12 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		atoms_euclidean.add(PDBAtom.CB);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
-		AtomIterator atomIterator = new AtomIterator(structure);
-
+		Atom[] structureAtoms = StructureTools.getAllNonHAtomArray(structure, false);
 
 		// Fetch the Euclidean distances (Only when requested)
-		while (atomIterator.hasNext()) {
+		for (Atom atom : structureAtoms) {
 
-			Atom atom = (Atom) atomIterator.next();
-			PDBAtom pdbatom = PDBAtom.of(atom.getName());
-			
+			PDBAtom pdbatom = PDBAtom.of(atom.getName());			
 			AminoAcid aminoAcid = (AminoAcid) atom.getGroup();
 			
 			// Continue if we do not care about this atom at all
@@ -242,13 +231,11 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			// Get required attributes of the atom
 			double x = atom.getX();
 			double y = atom.getY();
-			double z = atom.getZ();
-			
+			double z = atom.getZ();			
 			
 			int resid = aminoAcid.getResidueNumber().getSeqNum();
 			String chain = aminoAcid.getChainId();
 			Character residueName = aminoAcid.getAminoType();
-
 
 			//  Type (Donor/Acceptor) for Euclidean
 			boolean isEucDonor = euc_donors_arg.contains(residueName);
@@ -359,7 +346,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		this.euc_donors.saveSettingsTo(settings);
 		this.euc_acceptors.saveSettingsTo(settings);
-		this.grid.saveSettingsTo(settings);
 	}
 
 	/**
@@ -371,7 +357,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		this.euc_donors.loadSettingsFrom(settings);
 		this.euc_acceptors.loadSettingsFrom(settings);
-		this.grid.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -383,7 +368,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		this.euc_donors.validateSettings(settings);
 		this.euc_acceptors.validateSettings(settings);
-		this.grid.validateSettings(settings);
 	}
 
 	/**
