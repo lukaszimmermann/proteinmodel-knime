@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.porttypes.hhsuitedb;
+package org.proteinevolution.knime.dialog;
 
 import java.util.List;
 
@@ -7,19 +7,13 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObjectSpec;
+import org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObjectSpec;
 
-public class DialogComponentHHsuiteDBSelection extends DialogComponent  {
-
-	
-	// the logger instance
-	private static final NodeLogger logger = NodeLogger
-			.getLogger(DialogComponentHHsuiteDBSelection.class);
-
+public final class DialogComponentHHsuiteDBSelection extends DialogComponent  {
 	
 	/** Contains all column names matching the given given filter class. */
 	private final JList<String> m_chooser;

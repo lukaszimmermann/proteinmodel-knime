@@ -4,7 +4,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.proteinevolution.knime.porttypes.hhsuitedb.DialogComponentHHsuiteDBSelection;
+import org.proteinevolution.knime.dialog.DialogComponentHHsuiteDBSelection;
 
 /**
  * <code>NodeDialog</code> for the "HHsearch" Node.
