@@ -168,7 +168,12 @@ final class Grid implements Serializable {
 		while (atomIterator.hasNext()) {
 			
 			Atom atom = (Atom) atomIterator.next();
-			this.addAtom(new LocalAtom(atom.getX(), atom.getY(), atom.getZ(), new AtomIdentification(atom)));
+			
+			// Skip hydrogen
+			if ( ! atom.getElement().isHydrogen()) {
+				
+				this.addAtom(new LocalAtom(atom.getX(), atom.getY(), atom.getZ(), new AtomIdentification(atom)));
+			}
 		}		
 	}
 

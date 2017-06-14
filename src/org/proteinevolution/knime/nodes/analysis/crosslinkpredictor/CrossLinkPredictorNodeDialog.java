@@ -5,15 +5,11 @@ import javax.swing.ListSelectionModel;
 import org.knime.core.data.blob.BinaryObjectDataValue;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.proteinevolution.knime.util.LineParserChangeListener;
 import org.proteinevolution.models.spec.pdb.Residue;
 
 /**
@@ -45,41 +41,11 @@ public class CrossLinkPredictorNodeDialog extends DefaultNodeSettingsPane {
         super();
         
         int visibleRowCount = 8;
-        
-        // Start with IO
-        this.setDefaultTabTitle("INPUT/OUTPUT");
-        
-        
-        this.createNewGroup("Input PDB File");
-        
-        
-       // File Chooser for the PDB MODEL
-        DialogComponentFileChooser fileChooser = new DialogComponentFileChooser(
-        		new SettingsModelString(
-        				CrossLinkPredictorNodeModel.INPUT_CFGKEY,
-        				CrossLinkPredictorNodeModel.INPUT_DEFAULT),
-        		CrossLinkPredictorNodeModel.INPUT_HISTORY,
-        		"pdb");
-              
-        // Make changeListener in case a different PDB file is selected
-        LineParserChangeListener changeListener = new LineParserChangeListener();
-        //changeListener.addParser(new PDBChainStringSelection(chain1Selection));
-        //changeListener.addParser(new PDBChainStringSelection(chain2Selection));
-        fileChooser.getModel().addChangeListener(changeListener);
-        this.addDialogComponent(fileChooser);
-          
-        this.createNewGroup("Distances to Calculate");
-        this.addDialogComponent(new DialogComponentBoolean(
-        		new SettingsModelBoolean(
-        				CrossLinkPredictorNodeModel.ENABLE_EUCLIDEAN_CFGKEY,
-        				CrossLinkPredictorNodeModel.ENABLE_EUCLIDEAN_DEFAULT),
-        		"Calculate Euclidean Distance"));
-        
-        
+                        
         /*
          * RESIDUE/ATOM Selection
          */
-        this.createNewTab("EUCLIDEAN");
+        this.setDefaultTabTitle("EUCLIDEAN");
         
         
         this.createNewGroup("Attention");

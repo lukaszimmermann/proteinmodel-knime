@@ -1,8 +1,6 @@
 package org.proteinevolution.knime.nodes.analysis.crosslinkpredictor;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.biojava.nbio.structure.AminoAcid;
+import org.biojava.nbio.structure.Atom;
+import org.biojava.nbio.structure.AtomIterator;
+import org.biojava.nbio.structure.Structure;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -35,7 +37,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
@@ -58,18 +59,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	// the logger instance
 	@SuppressWarnings("unused")
 	private static final NodeLogger logger = NodeLogger.getLogger(CrossLinkPredictorNodeModel.class);
-
-	// Input PDB file
-	public static final String INPUT_CFGKEY = "INPUT_CFGKEY";
-	public static final String INPUT_DEFAULT = "";
-	public static final String INPUT_HISTORY = "INPUT_HISTORY";
-	private final SettingsModelString input = new SettingsModelString(INPUT_CFGKEY, INPUT_DEFAULT);
-
-
-	public static final String ENABLE_EUCLIDEAN_CFGKEY = "ENABLE_EUCLIDEAN_CFGKEY";
-	public static final boolean ENABLE_EUCLIDEAN_DEFAULT = true;
-	private final SettingsModelBoolean enable_euclidean = new SettingsModelBoolean(ENABLE_EUCLIDEAN_CFGKEY, ENABLE_EUCLIDEAN_DEFAULT);
-
 
 
 	// EUCLIDEAN
@@ -120,20 +109,20 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				int resi1 = atomIdent1.getResidueSeqNum();
 				String chain1 = atomIdent1.getChainId();
 				String atomname1 = atomIdent1.getAtom().repr;
-				
+
 				AtomIdentification atomIdent2 = atom2.getAtomIdentification();
 				String resname2 = atomIdent2.getResidue().name();
 				int resi2 = atomIdent2.getResidueSeqNum();
 				String chain2 = atomIdent2.getChainId();
 				String atomname2 = atomIdent2.getAtom().repr;
-				
+
 				String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);
 				String id2 = String.join("-", resname2, String.valueOf(resi2), chain2, atomname2);
-				
+
 				UnorderedAtomPair pair = new UnorderedAtomPair(atomIdent1, atomIdent2);
 				DataCell sasd_cell = sasd_distances.containsKey(pair) ? DoubleCellFactory.create(sasd_distances.get(pair)) : new MissingCell("no_SASD"); 
 				sasd_distances.remove(pair); // Because we are no longer interested in these distances
-				
+
 				// Add Row to the final data table
 				container.addRowToTable(
 						new DefaultRow(
@@ -162,7 +151,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	protected CrossLinkPredictorNodeModel() {
 
 		super(new PortType[] {StructurePortObject.TYPE},
-			  new PortType[] {BufferedDataTable.TYPE});
+				new PortType[] {BufferedDataTable.TYPE});
 	}
 
 	/**
@@ -187,15 +176,15 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
 		// END- TODO Block
-		
-		
+
+		Structure structure = ((StructurePortObject) inData[0]).getStructure().getStructureImpl();
+
 		// Initialize Grid
 		Grid grid = new Grid(
-				((StructurePortObject) inData[0]).getStructure().getStructureImpl(),
+				structure,
 				donors,
 				acceptors);
-		
-		
+
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
 				new DataColumnSpecCreator("atom_pair_identification", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
@@ -234,69 +223,56 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		atoms_euclidean.add(PDBAtom.CB);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
+		AtomIterator atomIterator = new AtomIterator(structure);
 
-		String input_filename = this.input.getStringValue();
-		BufferedReader br = new BufferedReader(new FileReader(input_filename));
-		String line;
-		
+
 		// Fetch the Euclidean distances (Only when requested)
-		if (this.enable_euclidean.getBooleanValue()) {
-			while( ( line = br.readLine()) != null  ) {
+		while (atomIterator.hasNext()) {
 
-				// Skip non-ATOM line
-				if ( ! PDBAtom.isRecord(line)) {
+			Atom atom = (Atom) atomIterator.next();
+			PDBAtom pdbatom = PDBAtom.of(atom.getName());
+			
+			AminoAcid aminoAcid = (AminoAcid) atom.getGroup();
+			
+			// Continue if we do not care about this atom at all
+			if ( ! atoms_euclidean.contains(pdbatom) && ! atoms_sasd.contains(pdbatom)) {
+				continue;
+			}
 
-					continue;
-				}
-				// Determine current Atom and residue name
-				PDBAtom atom = PDBAtom.of(line.substring(PDBAtom.FIELD_ATOM_NAME_START, PDBAtom.FIELD_ATOM_NAME_END).trim());
-
-				// Skip hydrogen
-				if (atom.element.isHydrogen()) {
-
-					continue;
-				}
-
-				// Continue if we do not care about this atom at all
-				if ( ! atoms_euclidean.contains(atom) && ! atoms_sasd.contains(atom)) {
-					continue;
-				}
-
-				// Get required attributes of the atom
-				double x = Double.parseDouble(line.substring(PDBAtom.FIELD_X_START, PDBAtom.FIELD_X_END));
-				double y = Double.parseDouble(line.substring(PDBAtom.FIELD_Y_START, PDBAtom.FIELD_Y_END));
-				double z = Double.parseDouble(line.substring(PDBAtom.FIELD_Z_START, PDBAtom.FIELD_Z_END));
-				int resid = Integer.parseInt(line.substring(PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_START, PDBAtom.FIELD_RESIDUE_SEQ_NUMBER_END).trim());
-				String chain = line.substring(PDBAtom.FIELD_CHAIN_IDENTIFIER_START, PDBAtom.FIELD_CHAIN_IDENTIFIER_END);
-				String residueName = line.substring(PDBAtom.FIELD_RESIDUE_NAME_START, PDBAtom.FIELD_RESIDUE_NAME_END).trim();
+			// Get required attributes of the atom
+			double x = atom.getX();
+			double y = atom.getY();
+			double z = atom.getZ();
+			
+			
+			int resid = aminoAcid.getResidueNumber().getSeqNum();
+			String chain = aminoAcid.getChainId();
+			Character residueName = aminoAcid.getAminoType();
 
 
-				//  Type (Donor/Acceptor) for Euclidean
-				boolean isEucDonor = euc_donors_arg.contains(residueName);
-				boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
+			//  Type (Donor/Acceptor) for Euclidean
+			boolean isEucDonor = euc_donors_arg.contains(residueName);
+			boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
 
-				if (isEucDonor || isEucAcceptor) {
+			if (isEucDonor || isEucAcceptor) {
 
-					LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(atom, Residue.valueOf(residueName), resid, chain));
+				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(pdbatom, Residue.aaOf(residueName), resid, chain));
 
-					if (isEucDonor && isEucAcceptor) {
+				if (isEucDonor && isEucAcceptor) {
 
-						euc_donors_acceptors.add(currentAtom);
+					euc_donors_acceptors.add(currentAtom);
 
-					} else if (isEucDonor) {
+				} else if (isEucDonor) {
 
-						euc_donors.add(currentAtom);
+					euc_donors.add(currentAtom);
 
-						// Must be acceptor
-					} else {
+					// Must be acceptor
+				} else {
 
-						euc_acceptors.add(currentAtom);
-					}
+					euc_acceptors.add(currentAtom);
 				}
 			}
 		}
-		br.close();
-		br = null;
 
 		int rowCounter = 0;
 
@@ -309,25 +285,25 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		rowCounter = addRow(euc_donors_acceptors, euc_acceptors, sasd_distances, container, rowCounter);
 		rowCounter = addRow(euc_donors, euc_acceptors, sasd_distances, container, rowCounter);
 
-		
+
 		// Add the rows for remaining distance pairs in the SASD version
 		for (UnorderedAtomPair atomPair : sasd_distances.keySet()) {
-			
+
 			AtomIdentification atomIdent1 = atomPair.getFirst();
 			String resname1 = atomIdent1.getResidue().name();
 			int resi1 = atomIdent1.getResidueSeqNum();
 			String chain1 = atomIdent1.getChainId();
 			String atomname1 = atomIdent1.getAtom().repr;
-			
+
 			AtomIdentification atomIdent2 = atomPair.getSecond();
 			String resname2 = atomIdent2.getResidue().name();
 			int resi2 = atomIdent2.getResidueSeqNum();
 			String chain2 = atomIdent2.getChainId();
 			String atomname2 = atomIdent2.getAtom().repr;
-			
+
 			String id1 = String.join("-", resname1, String.valueOf(resi1), chain1, atomname1);
 			String id2 = String.join("-", resname2, String.valueOf(resi2), chain2, atomname2);
-			
+
 			// Add Row to the final data table
 			container.addRowToTable(
 					new DefaultRow(
@@ -346,7 +322,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 									IntCellFactory.create(sasd_distances.get(atomPair))
 							}));
 		}
-		
+
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}
@@ -368,7 +344,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			throws InvalidSettingsException {
 
 		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
-			
+
 			throw new InvalidSettingsException("Inport Type of CrossLinkPredictor must be Structure");
 		}
 
@@ -381,12 +357,9 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-		// TODO save user settings to the config object.
-		this.input.saveSettingsTo(settings);
 		this.euc_donors.saveSettingsTo(settings);
 		this.euc_acceptors.saveSettingsTo(settings);
 		this.grid.saveSettingsTo(settings);
-		this.enable_euclidean.saveSettingsTo(settings);
 	}
 
 	/**
@@ -396,15 +369,9 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-		// TODO load (valid) settings from the config object.
-		// It can be safely assumed that the settings are valided by the 
-		// method below.
-
-		this.input.loadSettingsFrom(settings);
 		this.euc_donors.loadSettingsFrom(settings);
 		this.euc_acceptors.loadSettingsFrom(settings);
 		this.grid.loadSettingsFrom(settings);
-		this.enable_euclidean.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -414,16 +381,9 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 
-		// TODO check if the settings could be applied to our model
-		// e.g. if the count is in a certain range (which is ensured by the
-		// SettingsModel).
-		// Do not actually set any values of any member variables.
-
-		this.input.validateSettings(settings);
 		this.euc_donors.validateSettings(settings);
 		this.euc_acceptors.validateSettings(settings);
 		this.grid.validateSettings(settings);
-		this.enable_euclidean.validateSettings(settings);
 	}
 
 	/**
@@ -434,13 +394,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO load internal data. 
-		// Everything handed to output ports is loaded automatically (data
-		// returned by the execute method, models loaded in loadModelContent,
-		// and user settings set through loadSettingsFrom - is all taken care 
-		// of). Load here only the other internals that need to be restored
-		// (e.g. data used by the views).
-
+		// Nothing to do here
 	}
 
 	/**
@@ -451,12 +405,6 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO save internal models. 
-		// Everything written to output ports is saved automatically (data
-		// returned by the execute method, models saved in the saveModelContent,
-		// and user settings saved through saveSettingsTo - is all taken care 
-		// of). Save here only the other internals that need to be preserved
-		// (e.g. data used by the views).
+		// Nothing to do here
 	}
 }
-
