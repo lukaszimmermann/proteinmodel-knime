@@ -59,6 +59,20 @@ public final class CommandLine implements AutoCloseable {
 		this.files = new HashMap<String, File>();
 	}
 
+	public void addFlag(final String flag) {
+		
+		this.optionsKeys.add(this.checkOption(flag));
+		this.optionsValues.add(null);
+	}
+	
+	public void addFlag(final String flag, final boolean isSet) {
+		
+		if (isSet) {
+			
+			this.addFlag(flag);
+		}
+	}
+	
 	/**
 	 * Adds a new option to the CommandLine invocation.
 	 * 
@@ -178,7 +192,13 @@ public final class CommandLine implements AutoCloseable {
 		for (int i = 0; i < this.optionsKeys.size(); ++i) {
 
 			result.add(optionsKeys.get(i));
-			result.add(optionsValues.get(i));	
+			String value = optionsValues.get(i);
+			
+			// Might be null if flag
+			if (value != null) {
+				
+				result.add(value);	
+			}
 		}
 
 		for (String option : this.files.keySet()) {
@@ -199,8 +219,15 @@ public final class CommandLine implements AutoCloseable {
 
 			sb.append(" ");
 			sb.append(optionsKeys.get(i));
-			sb.append(" ");
-			sb.append(optionsValues.get(i));	
+			
+			String value = this.optionsValues.get(i);
+			
+			// Might be null if flag
+			if (value != null) {
+				
+				sb.append(" ");
+				sb.append(value);
+			}
 		}
 
 		for (String option : this.files.keySet()) {

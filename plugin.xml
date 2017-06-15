@@ -13,6 +13,7 @@
       <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
       <category description="Nodes for the BLAST" level-id="blast" name="BLAST" path="/protevo"/>
       <category description="Nodes for PSIPRED" level-id="psipred" name="PSI-PRED" path="/protevo"/>
+      <category description="Nodes for Concoord" level-id="concoord" name="Concoord" path="/protevo"/>
       <category description="Utility nodes" level-id="util" name="Utils" path="/protevo"/>
    	</extension>
     
@@ -36,9 +37,10 @@
 <node category-path="/protevo/output" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PSIPREDNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
+<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory" id="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
+<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
+<node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
 </extension>
    
    

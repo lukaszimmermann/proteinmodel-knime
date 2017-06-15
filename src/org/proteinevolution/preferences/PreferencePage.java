@@ -15,7 +15,7 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 	public static final String HHSUITE_EXECUTABLE_PATH = "HHSUITE_EXECUTABLE_PATH";
 	public static final String PSIPRED_EXECUTABLE_PATH = "PSIPRED_EXECUTABLE_PATH";
 	public static final String ROSETTA_FRAGMENTPICKER_EXECUTABLE = "ROSETTA_FRAGMENTPICKER_EXECUTABLE";
-	
+	public static final String CONCOORD_PATH = "CONCOORD_PATH";
 
 	@Override
 	public void init(final IWorkbench workbench) {
@@ -47,6 +47,10 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 				ROSETTA_FRAGMENTPICKER_EXECUTABLE,
 				"ROSETTA Fragmentpicker Executable", // Location of the Fragmentpicker executable from ROSETTA
 				true,   // File path to executable must be absolute
+				parent));
+		this.addField(new DirectoryFieldEditor(
+				CONCOORD_PATH,
+				"Concoord Path (containing bin and lib)",
 				parent));
 	}
 }
