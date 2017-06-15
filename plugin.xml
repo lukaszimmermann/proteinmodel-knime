@@ -21,7 +21,6 @@
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
 <node category-path="/protevo/idx" factory-class="org.proteinevolution.knime.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.plinkreader.PLinkReaderNodeFactory" id="org.proteinevolution.plinkreader.PLinkReaderNodeFactory"/>
 <node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
 <node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
