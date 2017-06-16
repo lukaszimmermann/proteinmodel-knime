@@ -171,6 +171,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		Structure structure = ((StructurePortObject) inData[0]).getStructure().getStructureImpl(0);
 
+
 		// Initialize Grid
 		Grid grid = new Grid(
 				structure,
@@ -212,19 +213,20 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		// CB atom currently hard coded (TODO)
 		Set<PDBAtom> atoms_euclidean = new HashSet<PDBAtom>();
-		atoms_euclidean.add(PDBAtom.CB);
+		atoms_euclidean.add(PDBAtom.CA);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
 		Atom[] structureAtoms = StructureTools.getAllNonHAtomArray(structure, false);
 
-		// Fetch the Euclidean distances (Only when requested)
+		// Fetch the Euclidean distances
 		for (Atom atom : structureAtoms) {
-
+			
 			PDBAtom pdbatom = PDBAtom.of(atom.getName());			
 			AminoAcid aminoAcid = (AminoAcid) atom.getGroup();
 			
 			// Continue if we do not care about this atom at all
-			if ( ! atoms_euclidean.contains(pdbatom) && ! atoms_sasd.contains(pdbatom)) {
+			if ( ! atoms_euclidean.contains(pdbatom)) {
+				
 				continue;
 			}
 
@@ -235,15 +237,15 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			
 			int resid = aminoAcid.getResidueNumber().getSeqNum();
 			String chain = aminoAcid.getChainId();
-			Character residueName = aminoAcid.getAminoType();
+			Residue residue = Residue.aaOf(aminoAcid.getAminoType());
 
 			//  Type (Donor/Acceptor) for Euclidean
-			boolean isEucDonor = euc_donors_arg.contains(residueName);
-			boolean isEucAcceptor = euc_acceptors_arg.contains(residueName);
+			boolean isEucDonor = euc_donors_arg.contains(residue.toString());
+			boolean isEucAcceptor = euc_acceptors_arg.contains(residue.toString());
 
 			if (isEucDonor || isEucAcceptor) {
 
-				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(pdbatom, Residue.aaOf(residueName), resid, chain));
+				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(pdbatom, residue, resid, chain));
 
 				if (isEucDonor && isEucAcceptor) {
 
@@ -333,6 +335,10 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
 
 			throw new InvalidSettingsException("Inport Type of CrossLinkPredictor must be Structure");
+		}
+		if (((StructurePortObjectSpec) inSpecs[0]).getNStructures() != 1) {
+			
+			throw new InvalidSettingsException("Only one structure allowed for crosslink prediction!");
 		}
 
 		return new DataTableSpec[]{null};

@@ -32,12 +32,13 @@ public final class HHsuiteDBPortObjectSpec extends AbstractSimplePortObjectSpec 
 	
 	public HHsuiteDBPortObjectSpec(final DataType type, final String[] names) {
 		
-		if (type == null || names == null) {
+		this.m_type = type;
+		this.names = names;
+		
+		if (this.m_type == null || this.names == null) {
 			
 			throw new NullPointerException("Argument must not be null.");
 		}
-		this.m_type = type;
-		this.names = names;
 	}
 	
 	  /** <b>Framework constructor - do not use.</b> The constructor is required

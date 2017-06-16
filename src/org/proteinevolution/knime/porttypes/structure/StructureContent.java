@@ -58,12 +58,16 @@ public final class StructureContent implements Serializable, Writeable {
 
 			throw new IOException("Class: StructureContent could not be found");
 		}
-		this.structureImpls = new ArrayList<StructureImpl>();
 		this.pdbStrings = structureContent.pdbStrings;
+		this.structureImpls = new ArrayList<StructureImpl>(this.pdbStrings.size());
+		for (int i = 0; i < this.pdbStrings.size(); ++i) {
+			
+			this.structureImpls.add(null);
+		}
 	}
-
+	
 	public StructureImpl getStructureImpl(final int index) throws IOException {
-
+		
 		if (this.structureImpls.get(index) == null) {
 
 			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
@@ -74,6 +78,7 @@ public final class StructureContent implements Serializable, Writeable {
 				for (String line : this.pdbStrings.get(index)) {
 					
 					bw.write(line);
+					bw.newLine();
 				}
 			}
 		
@@ -91,7 +96,6 @@ public final class StructureContent implements Serializable, Writeable {
 	public StructureContent(final List<List<String>> pdbStrings) {
 
 		this.pdbStrings = new ArrayList<List<String>>(pdbStrings);
-		
 		this.structureImpls = new ArrayList<StructureImpl>(pdbStrings.size());
 		
 		for(int i = 0; i < pdbStrings.size(); ++i) {

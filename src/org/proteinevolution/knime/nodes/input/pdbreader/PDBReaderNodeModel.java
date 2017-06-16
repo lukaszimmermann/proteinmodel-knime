@@ -61,7 +61,7 @@ public class PDBReaderNodeModel extends NodeModel {
 
 				new StructurePortObject(
 						new StructureContent(input),
-						new StructurePortObjectSpec(StructureContent.TYPE))	
+						new StructurePortObjectSpec(StructureContent.TYPE, 1))	
 		};
 	}
 
@@ -81,7 +81,7 @@ public class PDBReaderNodeModel extends NodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-		return new PortObjectSpec[]{new StructurePortObjectSpec(StructureContent.TYPE)};
+		return new PortObjectSpec[]{new StructurePortObjectSpec(StructureContent.TYPE, 1)};
 	}
 
 	/**

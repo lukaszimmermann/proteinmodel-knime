@@ -45,7 +45,7 @@ public class CrossLinkPredictorNodeDialog extends DefaultNodeSettingsPane {
         
         
         this.createNewGroup("Attention");
-        this.addDialogComponent(new DialogComponentLabel("Distances are currently always calculated between CB atoms."));
+        this.addDialogComponent(new DialogComponentLabel("Distances are currently always calculated between CA atoms."));
         
         // Group Residue Selection
         this.createNewGroup("Residue Selection");

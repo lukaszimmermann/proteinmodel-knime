@@ -19,16 +19,26 @@ public final class StructurePortObjectSpec extends AbstractSimplePortObjectSpec 
      * @noreference This class is not intended to be referenced by clients.
      */
     public static final class Serializer extends AbstractSimplePortObjectSpecSerializer<StructurePortObjectSpec> {}
+    
+    private static final String CFG_NO_STRUCTURES = "CFG_NO_STRUCTURES";
 	
 	private DataType m_type;
+	private int nStructures;
     	
-	public StructurePortObjectSpec(final DataType type) {
+	public StructurePortObjectSpec(final DataType type, final int nStructures) {
 		
-		if (type == null) {
+		this.m_type = type;
+		this.nStructures = nStructures;
+		
+		if (this.nStructures < 1) {
+			
+			throw new IllegalArgumentException("No. of structures must be at least 1!");
+		}
+		
+		if (this.m_type == null) {
 			
 			throw new NullPointerException("Argument must not be null.");
 		}
-		this.m_type = type;
 	}
 	
 	  /** <b>Framework constructor - do not use.</b> The constructor is required
@@ -44,12 +54,18 @@ public final class StructurePortObjectSpec extends AbstractSimplePortObjectSpec 
     public DataType getDataType() {
         return this.m_type;
     }
+    
+    public int getNStructures() {
+    	
+    	return this.nStructures;
+    }
 
     /** {@inheritDoc} */
 	@Override
 	protected void load(final ModelContentRO model) throws InvalidSettingsException {
 		
 		this.m_type = DataType.load(model);
+		this.nStructures = model.getInt(CFG_NO_STRUCTURES);
 	}
 	
 	 /** {@inheritDoc} */
@@ -57,6 +73,7 @@ public final class StructurePortObjectSpec extends AbstractSimplePortObjectSpec 
     protected void save(final ModelContentWO model) {
     	
         this.m_type.save(model);
+        model.addInt(CFG_NO_STRUCTURES, this.nStructures);
     }
 }
  
