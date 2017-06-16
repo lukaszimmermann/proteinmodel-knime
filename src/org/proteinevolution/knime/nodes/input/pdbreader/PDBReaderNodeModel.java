@@ -2,9 +2,10 @@ package org.proteinevolution.knime.nodes.input.pdbreader;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-import org.biojava.nbio.structure.StructureImpl;
-import org.biojava.nbio.structure.io.PDBFileReader;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -54,7 +55,7 @@ public class PDBReaderNodeModel extends NodeModel {
 		return new StructurePortObject[] {
 
 				new StructurePortObject(
-						new StructureContent( (StructureImpl) (new PDBFileReader()).getStructure(this.param_input.getStringValue())),
+						new StructureContent(Files.readAllLines(Paths.get(this.param_input.getStringValue()), StandardCharsets.UTF_8)),
 						new StructurePortObjectSpec(StructureContent.TYPE))	
 		};
 	}

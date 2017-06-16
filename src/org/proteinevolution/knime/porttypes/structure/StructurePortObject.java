@@ -85,7 +85,7 @@ public class StructurePortObject extends AbstractPortObject {
 	public JComponent[] getViews() {
 				
 		JmolPanel jmolPanel = new JmolPanel();
-		jmolPanel.getViewer().openStringInline(this.m_content.getStructureImpl().toPDB());
+		jmolPanel.getViewer().openStringInline(this.m_content.getPdbString());
 		
 		return new JComponent[] {
 				jmolPanel

@@ -61,13 +61,6 @@ public class JmolPanel extends JPanel {
 		this.currentSize = d;
 		this.rectClip.setSize(d);
 	}
-	
-	public void setCartoon() {
-		
-		this.viewer.evalString("select protein, nucleic");
-		this.viewer.evalString("cartoon only");
-		this.viewer.evalString("color cartoon structure");		
-	}
 }
 
 /*
