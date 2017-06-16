@@ -95,4 +95,10 @@ public abstract class HHSuiteNodeModel extends ExecutableNodeModel {
 			 	ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.HHSUITE_EXECUTABLE_PATH),
 				this.getExecutableName());
 	}
+	
+	@Override
+	protected void check() throws InvalidSettingsException {
+		
+		
+	}
 }

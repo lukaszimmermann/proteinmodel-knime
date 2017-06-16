@@ -20,7 +20,11 @@ public abstract class ConcoordBaseNodeModel extends ExecutableNodeModel {
 		super(inPortTypes, outPortTypes);
 	}
 	
-	
+	protected static File getLibDir() {
+		
+		return new File(ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.CONCOORD_PATH), "lib");
+	}
+
 	@Override
 	protected final File getExecutable() {
 
@@ -29,5 +33,30 @@ public abstract class ConcoordBaseNodeModel extends ExecutableNodeModel {
 						ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.CONCOORD_PATH),
 						"bin"),
 				this.getExecutableName());
+	}
+
+	@Override
+	protected void check() throws InvalidSettingsException {
+
+		// Ensure that the lib directory with all the required files are present
+		File libdir = getLibDir();
+
+		String[] files = new String[] {
+
+				"AA.DAT", "ATOMS_oplsx.DAT", "BB.DAT", "CHIRAL.DAT", "MARGINS_oplsua.DAT", "PLANAR.DAT", "RING.DAT",
+				"ATOMS_li.DAT", "ATOMS_repel.DAT", "BONDS.DAT", "HBONDS.DAT", "MARGINS_oplsx.DAT", "PSEUDO.DAT",
+				"ATOMS_oplsaa.DAT", "ATOMS_yamber2.DAT", "BONDS.DAT.noeh", "MARGINS_li.DAT", "MARGINS_repel.DAT", "RENAME_ATOM.DAT",
+				"ATOMS_oplsua.DAT", "ATOMS_yamber3.DAT", "CHARGE.DAT", "MARGINS_oplsaa.DAT", "MARGINS_yamber2.DAT", "RESIDUES.DAT"
+		};
+		
+		for (String f : files) {
+		
+			File currentFile = new File(libdir, f);
+			
+			if ( ! currentFile.exists()) {
+				
+				throw new InvalidSettingsException("File " + currentFile + " does not exist!");
+			}
+		}
 	}
 }

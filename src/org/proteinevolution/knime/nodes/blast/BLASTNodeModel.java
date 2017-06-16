@@ -28,4 +28,10 @@ public abstract class BLASTNodeModel extends ExecutableNodeModel {
 				ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.BLAST_EXECUTABLE_PATH),
 				this.getExecutableName());
 	}
+	
+	@Override
+	protected void check() throws InvalidSettingsException {
+		
+		// Nothing to be done here
+	}
 }

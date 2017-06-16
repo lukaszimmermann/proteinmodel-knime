@@ -27,4 +27,9 @@ public abstract class PSIPREDBaseNodeModel extends ExecutableNodeModel {
 				ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.PSIPRED_EXECUTABLE_PATH),
 				this.getExecutableName());
 	}
+	
+	@Override
+	protected void check() throws InvalidSettingsException {
+		
+	}
 }

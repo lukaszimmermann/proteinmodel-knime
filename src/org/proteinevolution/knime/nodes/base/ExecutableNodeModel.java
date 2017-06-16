@@ -18,13 +18,21 @@ public abstract class ExecutableNodeModel extends NodeModel {
 	protected ExecutableNodeModel(int nrInDataPorts, int nrOutDataPorts) throws InvalidSettingsException {
 		
 		super(nrInDataPorts, nrOutDataPorts);
+		
+		// Checks whether the executable is fine
 		this.checkExecutable();
+		
+		// Checks whether the binary of this node can be executed
+		this.check();
 	}
 
+	protected abstract void check() throws InvalidSettingsException;
+	
 	protected ExecutableNodeModel(PortType[] inPortTypes, PortType[] outPortTypes) throws InvalidSettingsException {
 		
 		super(inPortTypes, outPortTypes);
 		this.checkExecutable();
+		this.check();
 	}
 
 	private void checkExecutable() throws InvalidSettingsException {

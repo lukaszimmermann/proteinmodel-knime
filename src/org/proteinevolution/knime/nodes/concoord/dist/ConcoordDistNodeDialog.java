@@ -49,5 +49,9 @@ public class ConcoordDistNodeDialog extends DefaultNodeSettingsPane {
 		this.addDialogComponent(new DialogComponentNumber(
 				ConcoordDistNodeModel.getParamCutOffRadius(),
 				"Cut-off radius (Angstroms) for non-bonded interacting pairs (default 4.0)", 1));
+		
+		this.addDialogComponent(new DialogComponentNumber(
+				ConcoordDistNodeModel.getParamMinDist(),
+				"Minimum nr of distances to be defined for each atom (default 50, or 1 with -noe)", 1));
 	}
 }

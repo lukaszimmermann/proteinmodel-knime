@@ -2,12 +2,17 @@ package org.proteinevolution.knime.nodes.concoord.dist;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -23,6 +28,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.knime.core.util.FileUtil;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
@@ -132,7 +138,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	 */
 	protected ConcoordDistNodeModel() throws InvalidSettingsException {
 
-		super(new PortType[] {StructurePortObject.TYPE, BufferedDataTable.TYPE},
+		super(new PortType[] {StructurePortObject.TYPE, BufferedDataTable.TYPE_OPTIONAL},
 			 new PortType[]  {BufferedDataTable.TYPE});
 	}
 
@@ -146,15 +152,30 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		// Get Structure
 		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
 	
+		// Copy lib directory to a temporary location (because some files need to be renamed there)
+		File tempLib = Files.createTempDirectory("concoord").toFile();
+		FileUtil.copyDir(ConcoordBaseNodeModel.getLibDir(), tempLib);
+		
+		// Copy atomMargin files
+		FileUtil.copy(
+				new File(tempLib, String.format("ATOMS_%s.DAT", atomsMargins.get(this.param_atoms_margin.getStringValue()))),
+				new File(tempLib, "ATOMS.DAT"), exec); 
+		
+		FileUtil.copy(
+				new File(tempLib, String.format("MARGINS_%s.DAT", atomsMargins.get(this.param_atoms_margin.getStringValue()))),
+				new File(tempLib, "MARGINS.DAT"), exec); 
+		
+		logger.warn("Files copied");
+		
+		/*
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
 			
 			cmd.addInput("-p", structureContent);
 			cmd.addFlag("-r", this.param_retain_hydrogen_atoms.getBooleanValue());
 			cmd.addFlag("-nb", this.param_find_alternative_contacts.getBooleanValue());
-			cmd.addOption("-c", this.param_cut_off_radius.getDoubleValue());
-			
+			cmd.addOption("-c", this.param_cut_off_radius.getDoubleValue());	
 		}
-		
+		*/
 
 		return null;
 	}
@@ -174,7 +195,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
-
+		/*
 		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
 
 			throw new InvalidSettingsException("Port Type 0 of ConcoordDist node must be Structure!");
@@ -186,7 +207,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		}
 
 		DataTableSpec tableSpec = (DataTableSpec) inSpecs[1];
-	
+		*/
 		// TODO Check NOE file column names and make port 1 optional
 		
 		

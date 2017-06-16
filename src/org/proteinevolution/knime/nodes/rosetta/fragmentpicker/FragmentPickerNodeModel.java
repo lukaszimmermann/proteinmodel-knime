@@ -189,5 +189,10 @@ public class FragmentPickerNodeModel extends ExecutableNodeModel {
 
 		return new File(ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.ROSETTA_FRAGMENTPICKER_EXECUTABLE));
 	}
+	
+	@Override
+	protected void check() throws InvalidSettingsException {
+
+	}	
 }
 
