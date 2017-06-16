@@ -13,6 +13,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -29,13 +30,21 @@ import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
  */
 public class PDBWriterNodeModel extends NodeModel {
 
-	// Output
-	public static final String OUTPUT_CFGKEY = "OUTPUT";
-	public static final String OUTPUT_DEFAULT = "";
-	public static final String OUTPUT_HISTORY = "OUTPUT_HISTORY";
-	private final SettingsModelString param_output = new SettingsModelString(OUTPUT_CFGKEY, OUTPUT_DEFAULT);
 	
-	
+	// Param: output file:
+	public static SettingsModelString getParamOutput() {
+
+		return new SettingsModelString("OUTPUT_CFGKEY", "");
+	}
+	private final SettingsModelString param_output = getParamOutput();
+
+	// Param: Omit hetero
+	public static SettingsModelBoolean getParamOmitHetero() {
+
+		return new SettingsModelBoolean("OMIT_HETERO_CFGKEY", false);
+	}
+	private final SettingsModelBoolean param_omit_hetero = getParamOmitHetero();
+
 	// the logger instance
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(PDBWriterNodeModel.class);
@@ -46,7 +55,7 @@ public class PDBWriterNodeModel extends NodeModel {
 	protected PDBWriterNodeModel() {
 
 		super(new PortType[] {StructurePortObject.TYPE},
-			  new PortType[] {});
+				new PortType[] {});
 	}
 
 	/**
@@ -55,12 +64,13 @@ public class PDBWriterNodeModel extends NodeModel {
 	@Override
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
-		
+
 		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
+		structureContent.setOmitHET(this.param_omit_hetero.getBooleanValue());
 		
-    	FileWriter fw = new FileWriter(this.param_output.getStringValue());
-    	structureContent.write(fw);
-    	fw.close();
+		FileWriter fw = new FileWriter(this.param_output.getStringValue());
+		structureContent.write(fw);
+		fw.close();
 		return null;
 	}
 
@@ -69,9 +79,7 @@ public class PDBWriterNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void reset() {
-		// TODO Code executed on reset.
-		// Models build during execute are cleared here.
-		// Also data handled in load/saveInternals will be erased here.
+
 	}
 
 	/**
@@ -80,12 +88,6 @@ public class PDBWriterNodeModel extends NodeModel {
 	@Override
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
-
-		// TODO: check if user settings are available, fit to the incoming
-		// table structure, and the incoming types are feasible for the node
-		// to execute. If the node can execute in its current state return
-		// the spec of its output data table(s) (if you can, otherwise an array
-		// with null elements), or throw an exception with a useful user message
 
 		return new DataTableSpec[]{};
 	}
@@ -97,6 +99,7 @@ public class PDBWriterNodeModel extends NodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 
 		this.param_output.saveSettingsTo(settings);
+		this.param_omit_hetero.saveSettingsTo(settings);
 	}
 
 	/**
@@ -107,6 +110,7 @@ public class PDBWriterNodeModel extends NodeModel {
 			throws InvalidSettingsException {
 
 		this.param_output.loadSettingsFrom(settings);
+		this.param_omit_hetero.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -117,6 +121,7 @@ public class PDBWriterNodeModel extends NodeModel {
 			throws InvalidSettingsException {
 
 		this.param_output.validateSettings(settings);
+		this.param_omit_hetero.validateSettings(settings);
 	}
 
 	/**
@@ -127,13 +132,7 @@ public class PDBWriterNodeModel extends NodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO load internal data. 
-		// Everything handed to output ports is loaded automatically (data
-		// returned by the execute method, models loaded in loadModelContent,
-		// and user settings set through loadSettingsFrom - is all taken care 
-		// of). Load here only the other internals that need to be restored
-		// (e.g. data used by the views).
-
+		// Nothing to do here
 	}
 
 	/**
@@ -144,14 +143,6 @@ public class PDBWriterNodeModel extends NodeModel {
 			final ExecutionMonitor exec) throws IOException,
 	CanceledExecutionException {
 
-		// TODO save internal models. 
-		// Everything written to output ports is saved automatically (data
-		// returned by the execute method, models saved in the saveModelContent,
-		// and user settings saved through saveSettingsTo - is all taken care 
-		// of). Save here only the other internals that need to be preserved
-		// (e.g. data used by the views).
-
+		// Nothing to do here
 	}
-
 }
-

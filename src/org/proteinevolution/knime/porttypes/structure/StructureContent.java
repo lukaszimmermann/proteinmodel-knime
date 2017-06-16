@@ -1,5 +1,6 @@
 package org.proteinevolution.knime.porttypes.structure;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.Writer;
 
 import org.biojava.nbio.structure.StructureImpl;
 import org.knime.core.data.DataType;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.util.FileUtil;
 import org.proteinevolution.models.interfaces.Writeable;
 
@@ -23,11 +25,18 @@ import org.proteinevolution.models.interfaces.Writeable;
  */
 public final class StructureContent implements Serializable, Writeable {
 
+	private static final NodeLogger logger = NodeLogger
+			.getLogger(StructureContent.class);
+
+
 	private static final long serialVersionUID = -6977340626626226386L;
 	public static final DataType TYPE = DataType.getType(StructureCell.class);
 
 	private final StructureImpl structure;
-	
+
+	// Whether or not hetero atoms will be written when write is used
+	private boolean omitHET = false;
+
 	public StructureContent(final InputStream in) throws IOException  {
 
 		// Warning: in is not allowed to be closed here
@@ -37,7 +46,7 @@ public final class StructureContent implements Serializable, Writeable {
 		out.close();
 		ByteArrayInputStream bis = new ByteArrayInputStream(out.toByteArray());
 		StructureContent structureContent = null;
-		
+
 		try(ObjectInput ois = new ObjectInputStream(bis)) {
 
 			structureContent = (StructureContent) ois.readObject();
@@ -51,21 +60,44 @@ public final class StructureContent implements Serializable, Writeable {
 	}
 
 	public StructureImpl getStructureImpl() {
-		
+
 		return this.structure;
 	}
-	
-	
+
+
 	public StructureContent(final StructureImpl structure) {
 
 		this.structure = structure;
 	}
 
+	public void setOmitHET(final boolean b) {
+
+		this.omitHET = b;
+	}
+
 
 	@Override
 	public void write(final Writer out) throws IOException {
-		
-		// TODO Only writing PDB format supported
-		out.write(this.structure.toPDB());
+
+		String result = this.structure.toPDB();
+
+		if (this.omitHET) {
+
+			try(BufferedWriter br = new BufferedWriter(out)) {
+
+				for(String line : result.split("\\r?\\n")) {
+
+					if( ! line.startsWith("HET")) {
+
+						br.write(line);
+						br.newLine();
+					}
+				}
+			}
+
+		} else {
+
+			out.write(result);
+		}
 	}
 }

@@ -3,8 +3,9 @@ package org.proteinevolution.knime.nodes.output.pdbwriter;
 import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.proteinevolution.models.spec.FileExtensions;
 
 /**
  * <code>NodeDialog</code> for the "PDBWriter" Node.
@@ -29,12 +30,13 @@ public class PDBWriterNodeDialog extends DefaultNodeSettingsPane {
         
         this.addDialogComponent(
         		new DialogComponentFileChooser(
-        				new SettingsModelString(
-        						PDBWriterNodeModel.OUTPUT_CFGKEY,
-        						PDBWriterNodeModel.OUTPUT_DEFAULT),
-        				PDBWriterNodeModel.OUTPUT_HISTORY,
+        				PDBWriterNodeModel.getParamOutput(),
+        				"OUTPUT_HISTORY",
         				JFileChooser.SAVE_DIALOG,
-        				"pdb"));
+        				FileExtensions.PDB));
+        this.addDialogComponent(
+        		new DialogComponentBoolean(
+        				PDBWriterNodeModel.getParamOmitHetero(),
+        				"Omit Hetero Groups (non-polymer)"));
     }
 }
-

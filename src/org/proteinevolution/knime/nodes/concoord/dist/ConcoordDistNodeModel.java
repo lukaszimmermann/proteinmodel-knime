@@ -3,22 +3,17 @@ package org.proteinevolution.knime.nodes.concoord.dist;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -32,8 +27,6 @@ import org.knime.core.util.FileUtil;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
-import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;
-import org.proteinevolution.models.util.CommandLine;
 
 
 /**
@@ -43,10 +36,6 @@ import org.proteinevolution.models.util.CommandLine;
  * @author Lukas Zimmermann
  */
 public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
-
-	// the logger instance
-	private static final NodeLogger logger = NodeLogger
-			.getLogger(ConcoordDistNodeModel.class);
 
 	// Possible values for atomsMargin and bonds
 	private static final Map<String, String> atomsMargins;
@@ -165,7 +154,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 				new File(tempLib, String.format("MARGINS_%s.DAT", atomsMargins.get(this.param_atoms_margin.getStringValue()))),
 				new File(tempLib, "MARGINS.DAT"), exec); 
 		
-		logger.warn("Files copied");
+		
 		
 		/*
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
