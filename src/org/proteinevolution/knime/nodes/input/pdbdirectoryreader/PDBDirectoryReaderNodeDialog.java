@@ -4,7 +4,6 @@ import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * <code>NodeDialog</code> for the "PDBDirReader" Node.
@@ -19,21 +18,18 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class PDBDirectoryReaderNodeDialog extends DefaultNodeSettingsPane {
 
-    /**
-     * New pane for configuring PDBDirReader node dialog.
-     * This is just a suggestion to demonstrate possible default dialog
-     * components.
-     */
-    protected PDBDirectoryReaderNodeDialog() {
-        super();
-        
-        
-        this.addDialogComponent(new DialogComponentFileChooser(
-        		new SettingsModelString(
-        				PDBDirectoryReaderNodeModel.INPUT_CFGKEY,
-        				PDBDirectoryReaderNodeModel.INPUT_DEFAULT),
-        		PDBDirectoryReaderNodeModel.INPUT_HISTORY,
-        		JFileChooser.OPEN_DIALOG,
-        		true)); 
-    }	
+	/**
+	 * New pane for configuring PDBDirReader node dialog.
+	 * This is just a suggestion to demonstrate possible default dialog
+	 * components.
+	 */
+	protected PDBDirectoryReaderNodeDialog() {
+		super();
+
+		this.addDialogComponent(new DialogComponentFileChooser(
+				PDBDirectoryReaderNodeModel.getParamInput(),
+				"INPUT_HISTORY",
+				JFileChooser.OPEN_DIALOG,
+				true)); 
+	}	
 }

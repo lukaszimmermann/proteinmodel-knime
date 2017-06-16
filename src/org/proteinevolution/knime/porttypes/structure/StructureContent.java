@@ -83,14 +83,17 @@ public final class StructureContent implements Serializable, Writeable {
 		return this.structureImpls.get(index);
 	}
 
+	
+	public StructureContent(final List<List<String>> pdbStrings) {
 
-	public StructureContent(final List<String> pdbString) {
-
-		this.pdbStrings = new ArrayList<List<String>>(1);
-		this.pdbStrings.add(pdbString);
+		this.pdbStrings = new ArrayList<List<String>>(pdbStrings);
 		
-		this.structureImpls = new ArrayList<StructureImpl>(1);
-		this.structureImpls.add(null);
+		this.structureImpls = new ArrayList<StructureImpl>(pdbStrings.size());
+		
+		for(int i = 0; i < pdbStrings.size(); ++i) {
+			
+			this.structureImpls.add(null);
+		}
 	}
 
 	public void setOmitHET(final boolean b) {
