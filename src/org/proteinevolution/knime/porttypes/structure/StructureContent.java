@@ -33,8 +33,8 @@ public final class StructureContent implements Serializable, Writeable {
 	private static final long serialVersionUID = -6977340626626226386L;
 	public static final DataType TYPE = DataType.getType(StructureCell.class);
 
-	private final List<String> pdbString; // The PDB String of the structure
-	private StructureImpl structureImpl;
+	private final List<List<String>> pdbStrings; // The PDB String of the structure
+	private List<StructureImpl> structureImpls;
 
 	// Whether or not hetero atoms will be written when write is used
 	private boolean omitHET = false;
@@ -58,36 +58,39 @@ public final class StructureContent implements Serializable, Writeable {
 
 			throw new IOException("Class: StructureContent could not be found");
 		}
-		this.structureImpl = null;
-		this.pdbString = structureContent.pdbString;
+		this.structureImpls = new ArrayList<StructureImpl>();
+		this.pdbStrings = structureContent.pdbStrings;
 	}
 
-	public StructureImpl getStructureImpl() throws IOException {
+	public StructureImpl getStructureImpl(final int index) throws IOException {
 
-		if (this.structureImpl == null) {
+		if (this.structureImpls.get(index) == null) {
 
 			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
 			tempFile.deleteOnExit();
 			
 			try(BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
 				
-				for (String line : this.pdbString) {
+				for (String line : this.pdbStrings.get(index)) {
 					
 					bw.write(line);
 				}
 			}
 		
-			this.structureImpl = (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile());
+			this.structureImpls.set(index, (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile()));
 			tempFile.delete();
 		}
-		return this.structureImpl;
+		return this.structureImpls.get(index);
 	}
 
 
 	public StructureContent(final List<String> pdbString) {
 
-		this.pdbString = new ArrayList<String>(pdbString);
-		this.structureImpl = null;
+		this.pdbStrings = new ArrayList<List<String>>(1);
+		this.pdbStrings.add(pdbString);
+		
+		this.structureImpls = new ArrayList<StructureImpl>(1);
+		this.structureImpls.add(null);
 	}
 
 	public void setOmitHET(final boolean b) {
@@ -95,12 +98,12 @@ public final class StructureContent implements Serializable, Writeable {
 		this.omitHET = b;
 	}
 
-	public String getPdbString() {
+	public String getPdbString(final int index) {
 		
 		String linesep = System.lineSeparator();
 		
 		StringBuilder sb = new StringBuilder();
-		for (String line : this.pdbString) {
+		for (String line : this.pdbStrings.get(index)) {
 			sb.append(line);
 			sb.append(linesep);
 		}
@@ -110,10 +113,9 @@ public final class StructureContent implements Serializable, Writeable {
 	@Override
 	public void write(final Writer out) throws IOException {
 
-
 		try(BufferedWriter br = new BufferedWriter(out)) {
 
-			for(String line : this.pdbString) {
+			for(String line : this.pdbStrings.get(0)) {
 
 				if( ! this.omitHET || ! line.startsWith("HET")) {
 
