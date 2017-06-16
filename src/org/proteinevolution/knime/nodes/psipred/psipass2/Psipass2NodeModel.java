@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
@@ -24,6 +23,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
 import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
@@ -107,25 +107,7 @@ public class Psipass2NodeModel extends PSIPREDBaseNodeModel {
 			// SS input file
 			cmd.addOption("", ((URIPortObject) inData[0]).getURIContents().get(0).getURI().getPath());
 			
-			Process process = Runtime.getRuntime().exec(cmd.toString());
-			logger.warn(cmd.toString());
-			
-			// TODO Might not work on the cluster
-			while( process.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-					
-				}  catch(CanceledExecutionException e) {
-
-					process.destroy();
-				}
-			}
-			if ( process.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of psipass2 failed.");
-			}			
-			
+			Process process = ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
 			// Add uric of ss2 file
 			ss2_urics.add(new URIContent(ss2_file.toURI(), FileExtensions.SS2));
 			

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
@@ -22,6 +21,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
@@ -116,29 +116,8 @@ public class HHsearchNodeModel extends HHSuiteNodeModel {
 			cmd.addOutput("-o");
 			cmd.addOutput("-oa3m");
 
-			String commandLineString = cmd.toString();
-			logger.warn(cmd);
-
-			// Run hhblits process and constantly check whether is needs to be terminated 
-			// (TODO) Might need to be adapted for cluster execution
-			Process p = Runtime.getRuntime().exec(commandLineString);
-			while( p.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-
-				}  catch(CanceledExecutionException e) {
-
-					p.destroy();
-				}
-			}
-
-			// Execute HHBlits, nodes throws exception if this fails.
-			if ( p.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of HHblits failed.");
-			}
-
+			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
+			
 			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getFile("-oa3m").getAbsolutePath());
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 

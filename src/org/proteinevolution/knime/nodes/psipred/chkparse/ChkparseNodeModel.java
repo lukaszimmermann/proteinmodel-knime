@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
@@ -22,6 +21,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
 import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
@@ -67,24 +67,8 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 			cmd.addOption("", in.getURIContents().get(0).getURI().getPath());
 
 			child = new File(exec.createFileStore("chkparse").getFile(), "out");
-			Process process = Runtime.getRuntime().exec(cmd.toString());
-			logger.warn(cmd.toString());
 			
-			// TODO Might not work on the cluster
-			while( process.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-					
-				}  catch(CanceledExecutionException e) {
-
-					process.destroy();
-				}
-			}
-			if ( process.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of Chkparse failed.");
-			}			
+			Process process = ExecutableNodeModel.exec(cmd.toString(), exec, null, null);	
 			FileUtils.copyInputStreamToFile(process.getInputStream(), child);
 			urics.add(new URIContent(child.toURI(), FileExtensions.MTX));	
 		}

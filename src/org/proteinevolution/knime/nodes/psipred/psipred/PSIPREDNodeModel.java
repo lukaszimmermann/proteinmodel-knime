@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
@@ -22,6 +21,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
 import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.CommandLine;
@@ -72,27 +72,9 @@ public class PSIPREDNodeModel extends PSIPREDBaseNodeModel {
 			cmd.addOption("", new File(datadir, "weights.dat").getAbsolutePath());
 			cmd.addOption("", new File(datadir, "weights.dat2").getAbsolutePath());
 			cmd.addOption("", new File(datadir, "weights.dat3").getAbsolutePath());
-			
-
+		
 			child = new File(exec.createFileStore("psipred").getFile(), "out.ss");
-			Process process = Runtime.getRuntime().exec(cmd.toString());
-			logger.warn(cmd.toString());
-			
-			// TODO Might not work on the cluster
-			while( process.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-					
-				}  catch(CanceledExecutionException e) {
-
-					process.destroy();
-				}
-			}
-			if ( process.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of psipred failed.");
-			}			
+			Process process = ExecutableNodeModel.exec(cmd.toString(), exec, null, null);		
 			FileUtils.copyInputStreamToFile(process.getInputStream(), child);
 			urics.add(new URIContent(child.toURI(), FileExtensions.SS));	
 		}

@@ -3,7 +3,6 @@ package org.proteinevolution.knime.nodes.hhsuite.hhfilter;
 import java.io.File;
 import java.io.IOException;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -17,6 +16,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
@@ -98,28 +98,9 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 			cmd.addOption("-id", this.param_id.getDoubleValue());
 			cmd.addOption("-diff", this.param_diff.getIntValue());
 			cmd.addOutput("-o");
-
-			String commandLineString = cmd.toString();
-			logger.warn(cmd);
-
-			// Run hhblits process and constantly check whether is needs to be terminated 
-			// (TODO) Might need to be adapted for cluster execution
-			Process p = Runtime.getRuntime().exec(commandLineString);
-			while( p.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-
-				}  catch(CanceledExecutionException e) {
-
-					p.destroy();
-				}
-			}
-			// Execute HHBlits, nodes throws exception if this fails.
-			if ( p.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of HHfilter failed.");
-			}
+			
+			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
+			
 			sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(cmd.getFile("-o").getAbsolutePath());
 			sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
 		}

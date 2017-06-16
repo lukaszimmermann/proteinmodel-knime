@@ -40,6 +40,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.util.FileUtil;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
@@ -193,35 +194,9 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			cmd.addOutput("-od", ".dat");
 			cmd.addOutput("-op");
 
-			String commandLineString = cmd.toString();
-			logger.warn(commandLineString);
-
-			// Temporary working directory (to prevent nasty errors when overriding forcefield)
-			File tempWorkingDir = Files.createTempDirectory("concoord_work").toFile();
-
-			// Start the dist process
-			Process process = Runtime.getRuntime().exec(
-					commandLineString, 
-					new String[] {
-							String.format("CONCOORDLIB=%s", tempLib.getAbsoluteFile())	
-					}, tempWorkingDir);
-
-			while (process.isAlive()) {
-
-				try {
-
-					exec.checkCanceled();
-
-				} catch(CanceledExecutionException e) {
-
-					process.destroy();
-				}
-			}
-
-			if (process.waitFor() != 0) {
-
-				logger.warn("Execution FAILED!");
-			}
+			ExecutableNodeModel.exec(cmd.toString(), exec, new String[] {
+					String.format("CONCOORDLIB=%s", tempLib.getAbsoluteFile())	
+			}, Files.createTempDirectory("concoord_work").toFile());
 
 
 			// Assemble data table
@@ -253,7 +228,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 				while ((line = br.readLine()) != null) {
 
 					line = line.trim();
-					
+
 					if (line.equals("")) {
 
 						continue;
@@ -293,8 +268,8 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 				}
 			}
 		}
-		
-		
+
+
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}

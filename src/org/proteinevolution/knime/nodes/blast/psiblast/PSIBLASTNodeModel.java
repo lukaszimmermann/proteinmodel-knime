@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.ExecutionException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
@@ -25,6 +24,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.blast.BLASTNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
@@ -119,28 +119,9 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
 			cmd.addOutput("-out_pssm", ".chk");	
 
-			String commandlineString = cmd.toString();
-			logger.warn(commandlineString);
-
-			ProcessBuilder builder = new ProcessBuilder(cmd.toStringList());
-			builder.redirectErrorStream(true);
-			Process process = builder.start();
-
-			// TODO Might not work on the cluster
-			while( process.isAlive() ) {
-
-				try {	
-					exec.checkCanceled();
-				}  catch(CanceledExecutionException e) {
-
-					process.destroy();
-				}
-			}
-			if ( process.waitFor() != 0) {
-
-				throw new ExecutionException("Execution of PSI-BLAST failed.");
-			}
-
+		
+			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
+	
 			// Collect the output file and set to the output port
 			File tempOutput = cmd.getFile("-out_pssm"); // File is deleted when cmd closes
 			File child = new File(exec.createFileStore("psiblast").getFile(), tempOutput.getName());
