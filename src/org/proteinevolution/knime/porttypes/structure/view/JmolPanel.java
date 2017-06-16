@@ -1,12 +1,10 @@
 package org.proteinevolution.knime.porttypes.structure.view;
 
-import javax.swing.JPanel;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Rectangle;
+
+import javax.swing.JPanel;
 
 import org.jmol.adapter.smarter.SmarterJmolAdapter;
-import org.jmol.api.JmolAdapter;
 import org.jmol.api.JmolViewer;
 import org.jmol.viewer.Viewer;
 
@@ -20,21 +18,11 @@ public class JmolPanel extends JPanel {
 	private static final int WIDTH = 1500;
 	private static final int HEIGHT = 1000;
 	
-	
-	// instance variables
-	private final JmolAdapter adapter;
 	private final JmolViewer viewer;
-	private Dimension currentSize;
-	private Rectangle rectClip;
-	
 
 	public JmolPanel() {
 	
-		// Define viewer and initial dimensions
-		this.currentSize = new Dimension(WIDTH, HEIGHT);
-		this.rectClip = new Rectangle(WIDTH, HEIGHT);
-		this.adapter = new SmarterJmolAdapter();
-		this.viewer = Viewer.allocateViewer(this, this.adapter);		
+		this.viewer = Viewer.allocateViewer(this, new SmarterJmolAdapter());		
 	}
 	
 	public JmolViewer getViewer() {
@@ -45,21 +33,8 @@ public class JmolPanel extends JPanel {
 	public void paintComponent(final Graphics g) {
 		
 		super.paintComponent(g);
-		this.getSize(this.currentSize);
-		g.getClipBounds(this.rectClip);
 		
-		//this.setCartoon();
 		this.viewer.renderScreenImage(g, WIDTH, HEIGHT);
-	}
-	
-	
-	@Override
-	public void setSize(Dimension d) {
-		
-		super.setSize(d);
-		
-		this.currentSize = d;
-		this.rectClip.setSize(d);
 	}
 }
 

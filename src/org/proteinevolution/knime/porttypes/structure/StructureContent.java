@@ -83,6 +83,10 @@ public final class StructureContent implements Serializable, Writeable {
 		return this.structureImpls.get(index);
 	}
 
+	public int getNoStructures() {
+		
+		return this.pdbStrings.size();
+	}
 	
 	public StructureContent(final List<List<String>> pdbStrings) {
 

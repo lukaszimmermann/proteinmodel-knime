@@ -1,5 +1,7 @@
 package org.proteinevolution.knime.porttypes.structure;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,12 @@ import java.lang.reflect.Constructor;
 import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.knime.core.data.image.ImageContent;
 import org.knime.core.node.CanceledExecutionException;
@@ -87,8 +95,36 @@ public class StructurePortObject extends AbstractPortObject {
 		JmolPanel jmolPanel = new JmolPanel();
 		jmolPanel.getViewer().openStringInline(this.m_content.getPdbString(0));
 		
+		JPanel main = new JPanel();
+		main.setLayout(new BorderLayout());
+	
+		Integer[] labels = new Integer[this.m_content.getNoStructures()];
+		
+		for(int i = 0; i < labels.length; ++i) {
+			
+			labels[i] = i + 1;
+		}
+		JList<Integer> recordSelector = new JList<>(labels);
+		recordSelector.setPreferredSize(new Dimension(200, 2000));
+		recordSelector.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		recordSelector.addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				
+				jmolPanel.getViewer().openStringInline(
+						StructurePortObject.this.m_content.getPdbString(recordSelector.getSelectedValue()));
+			}
+		});
+		
+		JMenuBar toolbar = new JMenuBar();
+		toolbar.add(recordSelector);
+		main.add(toolbar, BorderLayout.WEST);
+		main.add(jmolPanel);
+		
 		return new JComponent[] {
-				jmolPanel
+				main
 		};
 	}
 
