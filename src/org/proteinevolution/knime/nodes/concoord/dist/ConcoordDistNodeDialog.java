@@ -1,5 +1,6 @@
 package org.proteinevolution.knime.nodes.concoord.dist;
 
+
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -53,5 +54,9 @@ public class ConcoordDistNodeDialog extends DefaultNodeSettingsPane {
 		this.addDialogComponent(new DialogComponentNumber(
 				ConcoordDistNodeModel.getParamMinDist(),
 				"Minimum nr of distances to be defined for each atom (default 50, or 1 with -noe)", 1));
+		this.addDialogComponent(new DialogComponentNumber(
+				ConcoordDistNodeModel.getParamDamp(),
+				"Multiply each distance margin by value (default 1.0)",
+				1));
 	}
 }
