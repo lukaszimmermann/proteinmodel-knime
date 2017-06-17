@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,28 +65,28 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			.getLogger(ConcoordDistNodeModel.class);
 
 	private static String padLeft(final DataCell s, final int i) {
-	
+
 		int padding = paddings[i];
 		String dataCellValue = s.toString();
-		
+
 		// Format some columns as double (better safe than sorry)
 		if ( i == 8 || i == 9 || i == 10) {
-			
+
 			if (dataCellValue.contains(".")) {
-							
+
 				int pointIndex = dataCellValue.lastIndexOf(".");			
 				int decimals = dataCellValue.substring(pointIndex + 1).length();
-				
+
 				dataCellValue = decimals <= 3 ? dataCellValue.concat(new String(new char[3 - decimals]).replace('\0', '0')) :
 					dataCellValue.substring(0, pointIndex + 4);
 			} else {
-				
+
 				dataCellValue = dataCellValue.concat(".000");
 			}
 		}
 		return String.format("%1$" + padding + "s", dataCellValue);
 	}
-	
+
 	// Names of the NOE file header
 	private static final String[] namesNOE = new String[] {
 			"resid1", "resname1", "atomname1", "segid1", "resid2",
@@ -92,7 +94,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			"upppscor", "index", "restrnum"
 	};
 	private static final int[] paddings = new int[] {8, 8, 9, 6, 6, 8, 9, 6, 8, 8, 8, 5, 8};
-	
+
 	// Possible values for atomsMargin and bonds
 	private static final Map<String, String> atomsMargins;
 	private static final List<String> atomsMarginsList;
@@ -155,8 +157,8 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		return new SettingsModelBoolean("ZERO_OCC_CFGKEY", false);
 	} 
 	private final SettingsModelBoolean param_zero_occ = getParamZeroOcc();
-	
-	
+
+
 	// Param: Find Alternative contacts
 	public static SettingsModelBoolean getParamFindAlternativeContacts() {
 
@@ -194,7 +196,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	protected ConcoordDistNodeModel() throws InvalidSettingsException {
 
 		super(new PortType[]   {StructurePortObject.TYPE, BufferedDataTable.TYPE_OPTIONAL},
-				new PortType[] {BufferedDataTable.TYPE});
+				new PortType[] {StructurePortObject.TYPE, BufferedDataTable.TYPE});
 	}
 
 	/**
@@ -208,7 +210,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
 
 		boolean withNOE = inData[1] != null;
-		
+
 		// Copy lib directory to a temporary location (because some files need to be renamed there)
 		File tempLib = Files.createTempDirectory("concoord").toFile();
 		FileUtil.copyDir(ConcoordBaseNodeModel.getLibDir(), tempLib);
@@ -226,6 +228,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		structureContent.setOmitHET(true);
 
 		BufferedDataContainer container = null;
+		List<List<String>> input;
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
 
 			cmd.addInput("-p", structureContent);
@@ -241,33 +244,33 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			// Add noes if present
 			File noeFile = null;
 			if (withNOE) {
-				
+
 				BufferedDataTable noes = (BufferedDataTable) inData[1];
 				DataTableSpec noesSpec = noes.getDataTableSpec();
-				
+
 				// Figure out the indices of the columns in the data table
 				int[] indices = new int[namesNOE.length];
-				
+
 				for (int i = 0; i < namesNOE.length; ++i) {
-					
+
 					indices[i] = noesSpec.findColumnIndex(namesNOE[i]);
 				}
-				
+
 				noeFile = Files.createTempFile("concoord_noe", ".noe").toFile();
 				noeFile.deleteOnExit();
-				
+
 				try(BufferedWriter br = new BufferedWriter(new FileWriter(noeFile))) {
-				
+
 					// Write Header
 					br.write("[ distance_restraints ]");
 					br.newLine();
 					br.write("[ resid1 resname1 atomname1 segid1 resid2 resname2 atomname2 segid2 lowbound uppbound upppscor index restrnum ]");
 					for (DataRow row : noes) {
-						
+
 						br.newLine();
-						
+
 						for (int i = 0; i < indices.length - 1; ++i) {
-							
+
 							br.write(padLeft( row.getCell(indices[i]), i));
 							br.write(" ");
 						}
@@ -285,11 +288,9 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			if (withNOE) {
 				noeFile.delete();
 			}
-			
+
 			// Assemble data table
-			// the data table spec of the single output table, 
-			// the table will have three columns:
-			DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
+			container = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] {
 
 					new DataColumnSpecCreator("class", StringCell.TYPE).createSpec(),
 					new DataColumnSpecCreator("atom1", IntCell.TYPE).createSpec(),
@@ -301,10 +302,12 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 					// for 1-3 restrictions
 					new DataColumnSpecCreator("atom3", IntCell.TYPE).createSpec(),
 					new DataColumnSpecCreator("angle", DoubleCell.TYPE).createSpec(),
-					new DataColumnSpecCreator("factor", DoubleCell.TYPE).createSpec(),
-			};
-			container = exec.createDataContainer(new DataTableSpec(allColSpecs));
+					new DataColumnSpecCreator("factor", DoubleCell.TYPE).createSpec() 
+			}));
 
+			input = new ArrayList<List<String>>(1);
+			input.add(Files.readAllLines(Paths.get(cmd.getFile("-op").getAbsolutePath()), StandardCharsets.UTF_8));
+			
 			// Parse distance file
 			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getFile("-od")))) {
 
@@ -356,7 +359,11 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			}
 		}
 		container.close();
-		return new BufferedDataTable[]{container.getTable()};
+		return new PortObject[]{
+				new StructurePortObject(
+						new StructureContent(input),
+						new StructurePortObjectSpec(StructureContent.TYPE, 1)),
+				container.getTable()};
 	}
 
 	/**
@@ -376,28 +383,28 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			throws InvalidSettingsException {
 
 		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
-			
+
 			throw new InvalidSettingsException("Port type 0 of ConcoordDist must be structure!");
 		}
 		if ( ((StructurePortObjectSpec) inSpecs[0]).getNStructures() != 1) {
-			
+
 			throw new InvalidSettingsException("Only one Structure allowed for ConcoordDist!");
 		}
-		
+
 		if (inSpecs[1] != null) {
-			
-			
+
+
 			if ( ! (inSpecs[1] instanceof DataTableSpec)) {
-				
+
 				throw new InvalidSettingsException("Port type 1 of ConcoordDist must be data table!");
 			}
-			
+
 			DataTableSpec noes = (DataTableSpec) inSpecs[1];
-			
+
 			for (String name : namesNOE) {
-				
+
 				if ( ! noes.containsName(name)) {
-					
+
 					throw new InvalidSettingsException("Column " + name + " is missing in NOE specification!");
 				}
 			}
