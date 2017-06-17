@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -97,18 +98,27 @@ public class StructurePortObject extends AbstractPortObject {
 		
 		JPanel main = new JPanel();
 		main.setLayout(new BorderLayout());
+		JPanel left = new JPanel();
 	
+		
 		Integer[] labels = new Integer[this.m_content.getNoStructures()];
 		
 		for(int i = 0; i < labels.length; ++i) {
 			
 			labels[i] = i;
 		}
+		
+		
 		JList<Integer> recordSelector = new JList<>(labels);
-		recordSelector.setPreferredSize(new Dimension(200, 2000));
+		
 		recordSelector.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		//recordSelector.setPreferredSize(new Dimension(200, 1000));
+		
+		JScrollPane scrollPane = new JScrollPane(recordSelector);
+		scrollPane.setPreferredSize(new Dimension(200, 200));
 		
 		recordSelector.addListSelectionListener(new ListSelectionListener() {
+			
 			
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
@@ -117,11 +127,9 @@ public class StructurePortObject extends AbstractPortObject {
 						StructurePortObject.this.m_content.getPdbString(recordSelector.getSelectedValue()));
 				
 			}
-		});
-		
-		JMenuBar toolbar = new JMenuBar();
-		toolbar.add(recordSelector);
-		main.add(toolbar, BorderLayout.WEST);
+		});		
+		left.add(scrollPane);
+		main.add(left, BorderLayout.WEST);
 		main.add(jmolPanel);
 		
 		return new JComponent[] {
