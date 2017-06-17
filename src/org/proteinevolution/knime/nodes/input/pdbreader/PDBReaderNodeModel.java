@@ -2,11 +2,6 @@ package org.proteinevolution.knime.nodes.input.pdbreader;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -54,13 +49,10 @@ public class PDBReaderNodeModel extends NodeModel {
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
-		List<List<String>> input = new ArrayList<List<String>>(1);
-		input.add(Files.readAllLines(Paths.get(this.param_input.getStringValue()), StandardCharsets.UTF_8));
-		
 		return new StructurePortObject[] {
 
 				new StructurePortObject(
-						new StructureContent(input),
+						StructureContent.fromFile(this.param_input.getStringValue()),
 						new StructurePortObjectSpec(StructureContent.TYPE, 1))	
 		};
 	}

@@ -6,9 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -228,7 +226,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		structureContent.setOmitHET(true);
 
 		BufferedDataContainer container = null;
-		List<List<String>> input;
+		StructureContent structureContentResult;
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
 
 			cmd.addInput("-p", structureContent);
@@ -288,7 +286,8 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			if (withNOE) {
 				noeFile.delete();
 			}
-
+			structureContentResult = StructureContent.fromFile(cmd.getFile("-op").getAbsolutePath());
+			
 			// Assemble data table
 			container = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] {
 
@@ -304,9 +303,6 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 					new DataColumnSpecCreator("angle", DoubleCell.TYPE).createSpec(),
 					new DataColumnSpecCreator("factor", DoubleCell.TYPE).createSpec() 
 			}));
-
-			input = new ArrayList<List<String>>(1);
-			input.add(Files.readAllLines(Paths.get(cmd.getFile("-op").getAbsolutePath()), StandardCharsets.UTF_8));
 			
 			// Parse distance file
 			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getFile("-od")))) {
@@ -361,7 +357,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		container.close();
 		return new PortObject[]{
 				new StructurePortObject(
-						new StructureContent(input),
+						structureContentResult,
 						new StructurePortObjectSpec(StructureContent.TYPE, 1)),
 				container.getTable()};
 	}
@@ -409,7 +405,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 				}
 			}
 		}
-		return new DataTableSpec[]{null};
+		return new DataTableSpec[]{null, null};
 	}
 
 	/**

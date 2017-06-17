@@ -11,7 +11,9 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,6 +94,16 @@ public final class StructureContent implements Serializable, Writeable {
 		
 		return this.pdbStrings.size();
 	}
+	
+	
+	public static StructureContent fromFile(final String path) throws IOException {
+		
+		List<List<String>> input = new ArrayList<List<String>>(1);
+		input.add(Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8));
+		
+		return new StructureContent(input);
+	}
+	
 	
 	public StructureContent(final List<List<String>> pdbStrings) {
 
