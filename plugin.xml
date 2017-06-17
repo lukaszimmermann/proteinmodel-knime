@@ -40,6 +40,7 @@
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory" id="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
 <node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory"/>
 </extension>
    
    

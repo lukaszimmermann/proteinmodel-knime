@@ -96,6 +96,14 @@ public final class StructureContent implements Serializable, Writeable {
 	}
 	
 	
+	public StructureContent concatenate(final StructureContent other) {
+		
+		List<List<String>> pdbStrings = new ArrayList<List<String>>(this.pdbStrings);
+		pdbStrings.addAll(new ArrayList<List<String>>(other.pdbStrings));
+		
+		return new StructureContent(pdbStrings);
+	}
+	
 	public static StructureContent fromFile(final String path) throws IOException {
 		
 		List<List<String>> input = new ArrayList<List<String>>(1);

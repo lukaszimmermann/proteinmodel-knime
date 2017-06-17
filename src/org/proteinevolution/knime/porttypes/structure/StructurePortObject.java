@@ -102,7 +102,7 @@ public class StructurePortObject extends AbstractPortObject {
 		
 		for(int i = 0; i < labels.length; ++i) {
 			
-			labels[i] = i + 1;
+			labels[i] = i;
 		}
 		JList<Integer> recordSelector = new JList<>(labels);
 		recordSelector.setPreferredSize(new Dimension(200, 2000));
@@ -115,6 +115,7 @@ public class StructurePortObject extends AbstractPortObject {
 				
 				jmolPanel.getViewer().openStringInline(
 						StructurePortObject.this.m_content.getPdbString(recordSelector.getSelectedValue()));
+				
 			}
 		});
 		
