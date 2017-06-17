@@ -1,10 +1,8 @@
 package org.proteinevolution.knime.nodes.concoord.dist;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -15,7 +13,6 @@ import java.util.Map;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
@@ -61,69 +58,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(ConcoordDistNodeModel.class);
 
-	private static String padLeft(final DataCell s, final int i) {
 
-		int padding = paddings[i];
-		String dataCellValue = s.toString();
-
-		// Format some columns as double (better safe than sorry)
-		if ( i == 8 || i == 9 || i == 10) {
-
-			if (dataCellValue.contains(".")) {
-
-				int pointIndex = dataCellValue.lastIndexOf(".");			
-				int decimals = dataCellValue.substring(pointIndex + 1).length();
-
-				dataCellValue = decimals <= 3 ? dataCellValue.concat(new String(new char[3 - decimals]).replace('\0', '0')) :
-					dataCellValue.substring(0, pointIndex + 4);
-			} else {
-
-				dataCellValue = dataCellValue.concat(".000");
-			}
-		}
-		return String.format("%1$" + padding + "s", dataCellValue);
-	}
-
-	// Names of the NOE file header
-	private static final String[] namesNOE = new String[] {
-			"resid1", "resname1", "atomname1", "segid1", "resid2",
-			"resname2", "atomname2", "segid2", "lowbound", "uppbound",
-			"upppscor", "index", "restrnum"
-	};
-	private static final int[] paddings = new int[] {8, 8, 9, 6, 6, 8, 9, 6, 8, 8, 8, 5, 8};
-
-	// Possible values for atomsMargin and bonds
-	private static final Map<String, String> atomsMargins;
-	private static final List<String> atomsMarginsList;
-	private static final Map<String, String> bonds;
-	private static final List<String> bondsList;
-
-	static {
-		atomsMargins = new LinkedHashMap<String, String>(6);
-		atomsMargins.put("OPLS-UA (united atoms)", "oplsua");
-		atomsMargins.put("OPLS-AA (all atoms)", "oplsaa");
-		atomsMargins.put("PROLSQ repel", "repel");
-		atomsMargins.put("Yamber2", "yamber2");
-		atomsMargins.put("Li et al.", "li");
-		atomsMargins.put("OPLS-X", "oplsx");
-		atomsMarginsList = new ArrayList<String>(atomsMargins.keySet());
-
-		bonds = new LinkedHashMap<String, String>(2);
-		bonds.put("Concoord default", ".noeh");
-		bonds.put("Engh-Huber", "");
-		bondsList = new ArrayList<String>(bonds.keySet());
-	}
-
-	public static List<String> getAtomsMarginsList() {
-
-		// Provide safe copy
-		return new ArrayList<String>(atomsMarginsList);
-	}
-	public static List<String> getBondsList() {
-
-		// Provide safe copy
-		return new ArrayList<String>(bondsList);
-	}
 
 	// Param: Selection of atomsMargin (VdW parameters)
 	public static SettingsModelString getParamAtomsMargin() {
@@ -211,8 +146,8 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		// Copy lib directory to a temporary location (because some files need to be renamed there)
 		File tempLib = ConcoordBaseNodeModel.createTempLib(
 				exec,
-				atomsMargins.get(this.param_atoms_margin.getStringValue()),
-				bonds.get(this.param_bonds.getStringValue()));
+				this.param_atoms_margin.getStringValue(),
+				this.param_bonds.getStringValue());
 
 		// CONCOORD has no atom types for hetero atoms
 		structureContent.setOmitHET(true);
@@ -234,40 +169,9 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			// Add noes if present
 			File noeFile = null;
 			if (withNOE) {
-
-				BufferedDataTable noes = (BufferedDataTable) inData[1];
-				DataTableSpec noesSpec = noes.getDataTableSpec();
-
-				// Figure out the indices of the columns in the data table
-				int[] indices = new int[namesNOE.length];
-
-				for (int i = 0; i < namesNOE.length; ++i) {
-
-					indices[i] = noesSpec.findColumnIndex(namesNOE[i]);
-				}
-
-				noeFile = Files.createTempFile("concoord_noe", ".noe").toFile();
-				noeFile.deleteOnExit();
-
-				try(BufferedWriter br = new BufferedWriter(new FileWriter(noeFile))) {
-
-					// Write Header
-					br.write("[ distance_restraints ]");
-					br.newLine();
-					br.write("[ resid1 resname1 atomname1 segid1 resid2 resname2 atomname2 segid2 lowbound uppbound upppscor index restrnum ]");
-					for (DataRow row : noes) {
-
-						br.newLine();
-
-						for (int i = 0; i < indices.length - 1; ++i) {
-
-							br.write(padLeft( row.getCell(indices[i]), i));
-							br.write(" ");
-						}
-						br.write(padLeft( row.getCell(indices[indices.length - 1]), indices.length - 1));
-					}
-					br.newLine();
-				}
+				noeFile = ConcoordBaseNodeModel.writeNoeFile((BufferedDataTable) inData[1]);
+				
+				logger.warn(noeFile.getAbsolutePath());
 				cmd.addOption("-noe", noeFile.getAbsolutePath());
 			}
 
@@ -277,7 +181,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 
 			if (withNOE) {
 				noeFile.delete();
-			}
+			}			
 			structureContentResult = StructureContent.fromFile(cmd.getFile("-op").getAbsolutePath());
 			
 			// Assemble data table
@@ -296,7 +200,6 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 					new DataColumnSpecCreator("factor", DoubleCell.TYPE).createSpec() 
 			}));
 			
-			// Parse distance file
 			try(BufferedReader br = new BufferedReader(new FileReader(cmd.getFile("-od")))) {
 
 				String currentClass = null;

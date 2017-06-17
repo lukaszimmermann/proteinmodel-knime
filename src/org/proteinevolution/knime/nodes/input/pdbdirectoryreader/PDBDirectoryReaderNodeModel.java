@@ -1,12 +1,8 @@
 package org.proteinevolution.knime.nodes.input.pdbdirectoryreader;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -55,31 +51,13 @@ public class PDBDirectoryReaderNodeModel extends NodeModel {
 	@Override
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
-
-		// List content of selected directory        
-		File[] content =  new File(this.param_input.getStringValue())
-				.listFiles(new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-
-				String path = pathname.getName();
-				return path.endsWith("pdb") || path.endsWith("ent");
-			}
-		});
-
-		List<String> input = new ArrayList<String>(content.length);
 		
-		for(File currentFile : content) {
-			
-			input.add(FileUtils.readFileToString(currentFile));
-		}
-	
+		StructureContent structureContent = StructureContent.fromDirectory(this.param_input.getStringValue());
 		return new StructurePortObject[] {
 
 				new StructurePortObject(
-						new StructureContent(input),
-						new StructurePortObjectSpec(StructureContent.TYPE, input.size()))
+						structureContent,
+						new StructurePortObjectSpec(StructureContent.TYPE, structureContent.getNoStructures()))
 		};
 	}
 

@@ -5,6 +5,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "ConcoordDist" Node.
@@ -31,13 +32,13 @@ public class ConcoordDistNodeDialog extends DefaultNodeSettingsPane {
 				new DialogComponentStringSelection(
 						ConcoordDistNodeModel.getParamAtomsMargin(), 
 						"Select Van-der-Waals parameters", 
-						ConcoordDistNodeModel.getAtomsMarginsList()));
+						ConcoordBaseNodeModel.getAtomsMarginsList()));
 		
 		this.addDialogComponent(
 				new DialogComponentStringSelection(
 						ConcoordDistNodeModel.getParamBonds(),
 						"Select bond/angle parameters",
-						ConcoordDistNodeModel.getBondsList()));
+						ConcoordBaseNodeModel.getBondsList()));
 		
 		this.addDialogComponent(new DialogComponentBoolean(
 				ConcoordDistNodeModel.getParamRetainHydrogenAtoms(),

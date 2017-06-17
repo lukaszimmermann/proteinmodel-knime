@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,23 +63,23 @@ public final class StructureContent implements Serializable, Writeable {
 		this.pdbStrings = structureContent.pdbStrings;
 		this.structureImpls = new ArrayList<StructureImpl>(this.pdbStrings.size());
 		for (int i = 0; i < this.pdbStrings.size(); ++i) {
-			
+
 			this.structureImpls.add(null);
 		}
 	}
-	
+
 	public StructureImpl getStructureImpl(final int index) throws IOException {
-		
+
 		if (this.structureImpls.get(index) == null) {
 
 			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
 			tempFile.deleteOnExit();
-			
+
 			try(FileWriter fw = new FileWriter(tempFile)) {
-				
+
 				fw.write(this.pdbStrings.get(index));
 			}
-		
+
 			this.structureImpls.set(index, (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile()));
 			tempFile.delete();
 		}
@@ -86,35 +87,59 @@ public final class StructureContent implements Serializable, Writeable {
 	}
 
 	public int getNoStructures() {
-		
+
 		return this.pdbStrings.size();
 	}
-	
-	
+
+
 	public StructureContent concatenate(final StructureContent other) {
-		
+
 		List<String> pdbStrings = new ArrayList<String>(this.pdbStrings);
 		pdbStrings.addAll(new ArrayList<String>(other.pdbStrings));
-		
+
 		return new StructureContent(pdbStrings);
 	}
-	
+
 	public static StructureContent fromFile(final String path) throws IOException {
-		
+
 		List<String> input = new ArrayList<String>(1);
 		input.add(FileUtils.readFileToString(new File(path)));
-		
+
 		return new StructureContent(input);
 	}
-	
-	
+
+	public static StructureContent fromDirectory(final String path) throws IOException {
+
+
+		// List content of selected directory        
+		File[] content =  new File(path).listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname) {
+
+				String path = pathname.getName();
+				return path.endsWith("pdb") || path.endsWith("ent");
+			}
+		});
+
+		List<String> input = new ArrayList<String>(content.length);
+
+		for(File currentFile : content) {
+
+			input.add(FileUtils.readFileToString(currentFile));
+		}
+		return new StructureContent(input);
+	}
+
+
+
 	public StructureContent(final List<String> pdbStrings) {
 
 		this.pdbStrings = new ArrayList<String>(pdbStrings);
 		this.structureImpls = new ArrayList<StructureImpl>(pdbStrings.size());
-		
+
 		for(int i = 0; i < pdbStrings.size(); ++i) {
-			
+
 			this.structureImpls.add(null);
 		}
 	}
@@ -125,10 +150,10 @@ public final class StructureContent implements Serializable, Writeable {
 	}
 
 	public String getPdbString(final int index) {
-		
+
 		return this.pdbStrings.get(index);
 	}
-	
+
 	@Override
 	public void write(final Writer out) throws IOException {
 
