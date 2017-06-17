@@ -1,8 +1,10 @@
 package org.proteinevolution.knime.nodes.concoord.dist;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.Map;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
@@ -44,6 +47,7 @@ import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
+import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;
 import org.proteinevolution.models.util.CommandLine;
 
 
@@ -58,6 +62,37 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	private static final NodeLogger logger = NodeLogger
 			.getLogger(ConcoordDistNodeModel.class);
 
+	private static String padLeft(final DataCell s, final int i) {
+	
+		int padding = paddings[i];
+		String dataCellValue = s.toString();
+		
+		// Format some columns as double (better safe than sorry)
+		if ( i == 8 || i == 9 || i == 10) {
+			
+			if (dataCellValue.contains(".")) {
+							
+				int pointIndex = dataCellValue.lastIndexOf(".");			
+				int decimals = dataCellValue.substring(pointIndex + 1).length();
+				
+				dataCellValue = decimals <= 3 ? dataCellValue.concat(new String(new char[3 - decimals]).replace('\0', '0')) :
+					dataCellValue.substring(0, pointIndex + 4);
+			} else {
+				
+				dataCellValue = dataCellValue.concat(".000");
+			}
+		}
+		return String.format("%1$" + padding + "s", dataCellValue);
+	}
+	
+	// Names of the NOE file header
+	private static final String[] namesNOE = new String[] {
+			"resid1", "resname1", "atomname1", "segid1", "resid2",
+			"resname2", "atomname2", "segid2", "lowbound", "uppbound",
+			"upppscor", "index", "restrnum"
+	};
+	private static final int[] paddings = new int[] {8, 8, 9, 6, 6, 8, 9, 6, 8, 8, 8, 5, 8};
+	
 	// Possible values for atomsMargin and bonds
 	private static final Map<String, String> atomsMargins;
 	private static final List<String> atomsMarginsList;
@@ -91,8 +126,6 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		return new ArrayList<String>(bondsList);
 	}
 
-
-
 	// Param: Selection of atomsMargin (VdW parameters)
 	public static SettingsModelString getParamAtomsMargin() {
 
@@ -116,7 +149,14 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	} 
 	private final SettingsModelBoolean param_retain_hydrogen_atoms = getParamRetainHydrogenAtoms();
 
+	// Param: Zero Occupancy is fixed atom
+	public static SettingsModelBoolean getParamZeroOcc() {
 
+		return new SettingsModelBoolean("ZERO_OCC_CFGKEY", false);
+	} 
+	private final SettingsModelBoolean param_zero_occ = getParamZeroOcc();
+	
+	
 	// Param: Find Alternative contacts
 	public static SettingsModelBoolean getParamFindAlternativeContacts() {
 
@@ -167,6 +207,8 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		// Get Structure
 		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
 
+		boolean withNOE = inData[1] != null;
+		
 		// Copy lib directory to a temporary location (because some files need to be renamed there)
 		File tempLib = Files.createTempDirectory("concoord").toFile();
 		FileUtil.copyDir(ConcoordBaseNodeModel.getLibDir(), tempLib);
@@ -189,16 +231,61 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			cmd.addInput("-p", structureContent);
 			cmd.addFlag("-r", this.param_retain_hydrogen_atoms.getBooleanValue());
 			cmd.addFlag("-nb", this.param_find_alternative_contacts.getBooleanValue());
+			cmd.addFlag("-q", this.param_zero_occ.getBooleanValue());
 			cmd.addOption("-c", this.param_cut_off_radius.getDoubleValue());
 			cmd.addOption("-m", this.param_min_dist.getIntValue());
+			cmd.addOption("-damp", this.param_damp.getDoubleValue());
 			cmd.addOutput("-od", ".dat");
 			cmd.addOutput("-op");
+
+			// Add noes if present
+			File noeFile = null;
+			if (withNOE) {
+				
+				BufferedDataTable noes = (BufferedDataTable) inData[1];
+				DataTableSpec noesSpec = noes.getDataTableSpec();
+				
+				// Figure out the indices of the columns in the data table
+				int[] indices = new int[namesNOE.length];
+				
+				for (int i = 0; i < namesNOE.length; ++i) {
+					
+					indices[i] = noesSpec.findColumnIndex(namesNOE[i]);
+				}
+				
+				noeFile = Files.createTempFile("concoord_noe", ".noe").toFile();
+				noeFile.deleteOnExit();
+				
+				try(BufferedWriter br = new BufferedWriter(new FileWriter(noeFile))) {
+				
+					// Write Header
+					br.write("[ distance_restraints ]");
+					br.newLine();
+					br.write("[ resid1 resname1 atomname1 segid1 resid2 resname2 atomname2 segid2 lowbound uppbound upppscor index restrnum ]");
+					for (DataRow row : noes) {
+						
+						br.newLine();
+						
+						for (int i = 0; i < indices.length - 1; ++i) {
+							
+							br.write(padLeft( row.getCell(indices[i]), i));
+							br.write(" ");
+						}
+						br.write(padLeft( row.getCell(indices[indices.length - 1]), indices.length - 1));
+					}
+					br.newLine();
+				}
+				cmd.addOption("-noe", noeFile.getAbsolutePath());
+			}
 
 			ExecutableNodeModel.exec(cmd.toString(), exec, new String[] {
 					String.format("CONCOORDLIB=%s", tempLib.getAbsoluteFile())	
 			}, Files.createTempDirectory("concoord_work").toFile());
 
-
+			if (withNOE) {
+				noeFile.delete();
+			}
+			
 			// Assemble data table
 			// the data table spec of the single output table, 
 			// the table will have three columns:
@@ -268,8 +355,6 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 				}
 			}
 		}
-
-
 		container.close();
 		return new BufferedDataTable[]{container.getTable()};
 	}
@@ -280,6 +365,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	@Override
 	protected void reset() {
 
+		// Nothing to do here
 	}
 
 	/**
@@ -289,6 +375,33 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
 			throws InvalidSettingsException {
 
+		if ( ! (inSpecs[0] instanceof StructurePortObjectSpec)) {
+			
+			throw new InvalidSettingsException("Port type 0 of ConcoordDist must be structure!");
+		}
+		if ( ((StructurePortObjectSpec) inSpecs[0]).getNStructures() != 1) {
+			
+			throw new InvalidSettingsException("Only one Structure allowed for ConcoordDist!");
+		}
+		
+		if (inSpecs[1] != null) {
+			
+			
+			if ( ! (inSpecs[1] instanceof DataTableSpec)) {
+				
+				throw new InvalidSettingsException("Port type 1 of ConcoordDist must be data table!");
+			}
+			
+			DataTableSpec noes = (DataTableSpec) inSpecs[1];
+			
+			for (String name : namesNOE) {
+				
+				if ( ! noes.containsName(name)) {
+					
+					throw new InvalidSettingsException("Column " + name + " is missing in NOE specification!");
+				}
+			}
+		}
 		return new DataTableSpec[]{null};
 	}
 
@@ -305,6 +418,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		this.param_atoms_margin.saveSettingsTo(settings);
 		this.param_bonds.saveSettingsTo(settings);
 		this.param_damp.saveSettingsTo(settings);
+		this.param_zero_occ.saveSettingsTo(settings);
 	}
 
 	/**
@@ -321,6 +435,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		this.param_atoms_margin.loadSettingsFrom(settings);
 		this.param_bonds.loadSettingsFrom(settings);
 		this.param_damp.loadSettingsFrom(settings);
+		this.param_zero_occ.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -337,6 +452,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		this.param_atoms_margin.validateSettings(settings);
 		this.param_bonds.validateSettings(settings);
 		this.param_damp.validateSettings(settings);
+		this.param_zero_occ.validateSettings(settings);
 	}
 
 	/**

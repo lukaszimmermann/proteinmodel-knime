@@ -44,6 +44,10 @@ public class ConcoordDistNodeDialog extends DefaultNodeSettingsPane {
 				"Retain hydrogen atoms"));
 
 		this.addDialogComponent(new DialogComponentBoolean(
+				ConcoordDistNodeModel.getParamZeroOcc(),
+				"Interpret zero occupancy as atom to keep fixed"));
+		
+		this.addDialogComponent(new DialogComponentBoolean(
 				ConcoordDistNodeModel.getParamFindAlternativeContacts(),
 				"Try to find alternatives for non-bonded interactions (by default the native contacts will be preserved). Warning: EXPERIMENTAL!"));
 
