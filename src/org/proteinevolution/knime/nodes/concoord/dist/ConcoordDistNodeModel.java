@@ -42,7 +42,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.util.FileUtil;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
@@ -210,22 +209,15 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 		boolean withNOE = inData[1] != null;
 
 		// Copy lib directory to a temporary location (because some files need to be renamed there)
-		File tempLib = Files.createTempDirectory("concoord").toFile();
-		FileUtil.copyDir(ConcoordBaseNodeModel.getLibDir(), tempLib);
-
-		// Copy atomMargin files
-		FileUtil.copy(
-				new File(tempLib, String.format("ATOMS_%s.DAT", atomsMargins.get(this.param_atoms_margin.getStringValue()))),
-				new File(tempLib, "ATOMS.DAT"), exec); 
-
-		FileUtil.copy(
-				new File(tempLib, String.format("MARGINS_%s.DAT", atomsMargins.get(this.param_atoms_margin.getStringValue()))),
-				new File(tempLib, "MARGINS.DAT"), exec); 
+		File tempLib = ConcoordBaseNodeModel.createTempLib(
+				exec,
+				atomsMargins.get(this.param_atoms_margin.getStringValue()),
+				bonds.get(this.param_bonds.getStringValue()));
 
 		// CONCOORD has no atom types for hetero atoms
 		structureContent.setOmitHET(true);
 
-		BufferedDataContainer container = null;
+		BufferedDataContainer container;
 		StructureContent structureContentResult;
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
 
@@ -387,6 +379,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			throw new InvalidSettingsException("Only one Structure allowed for ConcoordDist!");
 		}
 
+		this.param_min_dist.setIntValue(50);
 		if (inSpecs[1] != null) {
 
 
@@ -404,6 +397,9 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 					throw new InvalidSettingsException("Column " + name + " is missing in NOE specification!");
 				}
 			}
+			
+			// Recommended by CONCOORD for NOE
+			this.param_min_dist.setIntValue(1);
 		}
 		return new DataTableSpec[]{null, null};
 	}

@@ -11,12 +11,11 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.biojava.nbio.structure.StructureImpl;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.knime.core.data.DataType;
@@ -35,8 +34,8 @@ public final class StructureContent implements Serializable, Writeable {
 	private static final long serialVersionUID = -6977340626626226386L;
 	public static final DataType TYPE = DataType.getType(StructureCell.class);
 
-	private final List<List<String>> pdbStrings; // The PDB String of the structure
-	private List<StructureImpl> structureImpls;
+	private final List<String> pdbStrings; // The PDB Strings of the structures
+	private final List<StructureImpl> structureImpls;
 
 	// Whether or not hetero atoms will be written when write is used
 	private boolean omitHET = false;
@@ -75,13 +74,9 @@ public final class StructureContent implements Serializable, Writeable {
 			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
 			tempFile.deleteOnExit();
 			
-			try(BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
+			try(FileWriter fw = new FileWriter(tempFile)) {
 				
-				for (String line : this.pdbStrings.get(index)) {
-					
-					bw.write(line);
-					bw.newLine();
-				}
+				fw.write(this.pdbStrings.get(index));
 			}
 		
 			this.structureImpls.set(index, (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile()));
@@ -98,24 +93,24 @@ public final class StructureContent implements Serializable, Writeable {
 	
 	public StructureContent concatenate(final StructureContent other) {
 		
-		List<List<String>> pdbStrings = new ArrayList<List<String>>(this.pdbStrings);
-		pdbStrings.addAll(new ArrayList<List<String>>(other.pdbStrings));
+		List<String> pdbStrings = new ArrayList<String>(this.pdbStrings);
+		pdbStrings.addAll(new ArrayList<String>(other.pdbStrings));
 		
 		return new StructureContent(pdbStrings);
 	}
 	
 	public static StructureContent fromFile(final String path) throws IOException {
 		
-		List<List<String>> input = new ArrayList<List<String>>(1);
-		input.add(Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8));
+		List<String> input = new ArrayList<String>(1);
+		input.add(FileUtils.readFileToString(new File(path)));
 		
 		return new StructureContent(input);
 	}
 	
 	
-	public StructureContent(final List<List<String>> pdbStrings) {
+	public StructureContent(final List<String> pdbStrings) {
 
-		this.pdbStrings = new ArrayList<List<String>>(pdbStrings);
+		this.pdbStrings = new ArrayList<String>(pdbStrings);
 		this.structureImpls = new ArrayList<StructureImpl>(pdbStrings.size());
 		
 		for(int i = 0; i < pdbStrings.size(); ++i) {
@@ -131,14 +126,7 @@ public final class StructureContent implements Serializable, Writeable {
 
 	public String getPdbString(final int index) {
 		
-		String linesep = System.lineSeparator();
-		
-		StringBuilder sb = new StringBuilder();
-		for (String line : this.pdbStrings.get(index)) {
-			sb.append(line);
-			sb.append(linesep);
-		}
-		return sb.toString();
+		return this.pdbStrings.get(index);
 	}
 	
 	@Override
@@ -146,7 +134,7 @@ public final class StructureContent implements Serializable, Writeable {
 
 		try(BufferedWriter br = new BufferedWriter(out)) {
 
-			for(String line : this.pdbStrings.get(0)) {
+			for(String line : this.pdbStrings.get(0).split("\\r?\\n")) {
 
 				if( ! this.omitHET || ! line.startsWith("HET")) {
 

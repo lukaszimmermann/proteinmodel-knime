@@ -3,12 +3,10 @@ package org.proteinevolution.knime.nodes.input.pdbdirectoryreader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -70,13 +68,13 @@ public class PDBDirectoryReaderNodeModel extends NodeModel {
 			}
 		});
 
-		List<List<String>> input = new ArrayList<List<String>>(content.length);
+		List<String> input = new ArrayList<String>(content.length);
 		
 		for(File currentFile : content) {
 			
-			input.add(Files.readAllLines(Paths.get(currentFile.getAbsolutePath()), StandardCharsets.UTF_8));
+			input.add(FileUtils.readFileToString(currentFile));
 		}
-		
+	
 		return new StructurePortObject[] {
 
 				new StructurePortObject(
