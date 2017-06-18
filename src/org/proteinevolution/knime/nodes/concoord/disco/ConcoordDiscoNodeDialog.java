@@ -3,6 +3,7 @@ package org.proteinevolution.knime.nodes.concoord.disco;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.proteinevolution.knime.nodes.concoord.ConcoordBaseNodeModel;
 
 /**

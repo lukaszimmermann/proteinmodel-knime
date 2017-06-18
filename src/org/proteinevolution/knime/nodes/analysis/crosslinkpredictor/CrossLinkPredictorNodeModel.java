@@ -46,7 +46,6 @@ import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
-import org.proteinevolution.models.structure.LocalAtom;
 import org.proteinevolution.models.structure.UnorderedAtomPair;
 
 
@@ -74,8 +73,8 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 	private SettingsModelStringArray euc_acceptors = new SettingsModelStringArray(EUC_ACCEPTORS_CFGKEY, EUC_ACCEPTORS_DEFAULT);
 
 	private static int addRow(
-			final List<LocalAtom> atomList1,
-			final List<LocalAtom> atomList2,
+			final List<Atom> atomList1,
+			final List<Atom> atomList2,
 			final Map<UnorderedAtomPair, Integer> sasd_distances,
 			final DataContainer container,
 			int rowNumber) {
@@ -86,23 +85,23 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		for(int i = 0; i < atomList1.size(); ++i) {
 
 			int max = same ? i : sizeList2;
-			LocalAtom atom1 = atomList1.get(i);
+			Atom atom1 = atomList1.get(i);
 
 			for (int j = 0; j < max; j++) {
 
-				LocalAtom atom2 = atomList2.get(j);
+				Atom atom2 = atomList2.get(j);
 				// calculate the euclidean distance between the atoms
 				double diff1 = atom1.getX() - atom2.getX();
 				double diff2 = atom1.getY() - atom2.getY();
 				double diff3 = atom1.getZ() - atom2.getZ();
 
-				AtomIdentification atomIdent1 = atom1.getAtomIdentification();
+				AtomIdentification atomIdent1 = new AtomIdentification(atom1);
 				String resname1 = atomIdent1.getResidue().name();
 				int resi1 = atomIdent1.getResidueSeqNum();
 				String chain1 = atomIdent1.getChainId();
 				String atomname1 = atomIdent1.getAtom().repr;
 
-				AtomIdentification atomIdent2 = atom2.getAtomIdentification();
+				AtomIdentification atomIdent2 = new AtomIdentification(atom2);
 				String resname2 = atomIdent2.getResidue().name();
 				int resi2 = atomIdent2.getResidueSeqNum();
 				String chain2 = atomIdent2.getChainId();
@@ -120,7 +119,8 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 						new DefaultRow(
 								"Row"+rowNumber++,
 								new DataCell[] {
-										StringCellFactory.create( id1.compareToIgnoreCase(id2) <= 0 ? id1 + "_" + id2 : id2 + "_" + id1),
+										StringCellFactory.create(id1),
+										StringCellFactory.create(id2),
 										StringCellFactory.create(resname1),
 										IntCellFactory.create(resi1),
 										StringCellFactory.create(atomname1),
@@ -163,14 +163,13 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		Map<Residue, Set<PDBAtom>> acceptors = new HashMap<Residue, Set<PDBAtom>>();
 
 		Set<PDBAtom> lys_atoms = new HashSet<PDBAtom>();
-		lys_atoms.add(PDBAtom.CA);
+		lys_atoms.add(PDBAtom.CB);
 
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
 		// END- TODO Block
 
 		Structure structure = ((StructurePortObject) inData[0]).getStructure().getStructureImpl(0);
-
 
 		// Initialize Grid
 		Grid grid = new Grid(
@@ -179,7 +178,8 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 				acceptors);
 
 		DataColumnSpec[] allColSpecs = new DataColumnSpec[] {
-				new DataColumnSpecCreator("atom_pair_identification", StringCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("atom1", StringCell.TYPE).createSpec(),
+				new DataColumnSpecCreator("atom2", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resname1", StringCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("resid1", IntCell.TYPE).createSpec(),
 				new DataColumnSpecCreator("atomname1", StringCell.TYPE).createSpec(),
@@ -195,9 +195,9 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
 
 		// List keeping track of the acceptor/donors residues (for Euclidean distance)
-		List<LocalAtom> euc_donors = new ArrayList<LocalAtom>();
-		List<LocalAtom> euc_acceptors = new ArrayList<LocalAtom>();
-		List<LocalAtom> euc_donors_acceptors = new ArrayList<LocalAtom>();
+		List<Atom> euc_donors = new ArrayList<Atom>();
+		List<Atom> euc_acceptors = new ArrayList<Atom>();
+		List<Atom> euc_donors_acceptors = new ArrayList<Atom>();
 
 		// Figure out which atoms we care about
 		//////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +213,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		// CB atom currently hard coded (TODO)
 		Set<PDBAtom> atoms_euclidean = new HashSet<PDBAtom>();
-		atoms_euclidean.add(PDBAtom.CA);
+		atoms_euclidean.add(PDBAtom.CB);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
 		Atom[] structureAtoms = StructureTools.getAllNonHAtomArray(structure, false);
@@ -245,20 +245,18 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 			if (isEucDonor || isEucAcceptor) {
 
-				LocalAtom currentAtom = new LocalAtom(x,y,z, new AtomIdentification(pdbatom, residue, resid, chain));
-
 				if (isEucDonor && isEucAcceptor) {
 
-					euc_donors_acceptors.add(currentAtom);
+					euc_donors_acceptors.add(atom);
 
 				} else if (isEucDonor) {
 
-					euc_donors.add(currentAtom);
+					euc_donors.add(atom);
 
 					// Must be acceptor
 				} else {
 
-					euc_acceptors.add(currentAtom);
+					euc_acceptors.add(atom);
 				}
 			}
 		}
@@ -298,7 +296,8 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 					new DefaultRow(
 							"Row"+rowCounter++,
 							new DataCell[] {
-									StringCellFactory.create(id1.compareToIgnoreCase(id2) <= 0 ? id1 + "_" + id2 : id2 + "_" + id1),
+									StringCellFactory.create(id1),
+									StringCellFactory.create(id2),
 									StringCellFactory.create(resname1),
 									IntCellFactory.create(resi1),
 									StringCellFactory.create(atomname1),

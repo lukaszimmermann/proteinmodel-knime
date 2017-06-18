@@ -18,7 +18,6 @@ import org.knime.core.node.NodeLogger;
 import org.proteinevolution.models.spec.pdb.PDBAtom;
 import org.proteinevolution.models.spec.pdb.Residue;
 import org.proteinevolution.models.structure.AtomIdentification;
-import org.proteinevolution.models.structure.LocalAtom;
 import org.proteinevolution.models.structure.UnorderedAtomPair;
 
 /*
@@ -34,32 +33,32 @@ final class Grid implements Serializable {
 	private static final int margin = 5; // No. of columns of solvent at the edge of the grid
 
 	// Grid is blocked by at least another atom which is no donor or acceptor atom
-	private static final byte OCCUPIED = 127;
+	private static final int OCCUPIED = Integer.MAX_VALUE;
 
 	// Solvent threshold; everything below this value will be considered as solvent (allows fast resetting of the grid after the BFS has been performed)
-	private byte flag_threshold = Byte.MIN_VALUE + 1;
+	private int flag_threshold = Integer.MIN_VALUE + 1;
 
 
 	// End of STATIC //////////////////////////////////////////////////////////////////////////////////////////
 
 	// the actual grid
-	private byte[][][] grid;
+	private int[][][] grid;
 
 	// which residues are considered as donors and acceptors in this commit
 	private final Map<Residue, Set<PDBAtom>> donors;
 	private final Map<Residue, Set<PDBAtom>> acceptors;
 
 	// List all the donors and acceptors that we have encountered during addAtom
-	private final List<LocalAtom> atoms; 
-	private final List<Byte> donor_acceptor;
-	private byte atomIdentIndex = -1;
+	private final List<Atom> atoms; 
+	private final List<Integer> donor_acceptor;
+	private int atomIdentIndex = -1;
 	private final Map<UnorderedAtomPair, Integer> sasd_distances;
 
 
 	// FLAGS for the donor acceptor list
-	private static final byte DONOR = 0;
-	private static final byte ACCEPTOR = 1;
-	private static final byte DONOR_ACCEPTOR = 2;
+	private static final int DONOR = 0;
+	private static final int ACCEPTOR = 1;
+	private static final int DONOR_ACCEPTOR = 2;
 
 
 	// Number of cells of the grid in each dimension (triclinic)
@@ -81,8 +80,10 @@ final class Grid implements Serializable {
 			final Map<Residue, Set<PDBAtom>> donors,
 			final Map<Residue, Set<PDBAtom>> acceptors) {
 
-		this.atoms = new ArrayList<LocalAtom>();
-		this.donor_acceptor = new ArrayList<Byte>();
+		logger.warn("Grid constructor called");
+		
+		this.atoms = new ArrayList<Atom>();
+		this.donor_acceptor = new ArrayList<Integer>();
 		this.sasd_distances = new HashMap<UnorderedAtomPair, Integer>();
 
 		this.donors = donors;
@@ -100,6 +101,7 @@ final class Grid implements Serializable {
 		// The atoms of the structure that we are interested in for the grid
 		Atom[] gridAtoms = StructureTools.getAllNonHAtomArray(structure, false);
 
+		logger.warn("Searching grid boundaries");
 		for (Atom atom : gridAtoms) {
 
 			// Atom coordinates
@@ -115,6 +117,7 @@ final class Grid implements Serializable {
 			upper_y = y > upper_y ? y : upper_y;
 			upper_z = z > upper_z ? z : upper_z;   
 		}
+		logger.warn("Finish grid boundaries");
 		// Set grid dimensions
 		this.x_dim = (int) (Math.ceil(upper_x - lower_x) + 2 * margin);
 		this.y_dim = (int) (Math.ceil(upper_y - lower_y) + 2 * margin);
@@ -129,43 +132,29 @@ final class Grid implements Serializable {
 		this.size = this.x_dim * this.y_dim * this.z_dim;
 
 		// Initialize Grid
-		this.grid = new byte[this.x_dim][this.y_dim][this.z_dim];
+		logger.warn("INIT Grid");
+		this.grid = new int[this.x_dim][this.y_dim][this.z_dim];		
+		for (int i = 0; i < this.x_dim  ; ++i) {
 
-		// Set the border region of the grid to BORDER, to prevent 'falling off' the grid
-		for (int i = 1; i < this.x_dim - 1 ; ++i) {
+			for (int j = 0; j < this.y_dim; ++j) {
+								
+				// j == 0 or j == this_ydim-1
+				for (int k = 0; k < this.z_dim; ++k) {
 
-			for (int j = 1; j < this.y_dim -1; ++j) {
-
-				this.grid[i][j][0] = Grid.OCCUPIED;
-				this.grid[i][j][this.z_dim - 1] = Grid.OCCUPIED;
-
-				for (int k = 1; k < this.z_dim -1; ++k) {
-
-					this.grid[i][j][k] = Byte.MIN_VALUE;
+					this.grid[i][j][k] =
+							   i == 0  || i == this.x_dim - 1
+							|| j == 0  || j == this.y_dim - 1 
+							|| k == 0  || k == this.z_dim - 1 ? Grid.OCCUPIED : Integer.MIN_VALUE; 
 				}
 			}
-
-			// j == 0 or j == this_ydim-1
-			for (int k = 0; k < this.z_dim; ++k) {
-
-				this.grid[i][0][k] = Grid.OCCUPIED; 
-				this.grid[i][this.y_dim - 1][k] = Grid.OCCUPIED;
-			}
 		}
 
-		for (int j = 0; j <  this.y_dim - 1; ++j) {
-
-			for (int k = 0; k < this.z_dim - 1; ++k) {
-
-				this.grid[0][j][k] = Grid.OCCUPIED;
-				this.grid[this.x_dim - 1][j][k] = Grid.OCCUPIED;
-			}
-		}
-
+		logger.warn("Start adding atoms to grid");
 		for (Atom atom : gridAtoms) {
 
-			this.addAtom(new LocalAtom(atom.getX(), atom.getY(), atom.getZ(), new AtomIdentification(atom)));
-		}		
+			this.addAtom(atom);
+		}
+		logger.warn("Grid has been built");
 	}
 
 	private int translateX(final double value) {
@@ -230,17 +219,17 @@ final class Grid implements Serializable {
 	}
 
 	public void performBFS() {
-
+		
 		// The BFS is repeated for all localAtoms stored in the grid, we go from right to left
-		for (byte sourceIndex = this.atomIdentIndex; sourceIndex > -1; --sourceIndex) {
+		for (int sourceIndex = this.atomIdentIndex; sourceIndex > -1; --sourceIndex) {
 
-			LocalAtom atom = this.atoms.get(sourceIndex);
-			int[] start = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getAtomIdentification().getAtom().element);
+			Atom atom = this.atoms.get(sourceIndex);
+			int[] start = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getElement());
 
-			// Make sure that the Atom is 
+			// If the atom is not accessible, skip
 			if ( start == null) {
 
-				throw new IllegalStateException("No donor or acceptor cell accessible from this coordinates. BFS cannot be started");
+				continue;
 			}
 
 			// Used for performing the BFS
@@ -260,7 +249,7 @@ final class Grid implements Serializable {
 			z_queue.add(current_z);
 			length.add(current_length);
 
-			Set<Byte> lookingFor = new HashSet<Byte>(); 
+			Set<Integer> lookingFor = new HashSet<Integer>(); 
 			lookingFor.add(Grid.DONOR_ACCEPTOR);
 			switch (this.donor_acceptor.get(sourceIndex)) {
 
@@ -283,13 +272,13 @@ final class Grid implements Serializable {
 
 			// Indices of donors that we have already found 
 			// Because the distance is symmetrical, we already found all atoms above this index
-			Set<Byte> found = new HashSet<Byte>();		
-			for (byte i = sourceIndex; i < this.atomIdentIndex + 1; ++i) {
+			Set<Integer> found = new HashSet<Integer>();		
+			for (int i = sourceIndex; i < this.atomIdentIndex + 1; ++i) {
 
 				found.add(i);
 			}
 
-			byte current_dir;
+			int current_dir;
 
 			do {
 				// Get next grid point and the length
@@ -297,7 +286,7 @@ final class Grid implements Serializable {
 				current_y = y_queue.poll();
 				current_z = z_queue.poll();
 				current_length = length.poll();
-
+				
 				// Direction 1
 				current_dir = this.grid[current_x-1][current_y][current_z];		
 				if (current_dir < this.flag_threshold) {
@@ -321,8 +310,8 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 				}
 
@@ -344,8 +333,8 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 				} 
 
@@ -369,8 +358,8 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 
 				} 
@@ -394,8 +383,8 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 
 				} 
@@ -420,8 +409,8 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 				}
 
@@ -444,18 +433,22 @@ final class Grid implements Serializable {
 					// Assemble a distance pair for this finding
 					this.sasd_distances.put(
 							new UnorderedAtomPair(
-									atom.getAtomIdentification(),
-									this.atoms.get(current_dir).getAtomIdentification()), current_length);
+									new AtomIdentification(atom),
+									new AtomIdentification(atoms.get(current_dir))), current_length);
 					found.add(current_dir);
 				}
 
 
 				// Break if the queue is empty or we already found all possible donor, acceptors
-			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() );
+			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() && current_length < 80);
 
 			// BFS has finished. 
 			// Increase flag threshold
 			this.flag_threshold++;
+			if(this.flag_threshold == 0) {
+				
+				throw new RuntimeException("Grid is Exhausted. Cannot continue");
+			}
 		}
 	}
 
@@ -498,20 +491,22 @@ final class Grid implements Serializable {
 
 		// Space to block is determined by the VDW radius of the atom
 		double radius = element.getVDWRadius();
+		double radius2 = radius*radius;
 
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
 			int coord_x_1 = this.translateX(x + x_iter);
 			int coord_x_2 = this.translateX(x - x_iter);
 
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
-
+			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
+			double x_radius2 = x_radius*x_radius;
+			
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
 				int coord_y_2 = this.translateY(y - y_iter);
 
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+				double y_radius = Math.sqrt(x_radius2 - y_iter*y_iter);
 
 				for (double z_iter = 0; z_iter < y_radius; z_iter++) {
 
@@ -527,7 +522,7 @@ final class Grid implements Serializable {
 					this.grid[coord_x_2][coord_y_2][coord_z_1] = Grid.OCCUPIED;
 					this.grid[coord_x_2][coord_y_2][coord_z_2] = Grid.OCCUPIED;
 				}
-				// Update cells or z_iter = y_radius
+				// Update cells for z_iter = y_radius
 				int coord_z_1 = this.translateZ(z + y_radius);
 				int coord_z_2 = this.translateZ(z - y_radius);
 
@@ -573,9 +568,9 @@ final class Grid implements Serializable {
 	 * @param residue
 	 * @param atom
 	 */
-	public void addAtom(final LocalAtom atom) {
+	public void addAtom(final Atom atom) {
 
-		AtomIdentification atomIdentification = atom.getAtomIdentification();
+		AtomIdentification atomIdentification = new AtomIdentification(atom);
 		double x = atom.getX();
 		double y = atom.getY();
 		double z = atom.getZ();		
@@ -593,8 +588,7 @@ final class Grid implements Serializable {
 
 		// occupy the vdW volume of the atom (Might be inlined)
 		this.occupyVDW(x, y, z, pdbatom.element);
-
-		// If the current atom is donor or acceptor, the 
+		
 		if (isDonor || isAcceptor) {
 
 			if (this.atoms.contains(atom)) {
@@ -621,20 +615,22 @@ final class Grid implements Serializable {
 	private void makeAccessible(double x, double y, double z, double vdwRadius) {
 
 		double radius = vdwRadius + 1;
-
+		double radius2 = radius*radius;
+		
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
 			int coord_x_1 = this.translateX(x + x_iter);
 			int coord_x_2 = this.translateX(x - x_iter);
 
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
-
+			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
+			double x_radius2 = x_radius*x_radius;
+			
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
 				int coord_y_2 = this.translateY(y - y_iter);
 
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+				double y_radius = Math.sqrt(x_radius2 - y_iter*y_iter);
 
 				// Update cells or z_iter = y_radius
 				int coord_z_1 = this.translateZ(z + y_radius);
@@ -680,20 +676,22 @@ final class Grid implements Serializable {
 
 
 		double radius = element.getVDWRadius() + 1;
-
+		double radius2 = radius*radius;
+		
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
 			int coord_x_1 = this.translateX(x + x_iter);
 			int coord_x_2 = this.translateX(x - x_iter);
 
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
+			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
+			double x_radius2 = x_radius*x_radius; 
 
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
 				int coord_y_2 = this.translateY(y - y_iter);
 
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+				double y_radius = Math.sqrt(x_radius2 - y_iter*y_iter);
 
 				// Update cells or z_iter = y_radius
 				int coord_z_1 = this.translateZ(z + y_radius);
@@ -783,7 +781,8 @@ final class Grid implements Serializable {
 			final Element element) {
 
 		double radius = element.getVDWRadius() + 1;
-
+		double radius2 = radius*radius;
+		
 		double numerator = 0;
 		double denominator = 0;
 
@@ -792,14 +791,15 @@ final class Grid implements Serializable {
 			int coord_x_1 = this.translateX(x + x_iter);
 			int coord_x_2 = this.translateX(x - x_iter);
 
-			double x_radius = Math.sin(Math.acos(x_iter/radius)) * radius;
+			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
+			double x_radius2 = x_radius*x_radius;
 
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
 				int coord_y_2 = this.translateY(y - y_iter);
 
-				double y_radius = Math.sin(Math.acos(y_iter/x_radius)) * x_radius;
+				double y_radius = Math.sqrt(x_radius2 - y_iter*y_iter);
 
 				// Update cells or z_iter = y_radius
 				int coord_z_1 = this.translateZ(z + y_radius);
