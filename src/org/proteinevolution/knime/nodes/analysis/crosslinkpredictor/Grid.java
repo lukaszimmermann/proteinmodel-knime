@@ -440,7 +440,7 @@ final class Grid implements Serializable {
 
 
 				// Break if the queue is empty or we already found all possible donor, acceptors
-			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() && current_length < 80);
+			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() && current_length < 60);
 
 			// BFS has finished. 
 			// Increase flag threshold

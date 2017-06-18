@@ -163,7 +163,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		Map<Residue, Set<PDBAtom>> acceptors = new HashMap<Residue, Set<PDBAtom>>();
 
 		Set<PDBAtom> lys_atoms = new HashSet<PDBAtom>();
-		lys_atoms.add(PDBAtom.CB);
+		lys_atoms.add(PDBAtom.CA);
 
 		donors.put(Residue.LYS, lys_atoms);
 		acceptors.put(Residue.LYS, lys_atoms);
@@ -213,7 +213,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		// CB atom currently hard coded (TODO)
 		Set<PDBAtom> atoms_euclidean = new HashSet<PDBAtom>();
-		atoms_euclidean.add(PDBAtom.CB);
+		atoms_euclidean.add(PDBAtom.CA);
 		//////////////////////////////////////////////////////////////////////////////////////////////
 
 		Atom[] structureAtoms = StructureTools.getAllNonHAtomArray(structure, false);

@@ -63,8 +63,8 @@ public class FastaIndexerNodeDialog extends DefaultNodeSettingsPane {
         		new SettingsModelColumnName(
         				FastaIndexerNodeModel.PROT_CFGKEY,
         				FastaIndexerNodeModel.PROT_DEFAULT),
-        		"String Set with ProtIDs. <none> for exhaustive searching.",
-        		0, true, true, SetCell.getCollectionType(StringCell.TYPE).getPreferredValueClass()));
+        		"String Set with ProtIDs.",
+        		0, true, false, SetCell.getCollectionType(StringCell.TYPE).getPreferredValueClass()));
         
         // modification
         this.addDialogComponent(new DialogComponentStringSelection(
