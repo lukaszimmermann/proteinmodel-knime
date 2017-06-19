@@ -101,7 +101,7 @@ public class StructurePortObject extends AbstractPortObject {
 		JPanel left = new JPanel();
 	
 		
-		Integer[] labels = new Integer[this.m_content.getNoStructures()];
+		Integer[] labels = new Integer[this.m_content.getNumberOfStructures()];
 		
 		for(int i = 0; i < labels.length; ++i) {
 			

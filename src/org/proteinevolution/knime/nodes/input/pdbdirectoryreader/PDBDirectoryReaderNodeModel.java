@@ -57,7 +57,7 @@ public class PDBDirectoryReaderNodeModel extends NodeModel {
 
 				new StructurePortObject(
 						structureContent,
-						new StructurePortObjectSpec(StructureContent.TYPE, structureContent.getNoStructures()))
+						new StructurePortObjectSpec(StructureContent.TYPE, structureContent.getNumberOfStructures()))
 		};
 	}
 

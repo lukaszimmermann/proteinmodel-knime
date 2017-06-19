@@ -125,7 +125,7 @@ public class ConcoordDiscoNodeModel extends ConcoordBaseNodeModel {
 				new StructurePortObject(
 						structureContent,
 						new StructurePortObjectSpec(StructureContent.TYPE,
-								structureContent.getNoStructures()))
+								structureContent.getNumberOfStructures()))
 		};
 	}
 

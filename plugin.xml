@@ -42,6 +42,7 @@
 <node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory"/>
 <node category-path="/" factory-class="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory" id="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory" id="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory"/>
 </extension>
    
    

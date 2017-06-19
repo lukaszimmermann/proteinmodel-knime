@@ -85,8 +85,20 @@ public final class StructureContent implements Serializable, Writeable {
 		}
 		return this.structureImpls.get(index);
 	}
+	
+	public StructureImpl[] getAllStructureImpl() throws IOException {
+		
+		int nStructures = this.getNumberOfStructures();
+		StructureImpl[] result = new StructureImpl[nStructures];
+		
+		for (int i = 0; i < nStructures; ++i) {
+			
+			result[i] = this.getStructureImpl(i);
+		}
+		return result;
+	}
 
-	public int getNoStructures() {
+	public int getNumberOfStructures() {
 
 		return this.pdbStrings.size();
 	}
