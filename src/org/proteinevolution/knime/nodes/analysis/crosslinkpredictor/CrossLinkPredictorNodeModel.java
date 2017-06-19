@@ -220,23 +220,15 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 
 		// Fetch the Euclidean distances
 		for (Atom atom : structureAtoms) {
-			
+
 			PDBAtom pdbatom = PDBAtom.of(atom.getName());			
 			AminoAcid aminoAcid = (AminoAcid) atom.getGroup();
-			
+
 			// Continue if we do not care about this atom at all
 			if ( ! atoms_euclidean.contains(pdbatom)) {
-				
+
 				continue;
 			}
-
-			// Get required attributes of the atom
-			double x = atom.getX();
-			double y = atom.getY();
-			double z = atom.getZ();			
-			
-			int resid = aminoAcid.getResidueNumber().getSeqNum();
-			String chain = aminoAcid.getChainId();
 			Residue residue = Residue.aaOf(aminoAcid.getAminoType());
 
 			//  Type (Donor/Acceptor) for Euclidean
@@ -336,7 +328,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 			throw new InvalidSettingsException("Inport Type of CrossLinkPredictor must be Structure");
 		}
 		if (((StructurePortObjectSpec) inSpecs[0]).getNStructures() != 1) {
-			
+
 			throw new InvalidSettingsException("Only one structure allowed for crosslink prediction!");
 		}
 
