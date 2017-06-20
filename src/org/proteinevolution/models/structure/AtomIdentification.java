@@ -30,17 +30,7 @@ public final class AtomIdentification implements Serializable {
 		this.residue = Residue.aaOf(aa.getAminoType());
 		this.residueNumber = aa.getResidueNumber();
 	}
-	
-	public AtomIdentification(final PDBAtom pdbatom, final Residue residue, final int resid, final String chain) {
 		
-		this.pdbatom = pdbatom;
-		this.residue = residue;
-		this.residueNumber = new ResidueNumber();
-		this.residueNumber.setChainId(chain);
-		this.residueNumber.setSeqNum(resid);
-	}
-
-	
 	public PDBAtom getAtom() {
 
 		return this.pdbatom;
