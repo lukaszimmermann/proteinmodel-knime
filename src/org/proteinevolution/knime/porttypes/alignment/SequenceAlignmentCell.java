@@ -12,11 +12,14 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
+import org.knime.core.data.DataType;
 
 public class SequenceAlignmentCell extends DataCell {
 
 	private static final long serialVersionUID = -2360592608089151987L;
 
+	public static final DataType TYPE = DataType.getType(SequenceAlignmentCell.class);
+	
 	/**
 	 * Serializer for {@link SequenceAlignmentCell}.
 	 *

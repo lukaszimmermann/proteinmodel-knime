@@ -12,11 +12,14 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
+import org.knime.core.data.DataType;
 
 public class StructureCell extends DataCell {
 
 	private static final long serialVersionUID = 2833266670643350235L;
 
+	public static final DataType TYPE = DataType.getType(StructureCell.class);
+	
 	/**
 	 * Serializer for {@link StructureCell}.
 	 *
