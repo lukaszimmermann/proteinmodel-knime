@@ -71,13 +71,20 @@ public class StructureCell extends DataCell {
 
 	public StructureCell(final StructureContent content) {
 
-		if (content == null) {
+		// The assumption is that the StructureContent class is immutable
+		this.m_content = content;
+		
+		if (this.m_content == null) {
 
 			throw new NullPointerException("Argument must not be null.");
 		}
-		this.m_content = content;
 	}
 
+	public StructureContent getContent() {
+		
+		return this.m_content;
+	}
+	
 
 	@Override
 	public String toString() {

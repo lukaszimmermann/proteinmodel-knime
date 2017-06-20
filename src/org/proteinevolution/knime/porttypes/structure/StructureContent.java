@@ -41,6 +41,8 @@ public final class StructureContent implements Serializable, Writeable {
 	// Whether or not hetero atoms will be written when write is used
 	private boolean omitHET = false;
 
+
+	// Constructors
 	public StructureContent(final InputStream in) throws IOException  {
 
 		// Warning: in is not allowed to be closed here
@@ -67,49 +69,14 @@ public final class StructureContent implements Serializable, Writeable {
 			this.structureImpls.add(null);
 		}
 	}
-
-	public StructureImpl getStructureImpl(final int index) throws IOException {
-
-		if (this.structureImpls.get(index) == null) {
-
-			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
-			tempFile.deleteOnExit();
-
-			try(FileWriter fw = new FileWriter(tempFile)) {
-
-				fw.write(this.pdbStrings.get(index));
-			}
-
-			this.structureImpls.set(index, (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile()));
-			tempFile.delete();
-		}
-		return this.structureImpls.get(index);
-	}
 	
-	public StructureImpl[] getAllStructureImpl() throws IOException {
-		
-		int nStructures = this.getNumberOfStructures();
-		StructureImpl[] result = new StructureImpl[nStructures];
-		
-		for (int i = 0; i < nStructures; ++i) {
-			
-			result[i] = this.getStructureImpl(i);
-		}
-		return result;
-	}
+	// Copy constructor
+	public StructureContent(final StructureContent structureContent) {
 
-	public int getNumberOfStructures() {
-
-		return this.pdbStrings.size();
-	}
-
-
-	public StructureContent concatenate(final StructureContent other) {
-
-		List<String> pdbStrings = new ArrayList<String>(this.pdbStrings);
-		pdbStrings.addAll(new ArrayList<String>(other.pdbStrings));
-
-		return new StructureContent(pdbStrings);
+		// safe copy the lists
+		this.pdbStrings = new ArrayList<String>(structureContent.pdbStrings);
+		this.structureImpls = new ArrayList<StructureImpl>(structureContent.structureImpls);
+		assert this.pdbStrings.size() == this.structureImpls.size();
 	}
 
 	public static StructureContent fromFile(final String path) throws IOException {
@@ -143,8 +110,6 @@ public final class StructureContent implements Serializable, Writeable {
 		return new StructureContent(input);
 	}
 
-
-
 	public StructureContent(final List<String> pdbStrings) {
 
 		this.pdbStrings = new ArrayList<String>(pdbStrings);
@@ -152,23 +117,70 @@ public final class StructureContent implements Serializable, Writeable {
 
 		// At least one PDB string must be provided
 		if (this.pdbStrings.size() < 1) {
-			
+
 			throw new IllegalArgumentException("At least one PDB Stribg must be provided to the constructor of StructureContent");
 		}
-		
+
 		for(int i = 0; i < pdbStrings.size(); ++i) {
 
 			this.structureImpls.add(null);
 		}
 	}
-	
+
 	public StructureContent(final String pdbString) {
-		
+
 		this.pdbStrings = new ArrayList<String>(1);
 		this.pdbStrings.add(pdbString);
-		
+
 		this.structureImpls = new ArrayList<StructureImpl>(1);
 		this.structureImpls.add(null);
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	public StructureImpl getStructureImpl(final int index) throws IOException {
+
+		if (this.structureImpls.get(index) == null) {
+
+			File tempFile = Files.createTempFile("structureContent", ".pdb").toFile();
+			tempFile.deleteOnExit();
+
+			try(FileWriter fw = new FileWriter(tempFile)) {
+
+				fw.write(this.pdbStrings.get(index));
+			}
+
+			this.structureImpls.set(index, (StructureImpl) (new PDBFileReader()).getStructure(tempFile.getAbsoluteFile()));
+			tempFile.delete();
+		}
+		return this.structureImpls.get(index);
+	}
+
+	public StructureImpl[] getAllStructureImpl() throws IOException {
+
+		int nStructures = this.getNumberOfStructures();
+		StructureImpl[] result = new StructureImpl[nStructures];
+
+		for (int i = 0; i < nStructures; ++i) {
+
+			result[i] = this.getStructureImpl(i);
+		}
+		return result;
+	}
+
+	public int getNumberOfStructures() {
+
+		return this.pdbStrings.size();
+	}
+
+
+	public StructureContent concatenate(final StructureContent other) {
+
+		List<String> pdbStrings = new ArrayList<String>(this.pdbStrings);
+		pdbStrings.addAll(new ArrayList<String>(other.pdbStrings));
+
+		return new StructureContent(pdbStrings);
 	}
 
 	public void setOmitHET(final boolean b) {
@@ -182,12 +194,12 @@ public final class StructureContent implements Serializable, Writeable {
 	}
 
 	public List<String> getAllPdbStrings() {
-		
+
 		// Provide safe copy
 		return new ArrayList<String>(this.pdbStrings);
 	}
-	
-	
+
+
 	@Override
 	public void write(final Writer out) throws IOException {
 
