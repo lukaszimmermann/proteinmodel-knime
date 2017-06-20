@@ -226,8 +226,6 @@ final class Grid implements Serializable {
 			Atom atom = this.atoms.get(sourceIndex);
 			List<int[]> candidates = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getElement());
 
-
-
 			// Grid search for each candidate
 			for(int[] start : candidates) {
 
@@ -430,11 +428,16 @@ final class Grid implements Serializable {
 							&& ! found.contains(current_dir)
 							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
 
-						// Assemble a distance pair for this finding
-						this.sasd_distances.put(
-								new UnorderedAtomPair(
-										new AtomIdentification(atom),
-										new AtomIdentification(atoms.get(current_dir))), current_length);
+						UnorderedAtomPair unorderedAtomPair = new UnorderedAtomPair(
+								new AtomIdentification(atom),
+								new AtomIdentification(atoms.get(current_dir)));
+
+						if (    ! this.sasd_distances.containsKey(unorderedAtomPair) 
+							 ||   current_length < this.sasd_distances.get(unorderedAtomPair)) {
+
+							this.sasd_distances.put(unorderedAtomPair, current_length);
+						}
+
 						found.add(current_dir);
 					}
 
