@@ -150,10 +150,25 @@ public final class StructureContent implements Serializable, Writeable {
 		this.pdbStrings = new ArrayList<String>(pdbStrings);
 		this.structureImpls = new ArrayList<StructureImpl>(pdbStrings.size());
 
+		// At least one PDB string must be provided
+		if (this.pdbStrings.size() < 1) {
+			
+			throw new IllegalArgumentException("At least one PDB Stribg must be provided to the constructor of StructureContent");
+		}
+		
 		for(int i = 0; i < pdbStrings.size(); ++i) {
 
 			this.structureImpls.add(null);
 		}
+	}
+	
+	public StructureContent(final String pdbString) {
+		
+		this.pdbStrings = new ArrayList<String>(1);
+		this.pdbStrings.add(pdbString);
+		
+		this.structureImpls = new ArrayList<StructureImpl>(1);
+		this.structureImpls.add(null);
 	}
 
 	public void setOmitHET(final boolean b) {
@@ -166,6 +181,13 @@ public final class StructureContent implements Serializable, Writeable {
 		return this.pdbStrings.get(index);
 	}
 
+	public List<String> getAllPdbStrings() {
+		
+		// Provide safe copy
+		return new ArrayList<String>(this.pdbStrings);
+	}
+	
+	
 	@Override
 	public void write(final Writer out) throws IOException {
 
