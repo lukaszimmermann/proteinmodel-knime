@@ -2,7 +2,7 @@ package org.proteinevolution.models.structure;
 
 import java.util.Objects;
 
-public class UnorderedAtomPair {
+public final class UnorderedAtomPair {
 
 	private final AtomIdentification atom1;
 	private final AtomIdentification atom2;
@@ -24,21 +24,6 @@ public class UnorderedAtomPair {
 		return this.atom2;
 	}
 	
-	
-	public AtomIdentification getOther(final AtomIdentification atomIdent) {
-		
-		if (atomIdent.equals(this.atom1)) {
-			
-			return this.atom2;
-		}
-		if (atomIdent.equals(this.atom2)) {
-			
-			return this.atom1;
-		}
-		return null;
-	}
-	
-	
 	@Override
 	public boolean equals(Object o) {
 		
@@ -53,8 +38,8 @@ public class UnorderedAtomPair {
 		UnorderedAtomPair other = (UnorderedAtomPair) o;
 		
 		// pair is symmetric
-		return   other.atom1.equals(this.atom1) && other.atom2.equals(this.atom2)
-			  || other.atom1.equals(this.atom2) && other.atom2.equals(this.atom1);
+		return   (other.atom1.equals(this.atom1) && other.atom2.equals(this.atom2))
+			  || (other.atom1.equals(this.atom2) && other.atom2.equals(this.atom1));
 	}
 	
 	@Override
