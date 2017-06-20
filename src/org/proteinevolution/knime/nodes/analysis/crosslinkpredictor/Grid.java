@@ -81,7 +81,7 @@ final class Grid implements Serializable {
 			final Map<Residue, Set<PDBAtom>> acceptors) {
 
 		logger.warn("Grid constructor called");
-		
+
 		this.atoms = new ArrayList<Atom>();
 		this.donor_acceptor = new ArrayList<Integer>();
 		this.sasd_distances = new HashMap<UnorderedAtomPair, Integer>();
@@ -137,12 +137,12 @@ final class Grid implements Serializable {
 		for (int i = 0; i < this.x_dim  ; ++i) {
 
 			for (int j = 0; j < this.y_dim; ++j) {
-								
+
 				// j == 0 or j == this_ydim-1
 				for (int k = 0; k < this.z_dim; ++k) {
 
 					this.grid[i][j][k] =
-							   i == 0  || i == this.x_dim - 1
+							i == 0  || i == this.x_dim - 1
 							|| j == 0  || j == this.y_dim - 1 
 							|| k == 0  || k == this.z_dim - 1 ? Grid.OCCUPIED : Integer.MIN_VALUE; 
 				}
@@ -219,236 +219,237 @@ final class Grid implements Serializable {
 	}
 
 	public void performBFS() {
-		
+
 		// The BFS is repeated for all localAtoms stored in the grid, we go from right to left
 		for (int sourceIndex = this.atomIdentIndex; sourceIndex > -1; --sourceIndex) {
 
 			Atom atom = this.atoms.get(sourceIndex);
-			int[] start = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getElement());
+			List<int[]> candidates = this.queryAtom(atom.getX(), atom.getY(), atom.getZ(), atom.getElement());
 
-			// If the atom is not accessible, skip
-			if ( start == null) {
 
-				continue;
-			}
 
-			// Used for performing the BFS
-			Queue<Integer> x_queue = new LinkedList<Integer>();
-			Queue<Integer> y_queue = new LinkedList<Integer>();
-			Queue<Integer> z_queue = new LinkedList<Integer>();
-			Queue<Integer> length = new LinkedList<Integer>();
+			// Grid search for each candidate
+			for(int[] start : candidates) {
 
-			// Set initial current value of the grid search
-			int current_x = start[0];
-			int current_y = start[1];
-			int current_z = start[2];
-			int current_length = 0;
 
-			x_queue.add(current_x);
-			y_queue.add(current_y);
-			z_queue.add(current_z);
-			length.add(current_length);
+				// Used for performing the BFS
+				Queue<Integer> x_queue = new LinkedList<Integer>();
+				Queue<Integer> y_queue = new LinkedList<Integer>();
+				Queue<Integer> z_queue = new LinkedList<Integer>();
+				Queue<Integer> length = new LinkedList<Integer>();
 
-			Set<Integer> lookingFor = new HashSet<Integer>(); 
-			lookingFor.add(Grid.DONOR_ACCEPTOR);
-			switch (this.donor_acceptor.get(sourceIndex)) {
+				// Set initial current value of the grid search
+				int current_x = start[0];
+				int current_y = start[1];
+				int current_z = start[2];
+				int current_length = 0;
 
-			case Grid.DONOR_ACCEPTOR:
+				x_queue.add(current_x);
+				y_queue.add(current_y);
+				z_queue.add(current_z);
+				length.add(current_length);
 
-				lookingFor.add(Grid.DONOR);
-				lookingFor.add(Grid.ACCEPTOR);
-				break;
+				Set<Integer> lookingFor = new HashSet<Integer>(); 
+				lookingFor.add(Grid.DONOR_ACCEPTOR);
+				switch (this.donor_acceptor.get(sourceIndex)) {
 
-			case Grid.DONOR:
+				case Grid.DONOR_ACCEPTOR:
 
-				lookingFor.add(Grid.ACCEPTOR);
-				break;
+					lookingFor.add(Grid.DONOR);
+					lookingFor.add(Grid.ACCEPTOR);
+					break;
 
-			case Grid.ACCEPTOR:
+				case Grid.DONOR:
 
-				lookingFor.add(Grid.DONOR);
-				break;
-			}
+					lookingFor.add(Grid.ACCEPTOR);
+					break;
 
-			// Indices of donors that we have already found 
-			// Because the distance is symmetrical, we already found all atoms above this index
-			Set<Integer> found = new HashSet<Integer>();		
-			for (int i = sourceIndex; i < this.atomIdentIndex + 1; ++i) {
+				case Grid.ACCEPTOR:
 
-				found.add(i);
-			}
-
-			int current_dir;
-
-			do {
-				// Get next grid point and the length
-				current_x = x_queue.poll();
-				current_y = y_queue.poll();
-				current_z = z_queue.poll();
-				current_length = length.poll();
-				
-				// Direction 1
-				current_dir = this.grid[current_x-1][current_y][current_z];		
-				if (current_dir < this.flag_threshold) {
-
-					x_queue.add(current_x-1);
-					y_queue.add(current_y);
-					z_queue.add(current_z);
-					this.grid[current_x-1][current_y][current_z] = this.flag_threshold;
-					length.add(current_length+1);
-
-					// We have the following case:
-					// * Not solvent (current_dir > -1)
-					// * Grid not occupied (current_dir != OCCUPIED)
-					// * Associated atom has not already been found (! found.cintains(current_dir)
-					// * we are looking for that kind of atom
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
-
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
+					lookingFor.add(Grid.DONOR);
+					break;
 				}
 
-				// Direction 2
-				current_dir = this.grid[current_x+1][current_y][current_z];						
-				if (current_dir < this.flag_threshold) {
+				// Indices of donors that we have already found 
+				// Because the distance is symmetrical, we already found all atoms above this index
+				Set<Integer> found = new HashSet<Integer>();		
+				for (int i = sourceIndex; i < this.atomIdentIndex + 1; ++i) {
 
-					x_queue.add(current_x+1);
-					y_queue.add(current_y);
-					z_queue.add(current_z);
-					this.grid[current_x+1][current_y][current_z] = this.flag_threshold;
-					length.add(current_length+1);
-
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
-
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
-				} 
-
-				// Direction 3
-				current_dir = this.grid[current_x][current_y-1][current_z];						
-				if (current_dir < this.flag_threshold) {
-
-					x_queue.add(current_x);
-					y_queue.add(current_y-1);
-					z_queue.add(current_z);
-					this.grid[current_x][current_y-1][current_z] = this.flag_threshold;
-					length.add(current_length+1);
-
-					// We are looking for that entry but have not found ourselved (The interesting case)
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
-
-
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
-
-				} 
-
-				// Direction 4
-				current_dir = this.grid[current_x][current_y+1][current_z];						
-				if (current_dir < this.flag_threshold) {
-
-					x_queue.add(current_x);
-					y_queue.add(current_y+1);
-					z_queue.add(current_z);
-					this.grid[current_x][current_y+1][current_z] = this.flag_threshold;
-					length.add(current_length+1);
-
-					// We are looking for that entry but have not found ourselved (The interesting case)
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
-
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
-
-				} 
-
-
-				// Direction 5
-				current_dir = this.grid[current_x][current_y][current_z-1];						
-				if (current_dir < this.flag_threshold) {
-
-					x_queue.add(current_x);
-					y_queue.add(current_y);
-					z_queue.add(current_z-1);
-					this.grid[current_x][current_y][current_z-1] = this.flag_threshold;
-					length.add(current_length+1);
-
-					// We are looking for that entry but have not found ourselved (The interesting case)
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
-
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
+					found.add(i);
 				}
 
-				// Direction 6
-				current_dir = this.grid[current_x][current_y][current_z+1];						
-				if (current_dir < this.flag_threshold) {
+				int current_dir;
 
-					x_queue.add(current_x);
-					y_queue.add(current_y);
-					z_queue.add(current_z+1);
-					this.grid[current_x][current_y][current_z+1] = this.flag_threshold;
-					length.add(current_length+1);
+				do {
+					// Get next grid point and the length
+					current_x = x_queue.poll();
+					current_y = y_queue.poll();
+					current_z = z_queue.poll();
+					current_length = length.poll();
 
-					// We are looking for that entry but have not found ourselved (The interesting case)
-				} else if(    current_dir > -1
-						&& current_dir < sourceIndex
-						&& ! found.contains(current_dir)
-						&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+					// Direction 1
+					current_dir = this.grid[current_x-1][current_y][current_z];		
+					if (current_dir < this.flag_threshold) {
 
-					// Assemble a distance pair for this finding
-					this.sasd_distances.put(
-							new UnorderedAtomPair(
-									new AtomIdentification(atom),
-									new AtomIdentification(atoms.get(current_dir))), current_length);
-					found.add(current_dir);
+						x_queue.add(current_x-1);
+						y_queue.add(current_y);
+						z_queue.add(current_z);
+						this.grid[current_x-1][current_y][current_z] = this.flag_threshold;
+						length.add(current_length+1);
+
+						// We have the following case:
+						// * Not solvent (current_dir > -1)
+						// * Grid not occupied (current_dir != OCCUPIED)
+						// * Associated atom has not already been found (! found.cintains(current_dir)
+						// * we are looking for that kind of atom
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+					}
+
+					// Direction 2
+					current_dir = this.grid[current_x+1][current_y][current_z];						
+					if (current_dir < this.flag_threshold) {
+
+						x_queue.add(current_x+1);
+						y_queue.add(current_y);
+						z_queue.add(current_z);
+						this.grid[current_x+1][current_y][current_z] = this.flag_threshold;
+						length.add(current_length+1);
+
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+					} 
+
+					// Direction 3
+					current_dir = this.grid[current_x][current_y-1][current_z];						
+					if (current_dir < this.flag_threshold) {
+
+						x_queue.add(current_x);
+						y_queue.add(current_y-1);
+						z_queue.add(current_z);
+						this.grid[current_x][current_y-1][current_z] = this.flag_threshold;
+						length.add(current_length+1);
+
+						// We are looking for that entry but have not found ourselved (The interesting case)
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+
+					} 
+
+					// Direction 4
+					current_dir = this.grid[current_x][current_y+1][current_z];						
+					if (current_dir < this.flag_threshold) {
+
+						x_queue.add(current_x);
+						y_queue.add(current_y+1);
+						z_queue.add(current_z);
+						this.grid[current_x][current_y+1][current_z] = this.flag_threshold;
+						length.add(current_length+1);
+
+						// We are looking for that entry but have not found ourselved (The interesting case)
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+
+					} 
+
+
+					// Direction 5
+					current_dir = this.grid[current_x][current_y][current_z-1];						
+					if (current_dir < this.flag_threshold) {
+
+						x_queue.add(current_x);
+						y_queue.add(current_y);
+						z_queue.add(current_z-1);
+						this.grid[current_x][current_y][current_z-1] = this.flag_threshold;
+						length.add(current_length+1);
+
+						// We are looking for that entry but have not found ourselved (The interesting case)
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+					}
+
+					// Direction 6
+					current_dir = this.grid[current_x][current_y][current_z+1];						
+					if (current_dir < this.flag_threshold) {
+
+						x_queue.add(current_x);
+						y_queue.add(current_y);
+						z_queue.add(current_z+1);
+						this.grid[current_x][current_y][current_z+1] = this.flag_threshold;
+						length.add(current_length+1);
+
+						// We are looking for that entry but have not found ourselved (The interesting case)
+					} else if(    current_dir > -1
+							&& current_dir < sourceIndex
+							&& ! found.contains(current_dir)
+							&&  lookingFor.contains(this.donor_acceptor.get(current_dir))) {
+
+						// Assemble a distance pair for this finding
+						this.sasd_distances.put(
+								new UnorderedAtomPair(
+										new AtomIdentification(atom),
+										new AtomIdentification(atoms.get(current_dir))), current_length);
+						found.add(current_dir);
+					}
+
+
+					// Break if the queue is empty or we already found all possible donor, acceptors
+				} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() && current_length < 60);
+
+				// BFS has finished. 
+				// Increase flag threshold
+				this.flag_threshold++;
+				if(this.flag_threshold == 0) {
+
+					throw new RuntimeException("Grid is Exhausted. Cannot continue");
 				}
-
-
-				// Break if the queue is empty or we already found all possible donor, acceptors
-			} while( ! x_queue.isEmpty() && found.size() != this.donor_acceptor.size() && current_length < 60);
-
-			// BFS has finished. 
-			// Increase flag threshold
-			this.flag_threshold++;
-			if(this.flag_threshold == 0) {
-				
-				throw new RuntimeException("Grid is Exhausted. Cannot continue");
-			}
+			}	
 		}
 	}
 
@@ -500,7 +501,7 @@ final class Grid implements Serializable {
 
 			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
 			double x_radius2 = x_radius*x_radius;
-			
+
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
@@ -588,7 +589,7 @@ final class Grid implements Serializable {
 
 		// occupy the vdW volume of the atom (Might be inlined)
 		this.occupyVDW(x, y, z, pdbatom.element);
-		
+
 		if (isDonor || isAcceptor) {
 
 			if (this.atoms.contains(atom)) {
@@ -616,7 +617,7 @@ final class Grid implements Serializable {
 
 		double radius = vdwRadius + 1;
 		double radius2 = radius*radius;
-		
+
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
 			int coord_x_1 = this.translateX(x + x_iter);
@@ -624,7 +625,7 @@ final class Grid implements Serializable {
 
 			double x_radius = Math.sqrt(radius2 - x_iter*x_iter);
 			double x_radius2 = x_radius*x_radius;
-			
+
 			for (double y_iter = 0; y_iter < x_radius; y_iter++) {
 
 				int coord_y_1 = this.translateY(y + y_iter);
@@ -668,16 +669,17 @@ final class Grid implements Serializable {
 		this.setIfNotOccupied(this.translateX(x - radius), coord_y, coord_z);
 	}
 
-	private int[] queryAtom(
+	private List<int[]> queryAtom(
 			final double x,
 			final double y,
 			final double z,
 			final Element element) {
 
+		List<int[]> result = new ArrayList<int[]>();
 
 		double radius = element.getVDWRadius() + 1;
 		double radius2 = radius*radius;
-		
+
 		for (double x_iter = 0; x_iter < radius; x_iter++) {
 
 			int coord_x_1 = this.translateX(x + x_iter);
@@ -699,28 +701,28 @@ final class Grid implements Serializable {
 
 
 				if (this.grid[coord_x_1][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_1, coord_y_1, coord_z_1  };
+					result.add(new int[] {coord_x_1, coord_y_1, coord_z_1});
 				}
 				if (this.grid[coord_x_1][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
-					return new int[]  {coord_x_1, coord_y_1, coord_z_2 };
+					result.add(new int[]  {coord_x_1, coord_y_1, coord_z_2 });
 				}
 				if (this.grid[coord_x_1][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_1, coord_y_2, coord_z_1};
+					result.add(new int[] {coord_x_1, coord_y_2, coord_z_1});
 				}
 				if (this.grid[coord_x_1][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_1, coord_y_2, coord_z_2 };
+					result.add(new int[] {coord_x_1, coord_y_2, coord_z_2 });
 				}
 				if (this.grid[coord_x_2][coord_y_1][coord_z_1] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_2, coord_y_1, coord_z_1};
+					result.add(new int[] {coord_x_2, coord_y_1, coord_z_1});
 				}
 				if (this.grid[coord_x_2][coord_y_1][coord_z_2] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_2, coord_y_1, coord_z_2};
+					result.add(new int[] {coord_x_2, coord_y_1, coord_z_2});
 				}
 				if (this.grid[coord_x_2][coord_y_2][coord_z_1] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_2, coord_y_2, coord_z_1} ;
+					result.add(new int[] {coord_x_2, coord_y_2, coord_z_1}) ;
 				}
 				if (this.grid[coord_x_2][coord_y_2][coord_z_2] != Grid.OCCUPIED) {	
-					return new int[] {coord_x_2, coord_y_2, coord_z_2};
+					result.add(new int[] {coord_x_2, coord_y_2, coord_z_2});
 				}
 			}
 
@@ -731,16 +733,16 @@ final class Grid implements Serializable {
 			int coord_z = this.translateZ(z);
 
 			if (this.grid[coord_x_1][coord_y_1][coord_z] != Grid.OCCUPIED) {	
-				return new int[] {coord_x_1, coord_y_1, coord_z};
+				result.add(new int[] {coord_x_1, coord_y_1, coord_z});
 			}
 			if (this.grid[coord_x_1][coord_y_2][coord_z] != Grid.OCCUPIED) {	
-				return new int[] {coord_x_1, coord_y_2, coord_z};
+				result.add(new int[] {coord_x_1, coord_y_2, coord_z});
 			}
 			if (this.grid[coord_x_2][coord_y_1][coord_z] != Grid.OCCUPIED) {	
-				return new int[] {coord_x_2, coord_y_1, coord_z};
+				result.add(new int[] {coord_x_2, coord_y_1, coord_z});
 			}
 			if (this.grid[coord_x_2][coord_y_2][coord_z] != Grid.OCCUPIED) {	
-				return new int[] {coord_x_2, coord_y_2, coord_z};
+				result.add(new int[] {coord_x_2, coord_y_2, coord_z});
 			}
 		}
 
@@ -754,12 +756,12 @@ final class Grid implements Serializable {
 		int coord_z = this.translateZ(z);
 
 		if (this.grid[coord_x_1][coord_y][coord_z] != Grid.OCCUPIED) {	
-			return new int[] {coord_x_1, coord_y, coord_z};
+			result.add(new int[] {coord_x_1, coord_y, coord_z});
 		}
 		if (this.grid[coord_x_2][coord_y][coord_z] != Grid.OCCUPIED) {	
-			return new int[] {coord_x_2, coord_y, coord_z};
+			result.add(new int[] {coord_x_2, coord_y, coord_z});
 		}
-		return null;
+		return result;
 	}
 
 
@@ -782,7 +784,7 @@ final class Grid implements Serializable {
 
 		double radius = element.getVDWRadius() + 1;
 		double radius2 = radius*radius;
-		
+
 		double numerator = 0;
 		double denominator = 0;
 
