@@ -12,7 +12,6 @@ import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
 import javax.swing.JList;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -63,17 +62,17 @@ public class StructurePortObject extends AbstractPortObject {
     		final StructureContent content,
             final StructurePortObjectSpec spec) {
     	
-        if (spec == null || content == null) {
-            throw new NullPointerException("Argument must not be null.");
-        }
-        
         this.m_content = content;
         this.m_spec = spec;    
+    	
+        if (this.m_spec == null || this.m_content == null) {
+            throw new NullPointerException("Argument must not be null.");
+        }
     }
     
-    
-    public StructureContent getStructure() {
+    public StructureContent getStructureContent() {
         	
+    	// Assuming that StructureContent is Immutable
     	return this.m_content;
     }
 

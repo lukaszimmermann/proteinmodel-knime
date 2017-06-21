@@ -65,7 +65,7 @@ public class PDBWriterNodeModel extends NodeModel {
 	protected PortObject[] execute(final PortObject[] inData,
 			final ExecutionContext exec) throws Exception {
 
-		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
+		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructureContent();
 		structureContent.setOmitHET(this.param_omit_hetero.getBooleanValue());
 		
 		FileWriter fw = new FileWriter(this.param_output.getStringValue());

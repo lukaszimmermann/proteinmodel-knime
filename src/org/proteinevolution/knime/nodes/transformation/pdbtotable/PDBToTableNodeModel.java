@@ -55,7 +55,7 @@ public class PDBToTableNodeModel extends NodeModel {
 				new DataTableSpec(new DataColumnSpec[] {
 				new DataColumnSpecCreator("pdb", StructureCell.TYPE).createSpec(),
 		}));
-		StructureContent structureContent =  ((StructurePortObject) inData[0]).getStructure();
+		StructureContent structureContent =  ((StructurePortObject) inData[0]).getStructureContent();
 		List<String> pdbStrings = structureContent.getAllPdbStrings();
 		
 		int rowCounter = 0;

@@ -103,7 +103,7 @@ public class ConcoordDiscoNodeModel extends ConcoordBaseNodeModel {
 			File outputPDB = Files.createTempDirectory("discoStructures").toFile();
 			
 			cmd.addOption("-d", distFile.getAbsolutePath());
-			cmd.addInput("-p", ((StructurePortObject) inData[0]).getStructure());
+			cmd.addInput("-p", ((StructurePortObject) inData[0]).getStructureContent());
 			cmd.addOption("-op", new File(outputPDB, "prefix").getAbsolutePath());
 			cmd.addOption("-n", this.param_no_structures.getIntValue());
 			

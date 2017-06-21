@@ -2,7 +2,10 @@ package org.proteinevolution.models.spec;
 
 public final class HHR {
 
-	private HHR() {}
+	private HHR() {
+		
+		throw new AssertionError();
+	}
 
 	// Contains the indices of the records within a line of an HHR file
 

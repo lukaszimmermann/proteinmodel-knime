@@ -49,7 +49,7 @@ public class PDBConcatenateNodeModel extends NodeModel {
 
 		return new StructurePortObject[] {
 				new StructurePortObject(
-						first.getStructure().concatenate(second.getStructure()),
+						first.getStructureContent().concatenate(second.getStructureContent()),
 						new StructurePortObjectSpec(StructureContent.TYPE,
 								((StructurePortObjectSpec) first.getSpec()).getNStructures() 
 								+  ((StructurePortObjectSpec) second.getSpec()).getNStructures()))

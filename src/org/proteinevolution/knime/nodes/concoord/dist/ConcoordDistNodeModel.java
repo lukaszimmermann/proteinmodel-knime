@@ -139,7 +139,7 @@ public class ConcoordDistNodeModel extends ConcoordBaseNodeModel {
 			final ExecutionContext exec) throws Exception {
 
 		// Get Structure
-		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructure();
+		StructureContent structureContent = ((StructurePortObject) inData[0]).getStructureContent();
 
 		boolean withNOE = inData[1] != null;
 

@@ -76,8 +76,8 @@ public class PDBCompareNodeModel extends NodeModel {
 		}));
 
 		// Fetch reference and hypothesis structure from port 0
-		Structure[] references = ((StructurePortObject) inData[0]).getStructure().getAllStructureImpl();
-		Structure[] hypotheses = ((StructurePortObject) inData[1]).getStructure().getAllStructureImpl(); 
+		Structure[] references = ((StructurePortObject) inData[0]).getStructureContent().getAllStructureImpl();
+		Structure[] hypotheses = ((StructurePortObject) inData[1]).getStructureContent().getAllStructureImpl(); 
 
 		// The alignment algorithm
 		StructureAlignment algorithm  = StructureAlignmentFactory.getAlgorithm(CeMain.algorithmName);

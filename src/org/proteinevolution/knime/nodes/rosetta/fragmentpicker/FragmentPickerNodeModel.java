@@ -73,7 +73,7 @@ public class FragmentPickerNodeModel extends ExecutableNodeModel {
 
 		// Get Sequence Alignment and Structure
 		SequenceAlignmentContent sequenceAlignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-		StructureContent structure = ((StructurePortObject) inData[1]).getStructure();
+		StructureContent structure = ((StructurePortObject) inData[1]).getStructureContent();
 
 
 

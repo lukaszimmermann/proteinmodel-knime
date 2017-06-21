@@ -169,7 +169,7 @@ public class CrossLinkPredictorNodeModel extends NodeModel {
 		acceptors.put(Residue.LYS, lys_atoms);
 		// END- TODO Block
 
-		Structure structure = ((StructurePortObject) inData[0]).getStructure().getStructureImpl(0);
+		Structure structure = ((StructurePortObject) inData[0]).getStructureContent().getStructureImpl(0);
 
 		// Initialize Grid
 		Grid grid = new Grid(
