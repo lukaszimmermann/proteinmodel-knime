@@ -14,7 +14,7 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 	public static final String BLAST_EXECUTABLE_PATH = "BLAST_EXECUTABLE_PATH";
 	public static final String HHSUITE_EXECUTABLE_PATH = "HHSUITE_EXECUTABLE_PATH";
 	public static final String PSIPRED_EXECUTABLE_PATH = "PSIPRED_EXECUTABLE_PATH";
-	public static final String ROSETTA_FRAGMENTPICKER_EXECUTABLE = "ROSETTA_FRAGMENTPICKER_EXECUTABLE";
+	public static final String ROSETTA_EXECUTABLE_PATH = "ROSETTA_EXECUTABLE_PATH";
 	public static final String CONCOORD_PATH = "CONCOORD_PATH";
 	public static final String DSSP_EXECUTABLE = "DSSP_EXECUTABLE";
 
@@ -44,10 +44,9 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 				"PSIPRED Executable Path",			// Where the PSIPRED executables are located
 				parent));
 		
-		this.addField(new FileFieldEditor(
-				ROSETTA_FRAGMENTPICKER_EXECUTABLE,
-				"ROSETTA Fragmentpicker Executable", // Location of the Fragmentpicker executable from ROSETTA
-				true,   // File path to executable must be absolute
+		this.addField(new DirectoryFieldEditor(
+				ROSETTA_EXECUTABLE_PATH,
+				"ROSETTA Executable Path", // Location of the Fragmentpicker executable from ROSETTA
 				parent));
 		
 		this.addField(new FileFieldEditor(

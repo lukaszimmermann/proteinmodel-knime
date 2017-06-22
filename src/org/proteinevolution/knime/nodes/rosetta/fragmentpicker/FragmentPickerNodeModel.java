@@ -18,8 +18,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
-import org.proteinevolution.ProteinevolutionNodePlugin;
-import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
+import org.proteinevolution.knime.nodes.rosetta.RosettaBaseNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
@@ -29,7 +28,6 @@ import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;
 import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.spec.FileExtensions;
 import org.proteinevolution.models.util.URIUtils;
-import org.proteinevolution.preferences.PreferencePage;
 
 
 /**
@@ -38,7 +36,7 @@ import org.proteinevolution.preferences.PreferencePage;
  *
  * @author Lukas Zimmermann
  */
-public class FragmentPickerNodeModel extends ExecutableNodeModel {
+public class FragmentPickerNodeModel extends RosettaBaseNodeModel {
 
 
 	// the logger instance
@@ -180,19 +178,8 @@ public class FragmentPickerNodeModel extends ExecutableNodeModel {
 	@Override
 	protected String getExecutableName() {
 
-		// Implementation not necessary for ROSETTA's fragment picker
-		return null;
+		// TODO Make more flexible
+		return "fragment_picker.default.linuxgccrelease";
 	}
-
-	@Override
-	protected File getExecutable() {
-
-		return new File(ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.ROSETTA_FRAGMENTPICKER_EXECUTABLE));
-	}
-	
-	@Override
-	protected void check() throws InvalidSettingsException {
-
-	}	
 }
 

@@ -47,6 +47,7 @@
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory" id="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory"/>
 <node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
 <node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.rosetta.abinitiorelax.RosettaAbInitioRelaxNodeFactory" id="org.proteinevolution.knime.nodes.rosetta.abinitiorelax.RosettaAbInitioRelaxNodeFactory"/>
 </extension>
    
    
