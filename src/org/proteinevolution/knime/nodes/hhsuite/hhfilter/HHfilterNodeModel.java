@@ -16,13 +16,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.spec.AlignmentFormat;
-import org.proteinevolution.models.util.CommandLine;
 
 
 /**
@@ -92,12 +92,12 @@ public class HHfilterNodeModel extends HHSuiteNodeModel {
 		// Construct the commandLine call for this hhblits invocation
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 
-			cmd.addInput("-i", sequenceAlignment);
+			cmd.addFile("-i", sequenceAlignment);
 			cmd.addOption("-qid", this.param_qid.getDoubleValue());
 			cmd.addOption("-cov", this.param_cov.getDoubleValue());
 			cmd.addOption("-id", this.param_id.getDoubleValue());
 			cmd.addOption("-diff", this.param_diff.getIntValue());
-			cmd.addOutput("-o");
+			cmd.addOutputFile("-o");
 			
 			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
 			

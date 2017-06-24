@@ -21,10 +21,10 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.psipred.PSIPREDBaseNodeModel;
 import org.proteinevolution.models.spec.FileExtensions;
-import org.proteinevolution.models.util.CommandLine;
 import org.proteinevolution.models.util.URIUtils;
 
 

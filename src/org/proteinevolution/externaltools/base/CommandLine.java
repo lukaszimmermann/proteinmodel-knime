@@ -1,4 +1,4 @@
-package org.proteinevolution.models.util;
+package org.proteinevolution.externaltools.base;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,37 +42,43 @@ public final class CommandLine implements AutoCloseable {
 	 * 
 	 * @throws IllegalArgumentException If the file denoted by <code>executable</code> does either not exist or is not executable.
 	 */
-	public CommandLine(final File executable) throws IllegalArgumentException {
+	public CommandLine(final File executable) throws IOException {
 
-		if ( ! executable.exists()) {
+		if (executable == null) {
+
+			throw new IllegalArgumentException("Provided executable is null!");
+		}
+
+		this.executable = executable.getCanonicalFile();
+
+		if ( ! this.executable.exists()) {
 
 			throw new IllegalArgumentException("Provided executable does not exist.");
 		}
-		if ( ! executable.canExecute()) {
+		if ( ! this.executable.canExecute()) {
 
 			throw new IllegalArgumentException("Provided executable is not executable.");
 		}
 
-		this.executable = executable;
 		this.optionsKeys = new ArrayList<String>();
 		this.optionsValues = new ArrayList<String>();
 		this.files = new HashMap<String, File>();
 	}
 
 	public void addFlag(final String flag) {
-		
+
 		this.optionsKeys.add(this.checkOption(flag));
 		this.optionsValues.add(null);
 	}
-	
+
 	public void addFlag(final String flag, final boolean isSet) {
-		
+
 		if (isSet) {
-			
+
 			this.addFlag(flag);
 		}
 	}
-	
+
 	/**
 	 * Adds a new option to the CommandLine invocation.
 	 * 
@@ -103,7 +109,7 @@ public final class CommandLine implements AutoCloseable {
 	 * @return
 	 */
 	public File getFile(final String key) {
-		
+
 		return this.files.get(key);
 	}
 
@@ -117,7 +123,7 @@ public final class CommandLine implements AutoCloseable {
 	 * @return
 	 * @throws IOException
 	 */
-	public void addInput(String option, Writeable writeable) throws IOException  {
+	public void addFile(String option, final Writeable writeable) throws IOException  {
 
 		option = this.checkOption(option);
 
@@ -149,19 +155,35 @@ public final class CommandLine implements AutoCloseable {
 	}
 
 
-	public void addOutput(String option) throws IOException {
+	public void addOutputFile(String option) throws IOException {
 
-		this.addOutput(option, "");
+		this.addOutputFile(option, "");
 	}
 
-	public void addOutput(String option, final String ext ) throws IOException {
+	public void addOutputFile(String option, final String ext) throws IOException {
 
 		option = this.checkOption(option);
-		// Make a new temporary file and ask writeable to write into it
 		File tempFile = File.createTempFile("commandLine", ext);
 		tempFile.deleteOnExit();
 		this.files.put(option, tempFile);
 	}
+
+	public void addOutputDirectory(String option) throws IOException {
+
+		option = this.checkOption(option);
+		File tempDir = Files.createTempDirectory("commandLine").toFile();
+		tempDir.deleteOnExit();
+		this.files.put(option, tempDir);
+	}
+
+	public void addOutputDirectory(String option, String filePrefix) throws IOException {
+
+		option = this.checkOption(option);
+		File tempDir = Files.createTempDirectory("commandLine").toFile();
+		tempDir.deleteOnExit();
+		this.files.put(option, new File(tempDir, filePrefix));
+	}
+
 
 	private String checkOption(final String option) throws IllegalArgumentException {
 
@@ -180,7 +202,13 @@ public final class CommandLine implements AutoCloseable {
 		// Delete all input/output files
 		for (File tempFile: this.files.values()) {
 
-			Files.delete(tempFile.toPath());
+			try {
+				Files.delete(tempFile.toPath());
+
+			} catch(IOException e) {
+
+
+			}
 		}
 	}	
 
@@ -188,15 +216,15 @@ public final class CommandLine implements AutoCloseable {
 
 		List<String> result = new ArrayList<String>(1 + this.optionsKeys.size() + this.files.size());
 		result.add(this.executable.getAbsolutePath());
-		
+
 		for (int i = 0; i < this.optionsKeys.size(); ++i) {
 
 			result.add(optionsKeys.get(i));
 			String value = optionsValues.get(i);
-			
+
 			// Might be null if flag
 			if (value != null) {
-				
+
 				result.add(value);	
 			}
 		}
@@ -219,12 +247,12 @@ public final class CommandLine implements AutoCloseable {
 
 			sb.append(" ");
 			sb.append(optionsKeys.get(i));
-			
+
 			String value = this.optionsValues.get(i);
-			
+
 			// Might be null if flag
 			if (value != null) {
-				
+
 				sb.append(" ");
 				sb.append(value);
 			}

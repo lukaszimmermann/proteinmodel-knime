@@ -21,6 +21,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
+import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
@@ -29,7 +30,6 @@ import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjec
 import org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBContent;
 import org.proteinevolution.knime.porttypes.hhsuitedb.HHsuiteDBPortObject;
 import org.proteinevolution.models.spec.AlignmentFormat;
-import org.proteinevolution.models.util.CommandLine;
 
 
 /*
@@ -117,7 +117,7 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 		// Construct the commandLine call for this hhblits invocation
 		try (CommandLine cmd = new CommandLine(this.getExecutable())) {
 
-			cmd.addInput("-i", sequenceAlignment);
+			cmd.addFile("-i", sequenceAlignment);
 
 			for (String dbname : this.param_hhsuitedb.getStringArrayValue()) {
 
@@ -128,8 +128,8 @@ public class HHblitsNodeModel extends HHSuiteNodeModel {
 			cmd.addOption("-e", this.param_evalue.getDoubleValue());
 			cmd.addOption("-qid", this.param_qid.getDoubleValue());
 			cmd.addOption("-cov", this.param_cov.getDoubleValue());
-			cmd.addOutput("-o");
-			cmd.addOutput("-oa3m");
+			cmd.addOutputFile("-o");
+			cmd.addOutputFile("-oa3m");
 
 			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);
 			

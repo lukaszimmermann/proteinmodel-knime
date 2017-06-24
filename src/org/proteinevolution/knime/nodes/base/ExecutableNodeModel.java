@@ -65,7 +65,7 @@ public abstract class ExecutableNodeModel extends NodeModel {
 
 		logger.warn(command);
 		Process process = Runtime.getRuntime().exec(command, envp, dir);
-
+		
 		while (process.isAlive()) {
 
 			try {

@@ -24,13 +24,13 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.knime.nodes.base.ExecutableNodeModel;
 import org.proteinevolution.knime.nodes.blast.BLASTNodeModel;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.models.spec.FileExtensions;
-import org.proteinevolution.models.util.CommandLine;
 
 
 /**
@@ -112,12 +112,12 @@ public class PSIBLASTNodeModel extends BLASTNodeModel {
 			String db = this.param_database.getStringValue();
 			db = db.substring(0, db.length() - 4);
 			cmd.addOption("-db", db);
-			cmd.addInput(sequenceAlignment.getAlignmentFormat() == AlignmentFormat.SingleSequence ? "-query" : "-in_msa", sequenceAlignment);
+			cmd.addFile(sequenceAlignment.getAlignmentFormat() == AlignmentFormat.SingleSequence ? "-query" : "-in_msa", sequenceAlignment);
 			cmd.addOption("-inclusion_ethresh", this.param_inclusion_etresh.getDoubleValue());
 			cmd.addOption("-num_iterations", this.param_n_iterations.getIntValue());
 			cmd.addOption("-num_alignments", this.param_n_alignments.getIntValue());
 			cmd.addOption("-num_descriptions", this.param_n_descriptions.getIntValue());
-			cmd.addOutput("-out_pssm", ".chk");	
+			cmd.addOutputFile("-out_pssm", ".chk");	
 
 		
 			ExecutableNodeModel.exec(cmd.toString(), exec, null, null);

@@ -1,4 +1,4 @@
-package org.proteinevolution.externaltools;
+package org.proteinevolution.externaltools.base;
 
 public interface Sentinel {
 
