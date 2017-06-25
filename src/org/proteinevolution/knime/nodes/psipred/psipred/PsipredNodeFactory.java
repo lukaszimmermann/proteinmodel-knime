@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.nodes.blast.psiblast;
+package org.proteinevolution.knime.nodes.psipred.psipred;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,28 +13,26 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.ProteinevolutionNodePlugin;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
-import org.proteinevolution.externaltools.tools.Psiblast;
+import org.proteinevolution.externaltools.tools.PsipredPsipred;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
-import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
-import org.proteinevolution.models.interfaces.ISequenceAlignment;
 import org.proteinevolution.preferences.PreferencePage;
 
 /**
- * <code>NodeFactory</code> for the "PSIBLAST" Node.
+ * <code>NodeFactory</code> for the "PSIPRED" Node.
  * 
  *
  * @author Lukas Zimmermann
  */
-public class PSIBLASTNodeFactory  extends ToolInvocationNodeFactory<ISequenceAlignment, Path>{
+public final class PsipredNodeFactory extends ToolInvocationNodeFactory<Path, Path> {
 
 	@Override
-	protected ExternalToolInvocation<ISequenceAlignment, Path> initTool() {
+	protected ExternalToolInvocation<Path, Path> initTool() {
 
 		try{
-			return new Psiblast(Paths.get(
-					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.BLAST_EXECUTABLE_PATH), "psiblast").toFile());
+			return new PsipredPsipred(Paths.get(
+					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.PSIPRED_EXECUTABLE_PATH), "psipred").toFile());
 		} catch(IOException e) {
 
 			throw new IllegalStateException(e.getMessage());
@@ -42,41 +40,42 @@ public class PSIBLASTNodeFactory  extends ToolInvocationNodeFactory<ISequenceAli
 	}
 
 	@Override
-	protected KNIMEAdapter<ISequenceAlignment, Path> getAdapter() {
-
-
-		return new KNIMEAdapter<ISequenceAlignment, Path>() {
+	protected KNIMEAdapter<Path, Path> getAdapter() {
+		
+		return new KNIMEAdapter<Path, Path>() {
 
 			@Override
-			public ISequenceAlignment portToInput(final PortObject[] ports) {
-
-				return ((SequenceAlignmentPortObject) ports[0]).getAlignment();
+			public Path portToInput(PortObject[] ports) {
+			
+				return Paths.get(((FileStoreURIPortObject) ports[0]).getURIContents().get(0).getURI());
 			}
 
 			@Override
 			public PortObject[] resultToPort(final Path result, final ExecutionContext exec) throws IOException {
-
-				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsiblastNodeFactory"));
-		        File outFile = out.registerFile(PSIBLASTNodeFactory.class.getSimpleName() + ".chk");
+				
+				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredPsipredNode"));
+		        File outFile = out.registerFile(PsipredNodeFactory.class.getSimpleName() + ".ss");
 		        Files.copy(result, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		        return new PortObject[] {out};
 			}
 
 			@Override
 			public PortType[] getInputPortType() {
-
-				return new PortType[] {SequenceAlignmentPortObject.TYPE};
+				
+				return new PortType[] {IURIPortObject.TYPE};
 			}
 
 			@Override
 			public PortType[] getOutputPortType() {
-
+				
 				return new PortType[] {IURIPortObject.TYPE};
 			}
-		};
+		};		
 	}
 
+	
 	@Override
 	protected void check() throws IllegalStateException {
+
 	}
 }

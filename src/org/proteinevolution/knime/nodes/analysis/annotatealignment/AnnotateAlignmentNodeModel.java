@@ -10,19 +10,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.uri.URIPortObject;
+import org.knime.core.data.uri.IURIPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.port.PortTypeRegistry;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
@@ -38,17 +36,13 @@ import org.proteinevolution.models.util.URIUtils;
  */
 public class AnnotateAlignmentNodeModel extends NodeModel {
 
-	// the logger instance
-	private static final NodeLogger logger = NodeLogger
-			.getLogger(AnnotateAlignmentNodeModel.class);
-
 
 	/**
 	 * Constructor for the node model.
 	 */
 	protected AnnotateAlignmentNodeModel() {
 
-		super(new PortType[] {SequenceAlignmentPortObject.TYPE, PortTypeRegistry.getInstance().getPortType(URIPortObject.class)},
+		super(new PortType[] {SequenceAlignmentPortObject.TYPE, IURIPortObject.TYPE},
 				new PortType[] {SequenceAlignmentPortObject.TYPE});  
 	}
 
@@ -61,7 +55,7 @@ public class AnnotateAlignmentNodeModel extends NodeModel {
 
 		// Load SS file and sequence
 		SequenceAlignmentContent alignment = ((SequenceAlignmentPortObject) inData[0]).getAlignment();
-		String urc = ((URIPortObject) inData[1]).getURIContents().get(0).getURI().getPath();
+		String urc = ((IURIPortObject) inData[1]).getURIContents().get(0).getURI().getPath();
 
 		List<Character> chars = new ArrayList<Character>();
 		char[] result = null;

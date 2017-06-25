@@ -225,11 +225,12 @@ public final class CommandLine implements AutoCloseable {
 		// Delete all input/output files
 		for (File tempFile: this.files.values()) {
 
+			// TODO Also ensure that direcotories are removed
+			
 			try {
 				Files.delete(tempFile.toPath());
 
 			} catch(IOException e) {
-
 
 			}
 		}

@@ -27,6 +27,7 @@ import org.knime.core.data.filestore.FileStore;
  */
 public class FileStoreURIPortObject extends AbstractFileStoreURIPortObject {
 
+	
     /**
      * Creates {@link FileStoreURIPortObject} with the given {@link FileStore}.
      * 

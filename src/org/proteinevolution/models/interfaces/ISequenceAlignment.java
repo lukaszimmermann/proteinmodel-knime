@@ -19,7 +19,7 @@ package org.proteinevolution.models.interfaces;
  * @author Lukas Zimmermann
  */
 
-public interface ISequenceAlignment {
+public interface ISequenceAlignment extends Writeable {
 
   /**
    * Provides the sequence at a particular index in the alignment.

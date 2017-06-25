@@ -43,7 +43,7 @@ public class AnnotateAlignmentNodeFactory
      */
     @Override
     public boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -51,8 +51,7 @@ public class AnnotateAlignmentNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new AnnotateAlignmentNodeDialog();
+        return null;
     }
-
 }
 

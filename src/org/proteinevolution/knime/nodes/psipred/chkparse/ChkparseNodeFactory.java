@@ -55,7 +55,7 @@ public class ChkparseNodeFactory extends ToolInvocationNodeFactory<Path, Path>{
 			public PortObject[] resultToPort(Path result, ExecutionContext exec) throws IOException {
 					
 				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredChkparseNode"));
-		        File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".chk");
+		        File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".mtx");
 		        Files.copy(result, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		        return new PortObject[] {out};
 			}
