@@ -96,7 +96,7 @@ public class ConcoordDist extends ExternalToolInvocation<Writeable[], File[]> {
 
 
 	@Override
-	public File[] getResult(final CommandLine cmd) {
+	public File[] getResult(final CommandLine cmd, final File standardOut) {
 
 		File[] result = new File[2];
 		result[0] = cmd.getFile("-op");

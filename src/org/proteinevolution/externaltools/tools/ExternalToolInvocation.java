@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.apache.commons.io.FileUtils;
 import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.externaltools.base.Sentinel;
 
@@ -78,6 +79,9 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 
 	// The sentinel for the tool execution process
 	private Sentinel sentinel;
+		
+	// File containing the standard out of the Tool
+	private File standardOut = null;
 
 	// The key value pairs for the environment
 	private final List<EnvKeyValue> envp = new ArrayList<EnvKeyValue>();
@@ -95,7 +99,7 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 		}
 	};
 
-	protected abstract B getResult(final CommandLine cmd);
+	protected abstract B getResult(final CommandLine cmd, final File standardOut);
 	protected abstract void setCmd(final CommandLine cmd) throws IOException;
 
 	public ExternalToolInvocation(final File executable) throws IOException {
@@ -120,7 +124,6 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 				return true;
 			}
 		};
-		System.out.println("EXTERNAL TOOL SUCCESSFUL");
 	}
 
 
@@ -156,6 +159,7 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 
 		this.cmd = new CommandLine(this.executable);
 
+		this.standardOut = File.createTempFile("commandLine", "");
 		this.setCmd(this.cmd);
 		this.workingDirectory = Files.createTempDirectory(String.valueOf(ThreadLocalRandom.current().nextInt()));
 
@@ -168,6 +172,8 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 		}		
 		System.out.println(cmd.toString());
 		Process process = Runtime.getRuntime().exec(cmd.toString(), envp, this.workingDirectory.toFile());
+		FileUtils.copyInputStreamToFile(process.getInputStream(), this.standardOut);
+		
 		while(process.isAlive()) {
 
 			if ( ! this.sentinel.isHappy()) {
@@ -180,7 +186,7 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 
 			throw new Exception("Execution of process from ExternalToolInvocation has failed");
 		}
-		return this.getResult(this.cmd);
+		return this.getResult(this.cmd, this.standardOut);
 	}
 
 
@@ -195,6 +201,10 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 			}
 		} finally {
 
+			if (this.standardOut != null) {
+				
+				Files.delete(this.standardOut.toPath());
+			}
 			try {
 				if (this.cmd != null) {
 

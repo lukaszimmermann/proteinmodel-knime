@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.filestore.FileStore;
 import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
 import org.knime.core.data.uri.URIPortObjectSpec;
@@ -64,8 +65,7 @@ public class ChkparseNodeModel extends PSIPREDBaseNodeModel {
 
 		try(CommandLine cmd = new CommandLine(this.getExecutable())) {
 
-			cmd.addOption("", in.getURIContents().get(0).getURI().getPath());
-
+			cmd.addOption("", in.getURIContents().get(0).getURI().getPath());			
 			child = new File(exec.createFileStore("chkparse").getFile(), "out");
 			
 			Process process = ExecutableNodeModel.exec(cmd.toString(), exec, null, null);	

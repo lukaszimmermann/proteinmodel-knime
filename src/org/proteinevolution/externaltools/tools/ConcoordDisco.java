@@ -91,7 +91,7 @@ public class ConcoordDisco extends ExternalToolInvocation<Writeable[], File[]>  
 
 
 	@Override
-	protected File[] getResult(final CommandLine cmd) {
+	protected File[] getResult(final CommandLine cmd, final File standardOut) {
 
 		File[] result = new File[1];
 		result[0] = cmd.getFile("-op");

@@ -29,7 +29,7 @@ public class HHfilter extends ExternalToolInvocation<Writeable[], File[]>{
 	
 	
 	@Override
-	protected File[] getResult(final CommandLine cmd) {
+	protected File[] getResult(final CommandLine cmd, final File standardOut) {
 		
 		return new File[] {
 			cmd.getFile("-o")
