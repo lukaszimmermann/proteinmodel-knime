@@ -18,6 +18,7 @@ import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerParameter;
 import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.PathParameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.knime.KNIMEAdapter;
@@ -81,6 +82,9 @@ public abstract class ToolInvocationNodeFactory<A, B> extends NodeFactory<ToolIn
 
 						this.settingModels.add(new SettingsModelString(configName, ((StringSelectionParameter) param).get()));
 
+					} else if (param instanceof PathParameter) {
+						
+						this.settingModels.add(new SettingsModelString(configName, ((PathParameter) param).get().toAbsolutePath().toString()));
 					}
 				}
 			}

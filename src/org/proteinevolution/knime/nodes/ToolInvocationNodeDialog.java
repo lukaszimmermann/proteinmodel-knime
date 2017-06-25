@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
@@ -18,6 +19,7 @@ import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerParameter;
 import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.PathParameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
 
 public final class ToolInvocationNodeDialog extends DefaultNodeSettingsPane {
@@ -57,6 +59,14 @@ public final class ToolInvocationNodeDialog extends DefaultNodeSettingsPane {
 								label,
 								((StringSelectionParameter) param).getOptionKeys(), 
 								false));
+			} else if (param instanceof PathParameter) {
+
+				PathParameter pathParam = (PathParameter) param;
+
+				this.addDialogComponent(new DialogComponentFileChooser(
+						(SettingsModelString) s,
+						pathParam.getLabel(),
+						String.join("|", pathParam.getValidExtensions())));
 			}
 		}
 	}

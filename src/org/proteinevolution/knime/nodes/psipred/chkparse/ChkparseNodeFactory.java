@@ -1,9 +1,23 @@
 package org.proteinevolution.knime.nodes.psipred.chkparse;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import org.knime.core.data.uri.IURIPortObject;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortType;
+import org.proteinevolution.ProteinevolutionNodePlugin;
+import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
+import org.proteinevolution.externaltools.tools.PsipredChkparse;
+import org.proteinevolution.knime.KNIMEAdapter;
+import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
+import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
+import org.proteinevolution.preferences.PreferencePage;
 
 /**
  * <code>NodeFactory</code> for the "Chkparse" Node.
@@ -11,56 +25,56 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class ChkparseNodeFactory extends NodeFactory<ChkparseNodeModel> {
+public class ChkparseNodeFactory extends ToolInvocationNodeFactory<Path, Path>{
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
-	public ChkparseNodeModel createNodeModel() {
+	protected ExternalToolInvocation<Path, Path> initTool() {
+		
+		try{
+			return new PsipredChkparse(Paths.get(
+					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.PSIPRED_EXECUTABLE_PATH), "chkparse").toFile());
+		} catch(IOException e) {
 
-		try {
-			return new ChkparseNodeModel();
-
-		} catch (InvalidSettingsException e) {
-
-			throw new RuntimeException(e.getMessage());
+			throw new IllegalStateException(e.getMessage());
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public int getNrNodeViews() {
-		return 0;
+	protected KNIMEAdapter<Path, Path> getAdapter() {
+	
+		return new KNIMEAdapter<Path, Path>() {
+
+			@Override
+			public Path portToInput(PortObject[] ports) {
+			
+				return Paths.get(((FileStoreURIPortObject) ports[0]).getURIContents().get(0).getURI());
+			}
+
+			@Override
+			public PortObject[] resultToPort(Path result, ExecutionContext exec) throws IOException {
+					
+				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredChkparseNode"));
+		        File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".chk");
+		        Files.copy(result, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		        return new PortObject[] {out};
+			}
+
+			@Override
+			public PortType[] getInputPortType() {
+				
+				return new PortType[] {IURIPortObject.TYPE} ;
+			}
+
+			@Override
+			public PortType[] getOutputPortType() {
+			
+				return new PortType[] {IURIPortObject.TYPE};
+			}
+		};
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public NodeView<ChkparseNodeModel> createNodeView(final int viewIndex,
-			final ChkparseNodeModel nodeModel) {
-
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean hasDialog() {
-		
-		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public NodeDialogPane createNodeDialogPane() {
-
-		return null;
+	protected void check() throws IllegalStateException {
 	}
 }

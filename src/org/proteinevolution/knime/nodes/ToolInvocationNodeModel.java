@@ -2,6 +2,7 @@ package org.proteinevolution.knime.nodes;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
@@ -27,6 +28,7 @@ import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerParameter;
 import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.PathParameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.knime.KNIMEAdapter;
@@ -38,7 +40,7 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 	private final List<SettingsModel> settingsModels;
 	private final List<Parameter<?>> parameters;
 	private final KNIMEAdapter<A,B> knimeAdapter;
-	
+
 	protected ToolInvocationNodeModel(
 			final KNIMEAdapter<A,B> knimeAdapter,
 			final ExternalToolInvocation<A, B> tool,
@@ -51,13 +53,13 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 		this.tool = tool;
 		this.settingsModels = settingsModels;
 		this.parameters = params;
-		
+
 		if (this.knimeAdapter == null || this.tool == null || this.settingsModels == null || this.parameters == null) {
-			
+
 			throw new IllegalArgumentException("Constructor argument of ToolInvocationNodeModel cannot be null!");
 		}
 		if (this.settingsModels.size() != this.parameters.size()) {
-			
+
 			throw new IllegalArgumentException("SettingsModel and Parameter lists must have the same length!");
 		}
 	}
@@ -90,18 +92,22 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 			else if (param instanceof StringSelectionParameter) {
 
 				((StringSelectionParameter) param).set(((SettingsModelString) s).getStringValue());
+
+			} else if (param instanceof PathParameter) {
+
+				((PathParameter) param).set((Paths.get( ((SettingsModelString) s).getStringValue())));
 			}
 			else {
-				
+
 				throw new Exception("Parameter class not handled in node model. Cannot execute!");
 			}
 		}
 		this.tool.setInput(this.knimeAdapter.portToInput(inObjects));
 		this.tool.setSentinel(new Sentinel() {
-			
+
 			@Override
 			public boolean isHappy() {
-				
+
 				try {
 					exec.checkCanceled();
 					return true;
@@ -121,17 +127,17 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 
 
 	@Override
-    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
 
 		PortType[] outputPortTypes = this.knimeAdapter.getOutputPortType();
 		PortObjectSpec[] result = new PortObjectSpec[outputPortTypes.length];
 		for(int i = 0; i < result.length; ++i) {
-			
+
 			result[i] = null;
 		}
 		return result;
-    }
-	
+	}
+
 
 	@Override
 	protected void saveSettingsTo(NodeSettingsWO settings) {

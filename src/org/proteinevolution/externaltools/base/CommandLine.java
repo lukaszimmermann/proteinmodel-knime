@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,6 +136,28 @@ public final class CommandLine implements AutoCloseable {
 		fw.close(); 
 		this.files.put(option, tempFile);
 	}
+	
+	
+	
+	public void addFile(String option, final File file) throws IOException  {
+
+		option = this.checkOption(option);
+
+		// Check whether input file exists and is regular file
+		if ( file == null || ! file.exists() || ! file.isFile()) {
+			
+			throw new IllegalArgumentException("Input file is null or does not refer to an existing file!");
+		}
+	
+		// Make a new temporary file and ask writeable to write into it
+		File tempFile = File.createTempFile("commandLine", "");
+		tempFile.deleteOnExit();
+		
+		Files.copy(file.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		this.files.put(option, tempFile);
+	}
+	
+	
 
 	/**
 	 * Adds a new option to the CommandLine invocation.
