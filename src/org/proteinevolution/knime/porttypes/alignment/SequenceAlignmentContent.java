@@ -134,7 +134,7 @@ public final class SequenceAlignmentContent implements Serializable, Writeable, 
 	}
 
 
-	public static SequenceAlignmentContent fromFASTA(final String filePath) throws NotAnAlignmentException, FileNotFoundException, IOException {
+	public static SequenceAlignmentContent fromFASTA(final String filePath) throws FileNotFoundException, IOException {
 
 		boolean notFirst = false;
 

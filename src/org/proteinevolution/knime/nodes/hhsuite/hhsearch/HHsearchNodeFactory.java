@@ -1,9 +1,25 @@
 package org.proteinevolution.knime.nodes.hhsuite.hhsearch;
 
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+
+import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortType;
+import org.proteinevolution.ProteinevolutionNodePlugin;
+import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
+import org.proteinevolution.externaltools.tools.HHsearch;
+import org.proteinevolution.knime.KNIMEAdapter;
+import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
+import org.proteinevolution.knime.nodes.hhsuite.HHSuiteUtil;
+import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
+import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
+import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
+import org.proteinevolution.models.interfaces.Writeable;
+import org.proteinevolution.models.spec.AlignmentFormat;
+import org.proteinevolution.preferences.PreferencePage;
 
 /**
  * <code>NodeFactory</code> for the "HHsearch" Node.
@@ -11,56 +27,64 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class HHsearchNodeFactory 
-        extends NodeFactory<HHsearchNodeModel> {
+public final class HHsearchNodeFactory extends ToolInvocationNodeFactory<Writeable[], File[]> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public HHsearchNodeModel createNodeModel() {
-    	
-    	try {
-    		return new HHsearchNodeModel();
-    		
-    	} catch( InvalidSettingsException e) {
-    		
-    		throw new RuntimeException(e.getMessage());
-    	}
-    }
+	@Override
+	protected ExternalToolInvocation<Writeable[], File[]> initTool() {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getNrNodeViews() {
-        return 0;
-    }
+		try{
+			return new HHsearch(Paths.get(
+					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.HHSUITE_EXECUTABLE_PATH), "hhsearch").toFile());
+		} catch(IOException e) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<HHsearchNodeModel> createNodeView(final int viewIndex,
-            final HHsearchNodeModel nodeModel) {
-        return null;
-    }
+			throw new IllegalStateException(e.getMessage());
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasDialog() {
-        return true;
-    }
+	@Override
+	protected KNIMEAdapter<Writeable[], File[]> getAdapter() {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeDialogPane createNodeDialogPane() {
-        return new HHsearchNodeDialog();
-    }
+		return new KNIMEAdapter<Writeable[], File[]>() {
 
+			@Override
+			public Writeable[] portToInput(PortObject[] ports) {
+
+				return new Writeable[] {
+
+						((SequenceAlignmentPortObject) ports[0]).getAlignment()
+				};
+			}
+
+			@Override
+			public PortObject[] resultToPort(File[] result, ExecutionContext exec) throws IOException {
+
+				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
+				AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
+
+				return new PortObject[]{
+						HHSuiteUtil.getHHR(result[0], exec),
+						new SequenceAlignmentPortObject(
+								sequenceAlignmentOut,
+								new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, sequenceAlignmentOutFormat))
+				};
+			}
+
+			@Override
+			public PortType[] getInputPortType() {
+
+				return new PortType[] {SequenceAlignmentPortObject.TYPE};
+			}
+
+			@Override
+			public PortType[] getOutputPortType() {
+
+				return new PortType[] {BufferedDataTable.TYPE, SequenceAlignmentPortObject.TYPE};
+			}
+		};
+	}
+
+	@Override
+	protected void check() throws IllegalStateException {
+
+	}	
 }
-

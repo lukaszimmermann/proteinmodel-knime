@@ -7,7 +7,7 @@ package org.proteinevolution.knime.porttypes.alignment;
  * @author lzimmermann
  *
  */
-public final class NotAnAlignmentException extends Exception{
+public final class NotAnAlignmentException extends Error{
 
 	private static final long serialVersionUID = -4033853055846372918L;
 
