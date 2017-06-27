@@ -16,7 +16,6 @@
       <category description="Nodes for Concoord" level-id="concoord" name="Concoord" path="/protevo"/>
       <category description="Utility nodes" level-id="util" name="Utils" path="/protevo"/>
       <category description="Transformaton node" level-id="transformation" name="Transformation" path="/protevo"/>
-      <category description="Rosetta" level-id="rosetta" name="Rosetta" path="/protevo"/>
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
@@ -38,7 +37,6 @@
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory"/>
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
-<node category-path="/protevo/rosetta" factory-class="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory" id="org.proteinevolution.knime.nodes.rosetta.fragmentpicker.FragmentPickerNodeFactory"/>
 <node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
 <node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
 <node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory"/>
@@ -46,7 +44,6 @@
 <node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory" id="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory"/>
 <node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
 <node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.rosetta.abinitiorelax.RosettaAbInitioRelaxNodeFactory" id="org.proteinevolution.knime.nodes.rosetta.abinitiorelax.RosettaAbInitioRelaxNodeFactory"/>
 </extension>
    
    
