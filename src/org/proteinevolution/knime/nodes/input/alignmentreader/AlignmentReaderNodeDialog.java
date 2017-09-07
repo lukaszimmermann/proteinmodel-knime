@@ -2,7 +2,6 @@ package org.proteinevolution.knime.nodes.input.alignmentreader;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * <code>NodeDialog</code> for the "AlignmentReader" Node.
@@ -15,23 +14,14 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author Lukas Zimmermann
  */
-public class AlignmentReaderNodeDialog extends DefaultNodeSettingsPane {
-
-    /**
-     * New pane for configuring AlignmentReader node dialog.
-     * This is just a suggestion to demonstrate possible default dialog
-     * components.
-     */
+final class AlignmentReaderNodeDialog extends DefaultNodeSettingsPane {
+	
     protected AlignmentReaderNodeDialog() {
-        super();
-
+    	
         this.addDialogComponent(
         		new DialogComponentFileChooser(
-        				new SettingsModelString(
-        						AlignmentReaderNodeModel.INPUT_CFGKEY,
-        						AlignmentReaderNodeModel.INPUT_DEFAULT),
-        				AlignmentReaderNodeModel.INPUT_HISTORY,
+        				AlignmentReaderNodeModel.getInput(),
+        				"INPUT_HISTORY",
         				"fasta|fas|fa"));
     }
 }
-

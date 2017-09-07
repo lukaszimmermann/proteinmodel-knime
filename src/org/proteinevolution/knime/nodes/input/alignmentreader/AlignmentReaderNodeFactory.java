@@ -10,8 +10,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Lukas Zimmermann
  */
-public class AlignmentReaderNodeFactory 
-        extends NodeFactory<AlignmentReaderNodeModel> {
+public final class AlignmentReaderNodeFactory extends NodeFactory<AlignmentReaderNodeModel> {
 
     /**
      * {@inheritDoc}
