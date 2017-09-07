@@ -1,4 +1,4 @@
-package org.proteinevolution.knime.nodes;
+package org.proteinevolution.knime.nodes.base;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -9,18 +9,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.proteinevolution.externaltools.parameters.BooleanParameter;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerParameter;
 import org.proteinevolution.externaltools.parameters.Parameter;
-import org.proteinevolution.externaltools.parameters.PathParameter;
-import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.knime.KNIMEAdapter;
 
@@ -55,40 +44,8 @@ public abstract class ToolInvocationNodeFactory<A, B> extends NodeFactory<ToolIn
 
 					Parameter<?> param = (Parameter<?>) f.get(tool);
 					this.params.add(param);
-
-					if (param instanceof BooleanParameter) {
-
-						this.settingModels.add(new SettingsModelBoolean(configName, ((BooleanParameter) param).get()));
-					}
-					else if (param instanceof DoubleBoundedParameter) {
-
-						DoubleBoundedParameter doubleBoundedParam = (DoubleBoundedParameter) param;
-						this.settingModels.add(new SettingsModelDoubleBounded(
-								configName,
-								doubleBoundedParam.get(),
-								doubleBoundedParam.getLower(),
-								doubleBoundedParam.getUpper()));
-					}
-					else if (param instanceof IntegerBoundedParameter) {
-
-						IntegerBoundedParameter intBoundedParam = (IntegerBoundedParameter) param;
-						this.settingModels.add(new SettingsModelIntegerBounded(
-								configName,
-								intBoundedParam.get(), 
-								intBoundedParam.getLower(),
-								intBoundedParam.getUpper()));
-					}
-					else if (param instanceof IntegerParameter) {
-						this.settingModels.add(new SettingsModelInteger(configName, ((IntegerParameter) param).get()));
-					}
-					else if (param instanceof StringSelectionParameter) {
-
-						this.settingModels.add(new SettingsModelString(configName, ((StringSelectionParameter) param).get()));
-
-					} else if (param instanceof PathParameter) {
-						
-						this.settingModels.add(new SettingsModelString(configName, ((PathParameter) param).get().toAbsolutePath().toString()));
-					}
+					
+					this.settingModels.add(ParameterAdapter.paramToSettingsModel(param, configName));
 				}
 			}
 		} catch(IllegalAccessException | IOException e) {

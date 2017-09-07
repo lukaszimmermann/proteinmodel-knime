@@ -1,8 +1,7 @@
-package org.proteinevolution.knime.nodes;
+package org.proteinevolution.knime.nodes.base;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
@@ -23,15 +22,12 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.externaltools.base.Sentinel;
-import org.proteinevolution.externaltools.parameters.BooleanParameter;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerParameter;
 import org.proteinevolution.externaltools.parameters.Parameter;
-import org.proteinevolution.externaltools.parameters.PathParameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.knime.KNIMEAdapter;
+
 
 public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 
@@ -64,40 +60,40 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
 
 		// Transfer setting parameters to the tool
 		for (int i = 0; i < this.settingsModels.size(); ++i) {
 
-			Parameter<?> param = this.parameters.get(i);
-			SettingsModel s = this.settingsModels.get(i);
+			final Parameter<?> param = this.parameters.get(i);
+			final Object value = param.get();
+			final boolean isRangeValidator = param.getValidator() instanceof RangeValidator;
+			
+			final SettingsModel s = this.settingsModels.get(i);
 
-			if (param instanceof BooleanParameter) {
+			if (value instanceof Boolean) {
 
-				((BooleanParameter) param).set(((SettingsModelBoolean) s).getBooleanValue());				
+				((Parameter<Boolean>) param).set(((SettingsModelBoolean) s).getBooleanValue());				
 			}
-			else if (param instanceof DoubleBoundedParameter) {
+			else if (value instanceof Double && isRangeValidator) {
 
-				((DoubleBoundedParameter) param).set(((SettingsModelDoubleBounded) s).getDoubleValue());
+				((Parameter<Double>) param).set(((SettingsModelDoubleBounded) s).getDoubleValue());
 			}
-			else if (param instanceof IntegerBoundedParameter) {
+			else if (value instanceof Integer && isRangeValidator) {
 
-				((IntegerBoundedParameter) param).set(((SettingsModelIntegerBounded) s).getIntValue());
+				((Parameter<Integer>) param).set(((SettingsModelIntegerBounded) s).getIntValue());
 			}
-			else if (param instanceof IntegerParameter) {
+			else if (value instanceof Integer) {
 
-				((IntegerParameter) param).set(((SettingsModelInteger) s).getIntValue());
+				((Parameter<Integer>) param).set(((SettingsModelInteger) s).getIntValue());
 			}
 			else if (param instanceof StringSelectionParameter) {
 
 				((StringSelectionParameter) param).set(((SettingsModelString) s).getStringValue());
 
-			} else if (param instanceof PathParameter) {
-
-				((PathParameter) param).set((Paths.get( ((SettingsModelString) s).getStringValue())));
-			}
-			else {
+			} else {
 
 				throw new Exception("Parameter class not handled in node model. Cannot execute!");
 			}

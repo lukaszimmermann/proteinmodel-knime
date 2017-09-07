@@ -3,12 +3,10 @@ package org.proteinevolution.externaltools.tools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
-import org.proteinevolution.externaltools.parameters.PathParameter;
+import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.ISequenceAlignment;
 
 public final class Psiblast extends ExternalToolInvocation<ISequenceAlignment, Path> {
@@ -17,19 +15,20 @@ public final class Psiblast extends ExternalToolInvocation<ISequenceAlignment, P
 
 		super(executable);
 	}
-
+	
 	// Parameters
-	public final PathParameter database = new PathParameter(Paths.get(""), "Database", "pal");
-	public final DoubleBoundedParameter inclusion_etresh = 
-			new DoubleBoundedParameter(0.001, 0.0, 1000.0, "Inclusion E-value threshold (-inclusion_ethresh)");
-	public final IntegerBoundedParameter n_iterations = 
-			new IntegerBoundedParameter(3, 1, 8, "Number of iterations");
+	//public final PathParameter database = new PathParameter(Paths.get(""), "Database", "pal");
+	public final Parameter<Double> inclusion_etresh = 
+			new Parameter<Double>(0.001, "Inclusion E-value threshold (-inclusion_ethresh)", new RangeValidator<>(0.0, 1000.0));
 	
-	public final IntegerBoundedParameter n_alignments = 
-			new IntegerBoundedParameter(250, 0, 5000, "Number of alignments");
+	public final Parameter<Integer> n_iterations = 
+			new Parameter<Integer>(3, "Number of iterations", new RangeValidator<>(1, 8));
 	
-	public final IntegerBoundedParameter n_descriptions =
-			new IntegerBoundedParameter(250, 0, 5000, "Number of descriptions");
+	public final Parameter<Integer> n_alignments = 
+			new Parameter<Integer>(250, "Number of alignments", new RangeValidator<>(0, 5000));
+	
+	public final Parameter<Integer> n_descriptions =
+			new Parameter<Integer>(250, "Number of descriptions", new RangeValidator<>(0, 5000));
 	
 	
 	@Override
@@ -41,8 +40,8 @@ public final class Psiblast extends ExternalToolInvocation<ISequenceAlignment, P
 	@Override
 	protected void setCmd(final CommandLine cmd) throws IOException {
 				
-		String db = this.database.get().toAbsolutePath().toString();
-		cmd.addOption("-db", db.substring(0, db.length() - 4));
+		//String db = this.database.get().toAbsolutePath().toString();
+		//cmd.addOption("-db", db.substring(0, db.length() - 4));
 		cmd.addFile(this.input.getNumberSequences() == 1 ? "-query" : "-in_msa", this.input);
 		
 		cmd.addOption("-inclusion_ethresh", this.inclusion_etresh.get());

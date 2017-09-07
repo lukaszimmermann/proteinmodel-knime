@@ -11,7 +11,7 @@ import org.proteinevolution.ProteinevolutionNodePlugin;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.externaltools.tools.HHfilter;
 import org.proteinevolution.knime.KNIMEAdapter;
-import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
+import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;

@@ -11,10 +11,9 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.BooleanParameter;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
+import org.proteinevolution.externaltools.parameters.Parameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.Writeable;
 
 public class ConcoordDist extends ExternalToolInvocation<Writeable[], File[]> {
@@ -87,12 +86,12 @@ public class ConcoordDist extends ExternalToolInvocation<Writeable[], File[]> {
 	// Parameters
 	public final StringSelectionParameter atoms_margin = new StringSelectionParameter("OPLS-UA (united atoms)", atomsMarginsParam, "Van-der-Waals parameters");
 	public final StringSelectionParameter bonds = new StringSelectionParameter("Concoord default", bondsParam, "bond/angle parameters");
-	public final BooleanParameter retain_hydrogen_atoms = new BooleanParameter(false, "Retain hydrogen atoms");
-	public final BooleanParameter fix_zero_occ = new BooleanParameter(false, "Interpret zero occupancy as atom to keep fixed");
-	public final BooleanParameter find_alternative_contacts = new BooleanParameter(false, "Try to find alternatives for non-bonded interactions (by default the native contacts will be preserved). Warning: EXPERIMENTAL!");
-	public final DoubleBoundedParameter cut_off_radius = new DoubleBoundedParameter(4.0, 0.0, 20.0, "Cut-off radius (Angstroms) for non-bonded interacting pairs (default 4.0)");
-	public final IntegerBoundedParameter min_dist = new IntegerBoundedParameter(50, 1, 200, "Minimum nr of distances to be defined for each atom (default 50, or 1 with -noe)");
-	public final DoubleBoundedParameter damp = new DoubleBoundedParameter(1.0, 1.0, 10.0, "Multiply each distance margin by value (default 1.0)");
+	public final Parameter<Boolean> retain_hydrogen_atoms = new Parameter<>(false, "Retain hydrogen atoms");
+	public final Parameter<Boolean> fix_zero_occ = new Parameter<>(false, "Interpret zero occupancy as atom to keep fixed");
+	public final Parameter<Boolean> find_alternative_contacts = new Parameter<>(false, "Try to find alternatives for non-bonded interactions (by default the native contacts will be preserved). Warning: EXPERIMENTAL!");
+	public final Parameter<Double> cut_off_radius = new Parameter<>(4.0, "Cut-off radius (Angstroms) for non-bonded interacting pairs (default 4.0)", new RangeValidator<>(0.0, 20.0));
+	public final Parameter<Integer> min_dist = new Parameter<>(50, "Minimum nr of distances to be defined for each atom (default 50, or 1 with -noe)", new RangeValidator<>(1, 200));
+	public final Parameter<Double> damp = new Parameter<>(1.0, "Multiply each distance margin by value (default 1.0)", new RangeValidator<>(1.0, 10.0));
 
 
 	@Override

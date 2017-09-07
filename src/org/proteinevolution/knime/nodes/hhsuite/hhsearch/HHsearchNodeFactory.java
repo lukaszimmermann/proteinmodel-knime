@@ -12,7 +12,7 @@ import org.proteinevolution.ProteinevolutionNodePlugin;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.externaltools.tools.HHsearch;
 import org.proteinevolution.knime.KNIMEAdapter;
-import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
+import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteUtil;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;

@@ -17,7 +17,7 @@ import org.proteinevolution.ProteinevolutionNodePlugin;
 import org.proteinevolution.externaltools.tools.ConcoordDisco;
 import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.knime.KNIMEAdapter;
-import org.proteinevolution.knime.nodes.ToolInvocationNodeFactory;
+import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.porttypes.structure.StructureContent;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObject;
 import org.proteinevolution.knime.porttypes.structure.StructurePortObjectSpec;

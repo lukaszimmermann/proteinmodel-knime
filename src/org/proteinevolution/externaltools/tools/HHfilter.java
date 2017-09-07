@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
+import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.Writeable;
 
 public class HHfilter extends ExternalToolInvocation<Writeable[], File[]>{
@@ -15,17 +15,17 @@ public class HHfilter extends ExternalToolInvocation<Writeable[], File[]>{
 	
 	}
 	
-	public final DoubleBoundedParameter max_pairwise_seq_identity =
-			new DoubleBoundedParameter(90.0, 0.0, 100.0, "Maximum pairwise sequence identity (%)");
+	public final Parameter<Double> max_pairwise_seq_identity =
+			new Parameter<Double>(90.0, "Maximum pairwise sequence identity (%)", RangeValidator.percentage);
 	
-	public final IntegerBoundedParameter min_number_diverse_sequences = 
-			new IntegerBoundedParameter(0, 0, 10000, "Min. number of diverse sequences");
+	public final Parameter<Integer> min_number_diverse_sequences = 
+			new Parameter<>(0, "Min. number of diverse sequences", RangeValidator.natural);
 
-	public final DoubleBoundedParameter min_seq_identity_with_query = 
-			new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum sequence identity with query (%)");
+	public final Parameter<Double> min_seq_identity_with_query = 
+			new Parameter<>(0.0, "Minimum sequence identity with query (%)", RangeValidator.percentage);
 
-	public final DoubleBoundedParameter min_coverage_with_query = 
-			new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum coverage with query (%)");
+	public final Parameter<Double> min_coverage_with_query = 
+			new Parameter<>(0.0, "Minimum coverage with query (%)", RangeValidator.percentage);
 	
 	
 	@Override

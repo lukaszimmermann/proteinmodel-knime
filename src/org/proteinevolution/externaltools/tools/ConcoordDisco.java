@@ -11,8 +11,9 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
+import org.proteinevolution.externaltools.parameters.Parameter;
 import org.proteinevolution.externaltools.parameters.StringSelectionParameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.Writeable;
 
 public class ConcoordDisco extends ExternalToolInvocation<Writeable[], File[]>  {
@@ -87,7 +88,7 @@ public class ConcoordDisco extends ExternalToolInvocation<Writeable[], File[]>  
 	// Parameters
 	public final StringSelectionParameter atoms_margin = new StringSelectionParameter("OPLS-UA (united atoms)", atomsMarginsParam, "Van-der-Waals parameters");
 	public final StringSelectionParameter bonds = new StringSelectionParameter("Concoord default", bondsParam, "bond/angle parameters");
-	public final IntegerBoundedParameter no_structures = new IntegerBoundedParameter(500, 1, 1000, "Nr. of structures to be generated. Default: 500");
+	public final Parameter<Integer> no_structures = new Parameter<Integer>(500, "Nr. of structures to be generated. Default: 500", new RangeValidator<>(1, 1000));
 
 
 	@Override

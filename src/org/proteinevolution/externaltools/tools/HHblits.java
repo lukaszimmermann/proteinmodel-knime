@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
-import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.Writeable;
+import org.proteinevolution.externaltools.parameters.Parameter;
 
 public final class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 
@@ -15,10 +15,10 @@ public final class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 		super(executable);
 	}
 	
-	public final IntegerBoundedParameter number_of_iterations = new IntegerBoundedParameter(2, 0, 100, "Number of iteratons");
-	public final DoubleBoundedParameter evalue = new DoubleBoundedParameter(0.001, 0.0, 1.0, "E-value cut-off");	
-	public final DoubleBoundedParameter min_seqid_with_master = new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum sequence identity with master (%)");	
-	public final DoubleBoundedParameter min_coverage_with_master = new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum coverage with master (%)");
+	public final Parameter<Integer> number_of_iterations = new Parameter<>(2, "Number of iteratons", new RangeValidator<>(0, 100));
+	public final Parameter<Double> evalue = new Parameter<>(0.001, "E-value cut-off", RangeValidator.probability);	
+	public final Parameter<Double> min_seqid_with_master = new Parameter<>(0.0, "Minimum sequence identity with master (%)", new RangeValidator<>(0.0, 100.0));	
+	public final Parameter<Double> min_coverage_with_master = new Parameter<>(0.0, "Minimum coverage with master (%)", new RangeValidator<>(0.0, 100.0));
 	
 	// HHsuite database
 	//	public static final String HHSUITEDB_CFGKEY = "HHSUITEDB";

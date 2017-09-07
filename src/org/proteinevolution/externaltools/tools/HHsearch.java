@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 import org.proteinevolution.models.interfaces.Writeable;
+import org.proteinevolution.externaltools.parameters.Parameter;
 
 public class HHsearch extends ExternalToolInvocation<Writeable[], File[]> {
 
@@ -14,11 +15,11 @@ public class HHsearch extends ExternalToolInvocation<Writeable[], File[]> {
 	}
 
 
-	public final DoubleBoundedParameter evalue = new DoubleBoundedParameter(0.001, 0.0, 1.0, "E-value cut-off");
-	public final DoubleBoundedParameter min_seq_identity_with_master = 
-			new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum sequence identity with master sequence (%)");
-	public final DoubleBoundedParameter min_coverage_with_master = 
-			new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum coverage with master sequence (%)");
+	public final Parameter<Double> evalue = new Parameter<>(0.001, "E-value cut-off", RangeValidator.probability);
+	public final Parameter<Double> min_seq_identity_with_master = 
+			new Parameter<Double>(0.0, "Minimum sequence identity with master sequence (%)", RangeValidator.percentage);
+	public final Parameter<Double> min_coverage_with_master = 
+			new Parameter<Double>(0.0, "Minimum coverage with master sequence (%)", RangeValidator.percentage);
 
 
 
