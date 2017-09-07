@@ -120,7 +120,7 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 		Thread t = new Thread(futureTask);
 		t.start();
 		B result = futureTask.get();
-		PortObject[] out = this.knimeAdapter.resultToPort(result, exec); 
+		PortObject[] out = this.knimeAdapter.outputToPort(result, exec); 
 		tool.close();
 		return out;
 	}

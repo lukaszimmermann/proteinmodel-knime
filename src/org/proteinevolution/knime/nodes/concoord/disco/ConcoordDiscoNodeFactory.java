@@ -138,7 +138,7 @@ public final class ConcoordDiscoNodeFactory extends ToolInvocationNodeFactory<Wr
 			}
 
 			@Override
-			public PortObject[] resultToPort(File[] result, ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 				
 				// Assuming that the prefix is still part of the filename
 				StructureContent structureContent = StructureContent.fromDirectory(result[0].getParent());

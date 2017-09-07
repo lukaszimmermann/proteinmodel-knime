@@ -55,7 +55,7 @@ public class HHfilterNodeFactory  extends ToolInvocationNodeFactory<Writeable[],
 			}
 
 			@Override
-			public PortObject[] resultToPort(File[] result, ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 
 				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[0].getAbsolutePath());
 				AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	

@@ -51,7 +51,7 @@ public final class PsipredNodeFactory extends ToolInvocationNodeFactory<Path, Pa
 			}
 
 			@Override
-			public PortObject[] resultToPort(final Path result, final ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(final Path result, final ExecutionContext exec) throws IOException {
 				
 				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredPsipredNode"));
 		        File outFile = out.registerFile(PsipredNodeFactory.class.getSimpleName() + ".ss");

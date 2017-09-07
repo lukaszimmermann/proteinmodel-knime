@@ -8,9 +8,9 @@ import org.knime.core.node.port.PortType;
 
 public interface KNIMEAdapter<A, B> {
 
-	public A portToInput(final PortObject[] ports);
-	public PortObject[] resultToPort(final B result, final ExecutionContext exec) throws IOException;
+	A portToInput(final PortObject[] ports);
+	PortObject[] outputToPort(final B result, final ExecutionContext exec) throws IOException;
 	
-	public PortType[] getInputPortType();
-	public PortType[] getOutputPortType();
+	PortType[] getInputPortType();
+	PortType[] getOutputPortType();
 }

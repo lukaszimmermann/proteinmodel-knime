@@ -1,5 +1,6 @@
 package org.proteinevolution.knime.nodes;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,21 +30,23 @@ public abstract class ToolInvocationNodeFactory<A, B> extends NodeFactory<ToolIn
 	private final List<SettingsModel> settingModels;
 	private final List<Parameter<?>> params;
 
-	protected abstract ExternalToolInvocation<A, B> initTool();
+	protected abstract ExternalToolInvocation<A, B> initTool() throws IOException;
 	protected abstract KNIMEAdapter<A, B> getAdapter();
-	protected abstract void check() throws IllegalStateException;
+		
+	protected void check() throws IllegalStateException {
+		
+	}
 
-
-	protected ToolInvocationNodeFactory(){
+	protected ToolInvocationNodeFactory() {
 
 		this.check();
-		this.tool = initTool();
 		this.settingModels = new ArrayList<SettingsModel>();
 		this.params = new ArrayList<Parameter<?>>();
+		
 		//  Create all the SettingsModel for this tool
-
 		try {
-			for (Field f : tool.getClass().getFields()) {
+			this.tool = initTool();
+			for (final Field f : tool.getClass().getFields()) {
 
 				if(Parameter.class.isAssignableFrom(f.getType())) {
 
@@ -88,9 +91,9 @@ public abstract class ToolInvocationNodeFactory<A, B> extends NodeFactory<ToolIn
 					}
 				}
 			}
-		} catch(IllegalAccessException e) {
-
-
+		} catch(IllegalAccessException | IOException e) {
+			
+			throw new RuntimeException(e);
 		}
 	}
 

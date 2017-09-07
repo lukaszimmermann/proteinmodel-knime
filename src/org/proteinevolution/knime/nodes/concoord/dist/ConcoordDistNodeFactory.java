@@ -151,7 +151,7 @@ public class ConcoordDistNodeFactory extends ToolInvocationNodeFactory<Writeable
 			}
 
 			@Override
-			public PortObject[] resultToPort(final File[] result, final ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(final File[] result, final ExecutionContext exec) throws IOException {
 
 				StructureContent structureContentResult = StructureContent.fromFile(result[0].getAbsolutePath());
 

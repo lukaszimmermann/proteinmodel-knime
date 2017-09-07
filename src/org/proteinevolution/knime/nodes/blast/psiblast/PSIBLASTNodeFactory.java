@@ -54,7 +54,7 @@ public class PSIBLASTNodeFactory  extends ToolInvocationNodeFactory<ISequenceAli
 			}
 
 			@Override
-			public PortObject[] resultToPort(final Path result, final ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(final Path result, final ExecutionContext exec) throws IOException {
 
 				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsiblastNodeFactory"));
 		        File outFile = out.registerFile(PSIBLASTNodeFactory.class.getSimpleName() + ".chk");

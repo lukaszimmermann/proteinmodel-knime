@@ -56,7 +56,7 @@ public final class HHsearchNodeFactory extends ToolInvocationNodeFactory<Writeab
 			}
 
 			@Override
-			public PortObject[] resultToPort(File[] result, ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 
 				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
 				AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	

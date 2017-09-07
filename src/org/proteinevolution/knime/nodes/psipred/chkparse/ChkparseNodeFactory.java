@@ -52,7 +52,7 @@ public class ChkparseNodeFactory extends ToolInvocationNodeFactory<Path, Path>{
 			}
 
 			@Override
-			public PortObject[] resultToPort(Path result, ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(Path result, ExecutionContext exec) throws IOException {
 					
 				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredChkparseNode"));
 		        File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".mtx");

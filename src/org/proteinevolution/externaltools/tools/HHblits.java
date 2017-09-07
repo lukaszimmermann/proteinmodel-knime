@@ -8,12 +8,13 @@ import org.proteinevolution.externaltools.parameters.DoubleBoundedParameter;
 import org.proteinevolution.externaltools.parameters.IntegerBoundedParameter;
 import org.proteinevolution.models.interfaces.Writeable;
 
-public class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
+public final class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 
 	public HHblits(final File executable) throws IOException {
-		super(executable);
 		
+		super(executable);
 	}
+	
 	public final IntegerBoundedParameter number_of_iterations = new IntegerBoundedParameter(2, 0, 100, "Number of iteratons");
 	public final DoubleBoundedParameter evalue = new DoubleBoundedParameter(0.001, 0.0, 1.0, "E-value cut-off");	
 	public final DoubleBoundedParameter min_seqid_with_master = new DoubleBoundedParameter(0.0, 0.0, 100.0, "Minimum sequence identity with master (%)");	
@@ -24,7 +25,6 @@ public class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 	//	public static final String[] HHSUITEDB_DEFAULT = new String[0];
 	//	private final SettingsModelStringArray param_hhsuitedb = new SettingsModelStringArray(HHSUITEDB_CFGKEY, HHSUITEDB_DEFAULT);
 
-	
 	@Override
 	protected File[] getResult(final CommandLine cmd, final File standardOut) {
 		

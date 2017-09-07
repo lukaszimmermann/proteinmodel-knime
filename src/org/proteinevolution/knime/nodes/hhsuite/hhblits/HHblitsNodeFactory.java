@@ -28,20 +28,20 @@ import org.proteinevolution.preferences.PreferencePage;
  *
  * @author Lukas Zimmermann
  */
-public class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeable[], File[]> {
+public final class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeable[], File[]> {
 
 
 	@Override
 	protected ExternalToolInvocation<Writeable[], File[]> initTool() {
 
 		try{
-			return new HHblits(Paths.get(
-					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.HHSUITE_EXECUTABLE_PATH),
+			return new HHblits(
+					Paths.get(ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.HHSUITE_EXECUTABLE_PATH),
 					"hhblits").toFile());
 
 		} catch(IOException e) {
 
-			throw new IllegalStateException(e.getMessage());
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -51,7 +51,7 @@ public class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeable[], F
 		return new KNIMEAdapter<Writeable[], File[]>() {
 
 			@Override
-			public PortObject[] resultToPort(File[] result, ExecutionContext exec) throws IOException {
+			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 
 				// File to sequence Alignment
 				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
@@ -86,9 +86,5 @@ public class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeable[], F
 				return new PortType[] {SequenceAlignmentPortObject.TYPE};
 			}
 		};
-	}
-
-	@Override
-	protected void check() throws IllegalStateException {	
 	}
 }
