@@ -3,47 +3,46 @@
 
     This is an example for providing an own category 
       <extension point="org.knime.workbench.repository.categories">
-      <category description="Category containing nodes from the Proteinevolution department" level-id="protevo" name="Proteinevolution" path="/"/>
       
-      <category description="Nodes for Data input" level-id="input" name="Input" path="/protevo"/>
-      <category description="Nodes for Data output" level-id="output" name="Output" path="/protevo"/>
-      
-      <category description="Nodes for indexing against databases" level-id="idx" name="Index" path="/protevo"/>
-      <category description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/protevo"/>
-      <category description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/protevo"/>
-      <category description="Nodes for the BLAST" level-id="blast" name="BLAST" path="/protevo"/>
-      <category description="Nodes for PSIPRED" level-id="psipred" name="PSI-PRED" path="/protevo"/>
-      <category description="Nodes for Concoord" level-id="concoord" name="Concoord" path="/protevo"/>
-      <category description="Utility nodes" level-id="util" name="Utils" path="/protevo"/>
-      <category description="Transformaton node" level-id="transformation" name="Transformation" path="/protevo"/>
+      <category icon="icons/category.png" description="/community/ProteinModel" path="/community" name="ProteinModel" level-id="ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for Data input" level-id="input" name="Input" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for Data output" level-id="output" name="Output" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for indexing against databases" level-id="idx" name="Index" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for indexing against databases" level-id="analysis" name="Analysis" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for the HHsuite" level-id="hhsuite" name="HHsuite" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for the BLAST" level-id="blast" name="BLAST" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for PSIPRED" level-id="psipred" name="PSI-PRED" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Nodes for Concoord" level-id="concoord" name="Concoord" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Utility nodes" level-id="util" name="Utils" path="/community/ProteinModel"/>
+      <category icon="icons/category.png" description="Transformaton node" level-id="transformation" name="Transformation" path="/community/ProteinModel"/>
    	</extension>
     
    <extension point="org.knime.workbench.repository.nodes">
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
-<node category-path="/protevo/idx" factory-class="org.proteinevolution.knime.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
-<node category-path="/protevo/output" factory-class="org.proteinevolution.knime.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
-<node category-path="/protevo/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
-<node category-path="/protevo/util" factory-class="org.proteinevolution.knime.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
-<node category-path="/protevo/blast" factory-class="org.proteinevolution.knime.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
-<node category-path="/protevo/input" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
-<node category-path="/protevo/output" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
-<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
-<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
-<node category-path="/protevo/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
-<node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
-<node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory"/>
-<node category-path="/protevo/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory" id="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory"/>
-<node category-path="/protevo/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory" id="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory"/>
-<node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
-<node category-path="/protevo/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
+<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.xquestreader.XQuestReaderNodeFactory" id="org.proteinevolution.XQuestReaderNodeFactory"/>
+<node category-path="/community/ProteinModel/idx" factory-class="org.proteinevolution.knime.nodes.index.fastaindexer.FastaIndexerNodeFactory" id="org.proteinevolution.fastaindexer.FastaIndexerNodeFactory"/>
+<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.pdbatomreader.PDBATOMReaderNodeFactory" id="org.proteinevolution.pdb.pdbatomreader.PDBATOMReaderNodeFactory"/>
+<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
+<node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
+<node category-path="/community/ProteinModel/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
+<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
+<node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
+<node category-path="/community/ProteinModel/output" factory-class="org.proteinevolution.knime.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
+<node category-path="/community/ProteinModel/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
+<node category-path="/community/ProteinModel/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhfilter.HHfilterNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhfilter.HHfilterNodeFactory"/>
+<node category-path="/community/ProteinModel/util" factory-class="org.proteinevolution.knime.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory" id="org.proteinevolution.nodes.util.databaseidmapper.DatabaseIDMapperNodeFactory"/>
+<node category-path="/community/ProteinModel/blast" factory-class="org.proteinevolution.knime.nodes.blast.psiblast.PSIBLASTNodeFactory" id="org.proteinevolution.nodes.blast.psiblast.PSIBLASTNodeFactory"/>
+<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.pdbreader.PDBReaderNodeFactory" id="org.proteinevolution.nodes.input.pdbreader.PDBReaderNodeFactory"/>
+<node category-path="/community/ProteinModel/output" factory-class="org.proteinevolution.knime.nodes.output.pdbwriter.PDBWriterNodeFactory" id="org.proteinevolution.nodes.output.pdbwriter.PDBWriterNodeFactory"/>
+<node category-path="/community/ProteinModel/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory" id="org.proteinevolution.knime.nodes.psipred.chkparse.ChkparseNodeFactory"/>
+<node category-path="/community/ProteinModel/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipred.PsipredNodeFactory"/>
+<node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.analysis.annotatealignment.AnnotateAlignmentNodeFactory"/>
+<node category-path="/community/ProteinModel/psipred" factory-class="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory" id="org.proteinevolution.knime.nodes.psipred.psipass2.Psipass2NodeFactory"/>
+<node category-path="/community/ProteinModel/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory" id="org.proteinevolution.knime.nodes.concoord.dist.ConcoordDistNodeFactory"/>
+<node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbconcatenate.PDBConcatenateNodeFactory"/>
+<node category-path="/community/ProteinModel/concoord" factory-class="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory" id="org.proteinevolution.knime.nodes.concoord.disco.ConcoordDiscoNodeFactory"/>
+<node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory" id="org.proteinevolution.knime.nodes.analysis.pdbcompare.PDBCompareNodeFactory"/>
+<node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
+<node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
 </extension>
    
    
@@ -89,15 +88,10 @@
 	       specClass="org.knime.core.data.uri.URIPortObjectSpec"
 	       specSerializer="org.knime.core.data.uri.URIPortObjectSpec$Serializer">
      </portType>
- 
-   
-  
-  
+
   </extension> 
    
   <extension point="org.knime.core.DataType">
-  
-  
        <DataType 
        	cellClass="org.proteinevolution.knime.porttypes.uri.PortObjectHandlerCell">
           <serializer cellClass="org.proteinevolution.knime.porttypes.uri.PortObjectHandlerCell" 
@@ -109,8 +103,6 @@
   <serializer cellClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentCell" serializerClass="org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentCell$SequenceAlignmentCellSerializer"/>
   </DataType>   
 
-
-  
    <DataType cellClass="org.proteinevolution.knime.porttypes.structure.StructureCell">
   <serializer cellClass="org.proteinevolution.knime.porttypes.structure.StructureCell" serializerClass="org.proteinevolution.knime.porttypes.structure.StructureCell$StructureCellSerializer"/>
   </DataType>  
