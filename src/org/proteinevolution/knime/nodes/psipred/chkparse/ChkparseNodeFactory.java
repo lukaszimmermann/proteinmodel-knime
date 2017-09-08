@@ -26,50 +26,46 @@ import com.genericworkflownodes.knime.base.data.port.FileStoreURIPortObject;
  *
  * @author Lukas Zimmermann
  */
-public class ChkparseNodeFactory extends ToolInvocationNodeFactory<Path, Path>{
+public class ChkparseNodeFactory extends ToolInvocationNodeFactory<Path, Path> {
 
 
 	@Override
-	protected ExternalToolInvocation<Path, Path> initTool() {
-		
-		try{
-			return new PsipredChkparse(Paths.get(
-					ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.PSIPRED_EXECUTABLE_PATH), "chkparse").toFile());
-		} catch(IOException e) {
+	protected ExternalToolInvocation<Path, Path> initTool() throws IOException {
 
-			throw new IllegalStateException(e.getMessage());
-		}
+		return new PsipredChkparse(Paths.get(
+				ProteinevolutionNodePlugin.getDefault().getPreferenceStore().getString(PreferencePage.PSIPRED_EXECUTABLE_PATH), "chkparse").toFile());
+
 	}
 
 	@Override
 	protected KNIMEAdapter<Path, Path> getAdapter() {
-	
+
 		return new KNIMEAdapter<Path, Path>() {
 
 			@Override
 			public Path portToInput(PortObject[] ports) {
-			
+
 				return Paths.get(((FileStoreURIPortObject) ports[0]).getURIContents().get(0).getURI());
 			}
 
 			@Override
 			public PortObject[] outputToPort(Path result, ExecutionContext exec) throws IOException {
-					
+
 				FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("PsipredChkparseNode"));
-		        File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".mtx");
-		        Files.copy(result, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		        return new PortObject[] {out};
+				File outFile = out.registerFile(ChkparseNodeFactory.class.getSimpleName() + ".mtx");
+				Files.copy(result, outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				return new PortObject[] {out};
 			}
 
 			@Override
 			public PortType[] getInputPortType() {
-				
+
 				return new PortType[] {IURIPortObject.TYPE} ;
 			}
 
 			@Override
 			public PortType[] getOutputPortType() {
-			
+
 				return new PortType[] {IURIPortObject.TYPE};
 			}
 		};

@@ -2,31 +2,34 @@ package org.proteinevolution.externaltools.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.proteinevolution.externaltools.base.CommandLine;
-import org.proteinevolution.models.interfaces.Writeable;
+import org.proteinevolution.externaltools.parameters.Parameter;
+import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
 
-public final class ClustalOmega extends ExternalToolInvocation<Writeable[], File[]> {
+public final class ClustalOmega extends ExternalToolInvocation<Path, Path> {
 
 	public ClustalOmega(File executable) throws IOException {
 		super(executable);
 	}
 
-	//final Parameter<>
+	public final Parameter<Integer> threads = new Parameter<>(1, "No. of threads to use", RangeValidator.natural);
+	public final Parameter<Boolean> dealign = new Parameter<>(false, "Dealign input sequences");
 	
-	
+		
 	@Override
-	protected File[] getResult(CommandLine cmd, File standardOut) {
-		// TODO Auto-generated method stub
-		return null;
+	protected Path getResult(CommandLine cmd, File standardOut) {
+		
+		return cmd.getFile(0).toPath().toAbsolutePath();
 	}
 
 	@Override
-	protected void setCmd(CommandLine cmd) throws IOException {
-		// TODO Auto-generated method stub
+	protected void setCmd(final CommandLine cmd) throws IOException {
 		
-	}
-
-	
-		
+		cmd.addFlag("--force");
+		cmd.addFile("-i", this.input.toFile());
+		cmd.addFlag("--dealign", this.dealign.get());
+		cmd.addOutputFile("-o", "fasta");
+	}	
 }

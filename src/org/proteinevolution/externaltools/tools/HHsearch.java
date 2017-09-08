@@ -2,6 +2,8 @@ package org.proteinevolution.externaltools.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.proteinevolution.externaltools.base.CommandLine;
 import org.proteinevolution.externaltools.parameters.validators.RangeValidator;
@@ -15,12 +17,24 @@ public class HHsearch extends ExternalToolInvocation<Writeable[], File[]> {
 	}
 
 
+	public final Parameter<Integer> cpus = new Parameter<>(2, "CPUs to use");
 	public final Parameter<Double> evalue = new Parameter<>(0.001, "E-value cut-off", RangeValidator.probability);
 	public final Parameter<Double> min_seq_identity_with_master = 
 			new Parameter<Double>(0.0, "Minimum sequence identity with master sequence (%)", RangeValidator.percentage);
 	public final Parameter<Double> min_coverage_with_master = 
 			new Parameter<Double>(0.0, "Minimum coverage with master sequence (%)", RangeValidator.percentage);
-
+	public final Parameter<Path> database = new Parameter<Path>(Paths.get(""), "Database path", (path) -> {
+		
+		// Database file prefix, terminated by '_' or '.'
+		final String filename = path.getFileName().toString().trim();
+		if ("".equals(filename)) {
+			
+			return Paths.get(filename);
+		}
+		int idx2 = filename.indexOf('.');
+		idx2 = idx2 == -1 ? Integer.MAX_VALUE : idx2;
+		return path.getParent().resolve(filename.substring(0, idx2));
+	});
 
 
 	// HHsuite database
@@ -34,14 +48,16 @@ public class HHsearch extends ExternalToolInvocation<Writeable[], File[]> {
 
 		return new File[] {
 
-				cmd.getFile("-o"),
-				cmd.getFile("-oa3m")
+				cmd.getFile(0)
 		};
 	}
 
 	@Override
 	protected void setCmd(final CommandLine cmd) throws IOException {
 		
+		cmd.addOption("-cpu", this.cpus.get());
+		cmd.addOption("-M", "first");
+		cmd.addOption("-d", this.database.get().toAbsolutePath().toString());
 		cmd.addFile("-i", this.input[0]);
 		cmd.addOption("-e", this.evalue.get());
 		cmd.addOption("-qid", this.min_seq_identity_with_master.get());

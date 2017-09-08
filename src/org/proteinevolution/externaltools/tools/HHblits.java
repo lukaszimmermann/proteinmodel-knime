@@ -33,11 +33,9 @@ public final class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 			
 			return Paths.get(filename);
 		}
-		int idx1 = filename.indexOf('_');
 		int idx2 = filename.indexOf('.');
-		idx1 = idx1 == -1 ? Integer.MAX_VALUE : idx1;
 		idx2 = idx2 == -1 ? Integer.MAX_VALUE : idx2;
-		return path.getParent().resolve(filename.substring(0, Math.min(idx1, idx2)));
+		return path.getParent().resolve(filename.substring(0, idx2));
 	});
 	
 	// HHsuite database
@@ -50,8 +48,8 @@ public final class HHblits extends ExternalToolInvocation<Writeable[], File[]> {
 	
 		return new File[] {
 				
-				cmd.getFile("-o"),
-				cmd.getFile("-oa3m")
+				cmd.getFile(0),
+				cmd.getFile(1)
 		};
 	}
 

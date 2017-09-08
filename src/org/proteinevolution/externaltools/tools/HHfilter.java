@@ -32,13 +32,14 @@ public class HHfilter extends ExternalToolInvocation<Writeable[], File[]>{
 	protected File[] getResult(final CommandLine cmd, final File standardOut) {
 		
 		return new File[] {
-			cmd.getFile("-o")
+			cmd.getFile(0)
 		};
 	}
 
 	@Override
 	protected void setCmd(final CommandLine cmd) throws IOException {
 		
+		cmd.addOption("-M", "first");
 		cmd.addFile("-i", this.input[0]);
 		cmd.addOption("-qid", this.min_seq_identity_with_query.get());
 		cmd.addOption("-cov", this.min_coverage_with_query.get());

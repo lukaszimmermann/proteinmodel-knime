@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.proteinevolution.models.interfaces.Writeable;
@@ -29,8 +27,11 @@ public final class CommandLine implements AutoCloseable {
 	private final List<String> optionsKeys;
 	private final List<String> optionsValues;
 
-	// Temporary files used for IO
-	private final Map<String, File> files;
+	private final List<String> inFileKeys;
+	private final List<File> inFileValues;
+	
+	private final List<String> outFileKeys;
+	private final List<File> outFileValues;
 
 	private static final Pattern optionPattern = Pattern.compile("((-){1,2}[0-9a-zA-Z_]+)?");
 	private static final Pattern valuePattern = Pattern.compile(String.format("[0-9a-zA-Z_\\.%s-]+", File.separator));
@@ -63,7 +64,10 @@ public final class CommandLine implements AutoCloseable {
 
 		this.optionsKeys = new ArrayList<String>();
 		this.optionsValues = new ArrayList<String>();
-		this.files = new HashMap<String, File>();
+		this.inFileKeys = new ArrayList<String>();
+		this.inFileValues = new ArrayList<File>();
+		this.outFileKeys = new ArrayList<String>();
+		this.outFileValues = new ArrayList<File>();
 	}
 
 	public void addFlag(final String flag) {
@@ -109,9 +113,9 @@ public final class CommandLine implements AutoCloseable {
 	 * @param key The key which is associated with the returned file
 	 * @return
 	 */
-	public File getFile(final String key) {
+	public File getFile(final int index) {
 
-		return this.files.get(key);
+		return this.outFileValues.get(index);
 	}
 
 	/**
@@ -134,30 +138,31 @@ public final class CommandLine implements AutoCloseable {
 		FileWriter fw = new FileWriter(tempFile);
 		writeable.write(fw);
 		fw.close(); 
-		this.files.put(option, tempFile);
+		this.inFileKeys.add(option);
+		this.inFileValues.add(tempFile);
 	}
-	
-	
-	
+
+
 	public void addFile(String option, final File file) throws IOException  {
 
 		option = this.checkOption(option);
 
 		// Check whether input file exists and is regular file
 		if ( file == null || ! file.exists() || ! file.isFile()) {
-			
+
 			throw new IllegalArgumentException("Input file is null or does not refer to an existing file!");
 		}
-	
+
 		// Make a new temporary file and ask writeable to write into it
 		File tempFile = File.createTempFile("commandLine", "");
 		tempFile.deleteOnExit();
-		
+
 		Files.copy(file.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		this.files.put(option, tempFile);
+		this.inFileKeys.add(option);
+		this.inFileValues.add(tempFile);
 	}
-	
-	
+
+
 
 	/**
 	 * Adds a new option to the CommandLine invocation.
@@ -182,13 +187,33 @@ public final class CommandLine implements AutoCloseable {
 
 		this.addOutputFile(option, "");
 	}
+	
+	public void appendFileToOutput(final File file) throws IOException {
+		
+		// Check whether input file exists and is regular file
+		if ( file == null || ! file.exists() || ! file.isFile()) {
+
+			throw new IllegalArgumentException("Input file is null or does not refer to an existing file!");
+		}
+
+		// Make a new temporary file and ask writeable to write into it
+		File tempFile = File.createTempFile("commandLine", "");
+		tempFile.deleteOnExit();
+
+		Files.copy(file.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		this.outFileKeys.add("");
+		this.outFileValues.add(tempFile);
+	}
+	
 
 	public void addOutputFile(String option, final String ext) throws IOException {
 
 		option = this.checkOption(option);
 		File tempFile = File.createTempFile("commandLine", ext);
 		tempFile.deleteOnExit();
-		this.files.put(option, tempFile);
+
+		this.outFileKeys.add(option);
+		this.outFileValues.add(tempFile);
 	}
 
 	public void addOutputDirectory(String option) throws IOException {
@@ -196,7 +221,8 @@ public final class CommandLine implements AutoCloseable {
 		option = this.checkOption(option);
 		File tempDir = Files.createTempDirectory("commandLine").toFile();
 		tempDir.deleteOnExit();
-		this.files.put(option, tempDir);
+		this.outFileKeys.add(option);
+		this.outFileValues.add(tempDir);
 	}
 
 	public void addOutputDirectory(String option, String filePrefix) throws IOException {
@@ -204,7 +230,9 @@ public final class CommandLine implements AutoCloseable {
 		option = this.checkOption(option);
 		File tempDir = Files.createTempDirectory("commandLine").toFile();
 		tempDir.deleteOnExit();
-		this.files.put(option, new File(tempDir, filePrefix));
+
+		this.outFileKeys.add(option);
+		this.outFileValues.add(new File(tempDir, filePrefix));
 	}
 
 
@@ -223,10 +251,22 @@ public final class CommandLine implements AutoCloseable {
 	public void close() throws IOException {
 
 		// Delete all input/output files
-		for (File tempFile: this.files.values()) {
+		for (final File tempFile: this.inFileValues) {
 
 			// TODO Also ensure that direcotories are removed
-			
+
+			try {
+				Files.delete(tempFile.toPath());
+
+			} catch(IOException e) {
+
+			}
+		}
+		// Delete all input/output files
+		for (final File tempFile: this.outFileValues) {
+
+			// TODO Also ensure that direcotories are removed
+
 			try {
 				Files.delete(tempFile.toPath());
 
@@ -238,7 +278,7 @@ public final class CommandLine implements AutoCloseable {
 
 	public List<String> toStringList() {
 
-		List<String> result = new ArrayList<String>(1 + this.optionsKeys.size() + this.files.size());
+		List<String> result = new ArrayList<String>(1 + this.optionsKeys.size() + this.inFileKeys.size() + this.outFileKeys.size());
 		result.add(this.executable.getAbsolutePath());
 
 		for (int i = 0; i < this.optionsKeys.size(); ++i) {
@@ -252,11 +292,15 @@ public final class CommandLine implements AutoCloseable {
 				result.add(value);	
 			}
 		}
+		for (int i = 0; i < this.inFileKeys.size(); ++i) {
 
-		for (String option : this.files.keySet()) {
+			result.add(inFileKeys.get(i));
+			result.add(this.inFileValues.get(i).getAbsolutePath());	
+		}
+		for (int i = 0; i < this.outFileKeys.size(); ++i) {
 
-			result.add(option);
-			result.add(this.files.get(option).getAbsolutePath());	
+			result.add(outFileKeys.get(i));
+			result.add(this.outFileValues.get(i).getAbsolutePath());	
 		}
 		return result;
 	}
@@ -281,13 +325,19 @@ public final class CommandLine implements AutoCloseable {
 				sb.append(value);
 			}
 		}
-
-		for (String option : this.files.keySet()) {
+		for (int i = 0; i < this.inFileKeys.size(); ++i) {
 
 			sb.append(" ");
-			sb.append(option);
+			sb.append(inFileKeys.get(i));
 			sb.append(" ");
-			sb.append(this.files.get(option).getAbsolutePath());	
+			sb.append(this.inFileValues.get(i).getAbsolutePath());
+		}
+		for (int i = 0; i < this.outFileKeys.size(); ++i) {
+
+			sb.append(" ");
+			sb.append(outFileKeys.get(i));
+			sb.append(" ");
+			sb.append(this.outFileValues.get(i).getAbsolutePath());
 		}
 		return sb.toString();
 	}

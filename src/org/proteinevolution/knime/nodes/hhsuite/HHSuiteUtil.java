@@ -30,10 +30,9 @@ public final class HHSuiteUtil {
 
 	public static final PortObject getHHR(final File file, final ExecutionContext exec) throws IOException {
 
-		BufferedDataContainer container = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] {
+		final BufferedDataContainer container = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] {
 
 				new DataColumnSpecCreator("No", IntCell.TYPE ).createSpec(),
-				new DataColumnSpecCreator("Accession", StringCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Hit", StringCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("Probability", DoubleCell.TYPE ).createSpec(),
 				new DataColumnSpecCreator("E-value", DoubleCell.TYPE ).createSpec(),
@@ -51,7 +50,7 @@ public final class HHSuiteUtil {
 		// Read HHR output file
 		byte state = 0;
 		int rowCounter = 0;			
-		try(BufferedReader br = new BufferedReader(new FileReader(file.getAbsolutePath()))) {
+		try (final BufferedReader br = new BufferedReader(new FileReader(file.getAbsolutePath()))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 
@@ -68,14 +67,11 @@ public final class HHSuiteUtil {
 					// Get the last integer (remove the parentheses)
 					String ref = line.substring(HHR.REF_START).trim();
 					ref = ref.substring(1, ref.length() - 1);
-					String[] spt = line.substring(HHR.HIT_START, HHR.HIT_END).trim().split("\\s+");
-
 					// Add line to data table
-					container.addRowToTable(new DefaultRow("Row"+rowCounter++,new DataCell[] {
+					container.addRowToTable(new DefaultRow("Row"+rowCounter++, new DataCell[] {
 
 							IntCellFactory.create(line.substring(HHR.NO_START,HHR.NO_END).trim()),
-							StringCellFactory.create(spt[0]),
-							StringCellFactory.create(spt[1]),
+							StringCellFactory.create(line.substring(HHR.HIT_START, HHR.HIT_END).trim()),
 							DoubleCellFactory.create(line.substring(HHR.PROB_START, HHR.PROB_END).trim()),
 							DoubleCellFactory.create(line.substring(HHR.EVAL_START, HHR.EVAL_END).trim()),
 							DoubleCellFactory.create(line.substring(HHR.PVAL_START, HHR.PVAL_END).trim()),

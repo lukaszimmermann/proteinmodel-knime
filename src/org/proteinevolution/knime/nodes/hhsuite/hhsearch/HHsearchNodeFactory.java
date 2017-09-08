@@ -14,11 +14,8 @@ import org.proteinevolution.externaltools.tools.HHsearch;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.nodes.hhsuite.HHSuiteUtil;
-import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
-import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
 import org.proteinevolution.models.interfaces.Writeable;
-import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.preferences.PreferencePage;
 
 /**
@@ -58,15 +55,7 @@ public final class HHsearchNodeFactory extends ToolInvocationNodeFactory<Writeab
 			@Override
 			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 
-				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
-				AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
-
-				return new PortObject[]{
-						HHSuiteUtil.getHHR(result[0], exec),
-						new SequenceAlignmentPortObject(
-								sequenceAlignmentOut,
-								new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, sequenceAlignmentOutFormat))
-				};
+				return new PortObject[]{ HHSuiteUtil.getHHR(result[0], exec) };
 			}
 
 			@Override
@@ -78,7 +67,7 @@ public final class HHsearchNodeFactory extends ToolInvocationNodeFactory<Writeab
 			@Override
 			public PortType[] getOutputPortType() {
 
-				return new PortType[] {BufferedDataTable.TYPE, SequenceAlignmentPortObject.TYPE};
+				return new PortType[] {BufferedDataTable.TYPE};
 			}
 		};
 	}

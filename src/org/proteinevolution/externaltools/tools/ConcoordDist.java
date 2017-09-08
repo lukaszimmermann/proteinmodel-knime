@@ -96,11 +96,12 @@ public class ConcoordDist extends ExternalToolInvocation<Writeable[], File[]> {
 
 	@Override
 	public File[] getResult(final CommandLine cmd, final File standardOut) {
-
-		File[] result = new File[2];
-		result[0] = cmd.getFile("-op");
-		result[1] = cmd.getFile("-od");
-		return result;
+		
+		return new File[] {
+				
+				cmd.getFile(0),
+				cmd.getFile(1)	
+		};
 	}
 
 	@Override
@@ -112,8 +113,9 @@ public class ConcoordDist extends ExternalToolInvocation<Writeable[], File[]> {
 		cmd.addOption("-c", this.cut_off_radius.get());
 		cmd.addOption("-m", this.min_dist.get());
 		cmd.addOption("-damp", this.damp.get());
-		cmd.addOutputFile("-od", ".dat");
 		cmd.addOutputFile("-op", ".pdb");
+		cmd.addOutputFile("-od", ".dat");
+		
 	
 		cmd.addFile("-p", this.input[0]);
 		/*

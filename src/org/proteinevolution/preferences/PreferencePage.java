@@ -17,6 +17,7 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 	public static final String ROSETTA_EXECUTABLE_PATH = "ROSETTA_EXECUTABLE_PATH";
 	public static final String CONCOORD_PATH = "CONCOORD_PATH";
 	public static final String DSSP_EXECUTABLE = "DSSP_EXECUTABLE";
+	public static final String CLUSTALO_EXECUTABLE = "CLUSTALO_EXECUTABLE";
 
 	@Override
 	public void init(final IWorkbench workbench) {
@@ -58,6 +59,12 @@ public final class PreferencePage extends FieldEditorPreferencePage implements I
 		this.addField(new DirectoryFieldEditor(
 				CONCOORD_PATH,
 				"Concoord Path (containing bin and lib)",
+				parent));
+		
+		this.addField(new FileFieldEditor(
+				CLUSTALO_EXECUTABLE,
+				"Clustal Omega Executable", // Location of the clutalo executable of Clustal Omega
+				true,   // File path to executable must be absolute
 				parent));
 	}
 }
