@@ -17,9 +17,10 @@ import org.proteinevolution.externaltools.tools.Psiblast;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
-import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
 import org.proteinevolution.models.interfaces.ISequenceAlignment;
 import org.proteinevolution.preferences.PreferencePage;
+
+import com.genericworkflownodes.knime.base.data.port.FileStoreURIPortObject;
 
 /**
  * <code>NodeFactory</code> for the "PSIBLAST" Node.

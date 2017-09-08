@@ -16,8 +16,9 @@ import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.externaltools.tools.PsipredPsipred;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
-import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
 import org.proteinevolution.preferences.PreferencePage;
+
+import com.genericworkflownodes.knime.base.data.port.FileStoreURIPortObject;
 
 /**
  * <code>NodeFactory</code> for the "PSIPRED" Node.

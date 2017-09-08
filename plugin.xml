@@ -107,6 +107,19 @@
   <serializer cellClass="org.proteinevolution.knime.porttypes.structure.StructureCell" serializerClass="org.proteinevolution.knime.porttypes.structure.StructureCell$StructureCellSerializer"/>
   </DataType>  
   </extension> 
-   
-   
+  
+  <extension point="org.knime.base.filehandling.mimetypes">
+  <mimetype
+        name="application/fasta">
+     <fileextension
+           name="fasta">
+     </fileextension>
+     <fileextension
+           name="fas">
+     </fileextension>
+     <fileextension
+           name="fa">
+     </fileextension>
+  </mimetype> 
+  </extension> 
 </plugin>

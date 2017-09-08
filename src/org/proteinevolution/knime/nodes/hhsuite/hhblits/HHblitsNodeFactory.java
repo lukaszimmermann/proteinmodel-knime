@@ -16,9 +16,10 @@ import org.proteinevolution.externaltools.tools.HHblits;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
-import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
 import org.proteinevolution.models.interfaces.Writeable;
 import org.proteinevolution.preferences.PreferencePage;
+
+import com.genericworkflownodes.knime.base.data.port.FileStoreURIPortObject;
 
 
 /**
@@ -55,11 +56,9 @@ public final class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeabl
 				// File to sequence Alignment (TODO HHblits does currently not compute alignment files)
 				//SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
 				//AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
-				
 				final FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("HHblitsHHblitsNode"));
-		        final File outFile = out.registerFile(HHblitsNodeFactory.class.getSimpleName() + ".fasta");
-		        Files.copy(result[1].toPath().toAbsolutePath(), outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			
+				final File outFile =  out.registerFile(HHblitsNodeFactory.class.getSimpleName() + ".fasta");
+				Files.copy(result[1].toPath().toAbsolutePath(), outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				return new PortObject[] {out};
 			}
 

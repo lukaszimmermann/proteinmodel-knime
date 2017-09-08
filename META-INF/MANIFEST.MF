@@ -326,5 +326,6 @@ Export-Package: chemcomp,
  org.proteinevolution.models.structure,
  org.proteinevolution.models.util,
  org.proteinevolution.preferences
+Import-Package: com.genericworkflownodes.knime.base.data.port
 
 
