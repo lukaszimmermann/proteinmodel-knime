@@ -2,6 +2,8 @@ package org.proteinevolution.knime.nodes.base;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
@@ -30,7 +32,36 @@ import org.proteinevolution.knime.KNIMEAdapter;
 
 
 public final class ToolInvocationNodeModel<A, B> extends NodeModel {
+	
+	private static class KNIMESentinel implements Sentinel {
 
+		private boolean isHappy = true;
+		private final ExecutionContext exec;
+		
+		public KNIMESentinel(final ExecutionContext exec) {
+			
+			this.exec = exec;
+		}
+		
+		@Override
+		public boolean isHappy() {
+			
+			if ( ! this.isHappy) {
+				
+				return false;
+			}
+			try {
+				exec.checkCanceled();
+				
+			}  catch(final CanceledExecutionException e) {
+				
+				this.isHappy = false;
+			}
+			return this.isHappy;
+		}
+	}
+	
+	
 	// The tool which is to be executed
 	private final ExternalToolInvocation<A,B> tool;
 	private final List<SettingsModel> settingsModels;
@@ -85,6 +116,10 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 
 				((Parameter<Integer>) param).set(((SettingsModelIntegerBounded) s).getIntValue());
 			}
+			else if (value instanceof Path) {
+				
+				((Parameter<Path>) param).set(Paths.get(((SettingsModelString) s).getStringValue()));
+			}
 			else if (value instanceof Integer) {
 
 				((Parameter<Integer>) param).set(((SettingsModelInteger) s).getIntValue());
@@ -99,19 +134,7 @@ public final class ToolInvocationNodeModel<A, B> extends NodeModel {
 			}
 		}
 		this.tool.setInput(this.knimeAdapter.portToInput(inObjects));
-		this.tool.setSentinel(new Sentinel() {
-
-			@Override
-			public boolean isHappy() {
-
-				try {
-					exec.checkCanceled();
-					return true;
-				}  catch(CanceledExecutionException e) {
-					return false;
-				}
-			}
-		});
+		this.tool.setSentinel(new KNIMESentinel(exec));
 		FutureTask<B> futureTask = new FutureTask<>(this.tool);
 		Thread t = new Thread(futureTask);
 		t.start();

@@ -31,6 +31,12 @@ public class Parameter<T> {
 		}
 	}
 	
+	public Parameter(final T def, final String label, final Renderer<T> renderer) {
+		
+		this(def, label, renderer, null);
+	}
+	
+	
 	public Parameter(final T def, final String label, final Validator<T> validator) {
 		
 		this(def, label, null, validator);

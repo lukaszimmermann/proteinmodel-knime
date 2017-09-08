@@ -2,9 +2,11 @@ package org.proteinevolution.knime.nodes.hhsuite.hhblits;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
-import org.knime.core.node.BufferedDataTable;
+import org.knime.core.data.uri.IURIPortObject;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortType;
@@ -13,12 +15,9 @@ import org.proteinevolution.externaltools.tools.ExternalToolInvocation;
 import org.proteinevolution.externaltools.tools.HHblits;
 import org.proteinevolution.knime.KNIMEAdapter;
 import org.proteinevolution.knime.nodes.base.ToolInvocationNodeFactory;
-import org.proteinevolution.knime.nodes.hhsuite.HHSuiteUtil;
-import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
-import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
+import org.proteinevolution.knime.porttypes.uri.FileStoreURIPortObject;
 import org.proteinevolution.models.interfaces.Writeable;
-import org.proteinevolution.models.spec.AlignmentFormat;
 import org.proteinevolution.preferences.PreferencePage;
 
 
@@ -53,16 +52,15 @@ public final class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeabl
 			@Override
 			public PortObject[] outputToPort(File[] result, ExecutionContext exec) throws IOException {
 
-				// File to sequence Alignment
-				SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
-				AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
-
-				return new PortObject[]{
-						new SequenceAlignmentPortObject(
-								sequenceAlignmentOut,
-								new SequenceAlignmentPortObjectSpec(SequenceAlignmentContent.TYPE, sequenceAlignmentOutFormat)),
-						HHSuiteUtil.getHHR(result[0], exec)
-				};
+				// File to sequence Alignment (TODO HHblits does currently not compute alignment files)
+				//SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(result[1].getAbsolutePath());
+				//AlignmentFormat sequenceAlignmentOutFormat = sequenceAlignmentOut.getAlignmentFormat();	
+				
+				final FileStoreURIPortObject out = new FileStoreURIPortObject(exec.createFileStore("HHblitsHHblitsNode"));
+		        final File outFile = out.registerFile(HHblitsNodeFactory.class.getSimpleName() + ".fasta");
+		        Files.copy(result[1].toPath().toAbsolutePath(), outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			
+				return new PortObject[] {out};
 			}
 
 			@Override
@@ -77,7 +75,7 @@ public final class HHblitsNodeFactory extends ToolInvocationNodeFactory<Writeabl
 			@Override
 			public PortType[] getOutputPortType() {
 
-				return new PortType[] {SequenceAlignmentPortObject.TYPE, BufferedDataTable.TYPE};
+				return new PortType[] {IURIPortObject.TYPE};
 			}
 
 			@Override

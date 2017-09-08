@@ -40,11 +40,10 @@ public abstract class ToolInvocationNodeFactory<A, B> extends NodeFactory<ToolIn
 				if(Parameter.class.isAssignableFrom(f.getType())) {
 
 					// Name of the CONFIG KEY
-					String configName = f.getName().toUpperCase();
-
-					Parameter<?> param = (Parameter<?>) f.get(tool);
-					this.params.add(param);
-					
+					final String configName = f.getName().toUpperCase();
+						
+					final Parameter<?> param = (Parameter<?>) f.get(tool);
+					this.params.add(param);					
 					this.settingModels.add(ParameterAdapter.paramToSettingsModel(param, configName));
 				}
 			}

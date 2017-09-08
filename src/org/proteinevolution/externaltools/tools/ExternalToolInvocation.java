@@ -171,14 +171,14 @@ public abstract class ExternalToolInvocation<A, B> implements Callable<B>, AutoC
 			envp[i] = String.format("%s=%s", pair.getKey(), pair.getValue());
 		}		
 		System.out.println(cmd.toString());
-		Process process = Runtime.getRuntime().exec(cmd.toString(), envp, this.workingDirectory.toFile());
+		final Process process = Runtime.getRuntime().exec(cmd.toString(), envp, this.workingDirectory.toFile());
 		FileUtils.copyInputStreamToFile(process.getInputStream(), this.standardOut);
 		
 		while(process.isAlive()) {
 
 			if ( ! this.sentinel.isHappy()) {
 
-				process.destroy();
+				process.destroyForcibly();
 			}
 		}
 

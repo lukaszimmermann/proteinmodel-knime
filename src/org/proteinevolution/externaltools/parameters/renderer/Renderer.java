@@ -1,9 +1,7 @@
 package org.proteinevolution.externaltools.parameters.renderer;
 
+@FunctionalInterface
 public interface Renderer<T> {
 
-	default T render(final T value) {
-		
-		return value;
-	}
+	T render(final T value);
 }

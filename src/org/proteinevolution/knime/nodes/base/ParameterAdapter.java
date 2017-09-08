@@ -1,7 +1,10 @@
 package org.proteinevolution.knime.nodes.base;
 
+import java.nio.file.Path;
+
 import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
@@ -46,6 +49,11 @@ final class ParameterAdapter {
 			
 			return new DialogComponentNumberEdit((SettingsModelDoubleBounded) s, label);
 		}
+		if (value instanceof Path) {
+			
+			return new DialogComponentFileChooser( (SettingsModelString) s, "INPUT_HISTORY", "");
+		}
+		
 		if (param instanceof StringSelectionParameter) {
 			
 			return new DialogComponentStringSelection(
@@ -61,8 +69,10 @@ final class ParameterAdapter {
 	static final SettingsModel paramToSettingsModel(final Parameter<?> param, final String configName) {
 		
 		final Object value = param.get();
+		
 		final boolean isRangeValidator = param.getValidator() instanceof RangeValidator;
 		final RangeValidator<?> validator = isRangeValidator ? (RangeValidator<?>) param.getValidator() : null;
+				
 		
 		if (value instanceof Boolean) {
 			
@@ -74,6 +84,11 @@ final class ParameterAdapter {
 			return isRangeValidator ? new SettingsModelDoubleBounded(configName, doubleVal, (Double) validator.getLower(), (Double) validator.getUpper())
 		                            : new SettingsModelDouble(configName, doubleVal);
 		}
+		if (value instanceof Path) {
+						
+			return new SettingsModelString(configName, ((Path) value).toAbsolutePath().toString());
+		}
+		
 		if (value instanceof Integer) {
 			
 			final Integer intVal = (Integer) value;
