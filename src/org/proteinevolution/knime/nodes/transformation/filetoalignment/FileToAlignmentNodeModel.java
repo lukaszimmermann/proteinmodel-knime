@@ -1,9 +1,10 @@
-package org.proteinevolution.knime.nodes.input.alignmentreader;
+package org.proteinevolution.knime.nodes.transformation.filetoalignment;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.uri.IURIPortObject;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -11,73 +12,69 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentContent;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObject;
 import org.proteinevolution.knime.porttypes.alignment.SequenceAlignmentPortObjectSpec;
 
-
 /**
- * This is the model implementation of AlignmentReader.
+ * This is the model implementation of FileToAlignment.
  * 
  *
  * @author Lukas Zimmermann
  */
-final class AlignmentReaderNodeModel extends NodeModel {
-	        
-    static SettingsModelString getInput() {
-  	
-    	return new SettingsModelString("INPUT_CFGKEY", "");
-    }
-    private final SettingsModelString input = getInput();
+public class FileToAlignmentNodeModel extends NodeModel {
     
     /**
      * Constructor for the node model.
      */
-    protected AlignmentReaderNodeModel() {
-                	
-        super(new PortType[] {},
-              new PortType[] {SequenceAlignmentPortObject.TYPE});
+    protected FileToAlignmentNodeModel() {
+  
+    	 super(new PortType[] {IURIPortObject.TYPE},
+               new PortType[] {SequenceAlignmentPortObject.TYPE});
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected SequenceAlignmentPortObject[] execute(final PortObject[] inData,
+    protected PortObject[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
-    
-    	// TODO Currently, only reading FASTA is supported
-    	final SequenceAlignmentContent sequenceAlignment = SequenceAlignmentContent.fromFASTA(this.input.getStringValue());    	
-        return new SequenceAlignmentPortObject[] {
-        		
-        	new SequenceAlignmentPortObject(
-        			sequenceAlignment,
-        			new SequenceAlignmentPortObjectSpec(
-        					SequenceAlignmentContent.TYPE,
-        					sequenceAlignment.getAlignmentFormat()))	
-        };
+    	
+    	final SequenceAlignmentContent sequenceAlignmentOut = SequenceAlignmentContent.fromFASTA(((IURIPortObject) inData[0])
+    			.getURIContents()
+    			.get(0)
+    			.getURI().getPath());
+		return new PortObject[]{
+				
+				new SequenceAlignmentPortObject(
+						sequenceAlignmentOut,
+						new SequenceAlignmentPortObjectSpec(
+								SequenceAlignmentContent.TYPE,
+								sequenceAlignmentOut.getAlignmentFormat()))
+		};			
     }
 
     /**
+     * {@inheritDoc}
      */
     @Override
     protected void reset() {
-    	
-       // Nothing to be done here
+        
+    	// Nothing to be done here
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
-        
-        // Nothing to be done here
-        return null;
+
+    	// TODO Check for correct input type of alignment
+        return new DataTableSpec[]{null};
     }
 
     /**
@@ -85,8 +82,8 @@ final class AlignmentReaderNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-        this.input.saveSettingsTo(settings);
+         
+    	// Nothing to be done here
     }
 
     /**
@@ -95,8 +92,8 @@ final class AlignmentReaderNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
-    	this.input.loadSettingsFrom(settings);
+        
+    	// Nothing to be done here
     }
 
     /**
@@ -105,8 +102,8 @@ final class AlignmentReaderNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
-    		this.input.validateSettings(settings);
+        
+    	// Nothing to be done here
     }
     
     /**
@@ -116,7 +113,7 @@ final class AlignmentReaderNodeModel extends NodeModel {
     protected void loadInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-    	
+       
     	// Nothing to be done here
     }
     
@@ -127,7 +124,8 @@ final class AlignmentReaderNodeModel extends NodeModel {
     protected void saveInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-    
+        
     	// Nothing to be done here
     }
 }
+

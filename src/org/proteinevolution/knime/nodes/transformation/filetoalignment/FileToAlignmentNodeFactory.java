@@ -1,23 +1,24 @@
-package org.proteinevolution.knime.nodes.input.alignmentreader;
+package org.proteinevolution.knime.nodes.transformation.filetoalignment;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "AlignmentReader" Node.
+ * <code>NodeFactory</code> for the "FileToAlignment" Node.
  * 
  *
  * @author Lukas Zimmermann
  */
-public final class AlignmentReaderNodeFactory extends NodeFactory<AlignmentReaderNodeModel> {
+public class FileToAlignmentNodeFactory 
+        extends NodeFactory<FileToAlignmentNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AlignmentReaderNodeModel createNodeModel() {
-        return new AlignmentReaderNodeModel();
+    public FileToAlignmentNodeModel createNodeModel() {
+        return new FileToAlignmentNodeModel();
     }
 
     /**
@@ -32,8 +33,8 @@ public final class AlignmentReaderNodeFactory extends NodeFactory<AlignmentReade
      * {@inheritDoc}
      */
     @Override
-    public NodeView<AlignmentReaderNodeModel> createNodeView(final int viewIndex,
-            final AlignmentReaderNodeModel nodeModel) {
+    public NodeView<FileToAlignmentNodeModel> createNodeView(final int viewIndex,
+            final FileToAlignmentNodeModel nodeModel) {
     	
         return null;
     }
@@ -43,7 +44,7 @@ public final class AlignmentReaderNodeFactory extends NodeFactory<AlignmentReade
      */
     @Override
     public boolean hasDialog() {
-        return true;
+        return false;
     }
 
     /**
@@ -51,6 +52,8 @@ public final class AlignmentReaderNodeFactory extends NodeFactory<AlignmentReade
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new AlignmentReaderNodeDialog();
+    	
+        return null;
     }
 }
+

@@ -46,6 +46,7 @@
 <node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
 <node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
 <node category-path="/community/ProteinModel/external/clustalo" factory-class="org.proteinevolution.knime.nodes.clustalomega.ClustalOmegaNodeFactory" id="org.proteinevolution.knime.nodes.clustalomega.ClustalOmegaNodeFactory"/>
+<node category-path="/" factory-class="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory"/>
 </extension>
    
    
@@ -102,11 +103,11 @@
   </mimetype> 
   
   <mimetype name="application/octet-stream">
-  <fileextension name="chk"></fileextension>
-  <fileextension name="mtx"></fileextension>
-  <fileextension name="ss"></fileextension>
-  <fileextension name="ss2"></fileextension>
-  <fileextension name="horiz"></fileextension>
+  <fileextension name="chk"/>
+  <fileextension name="mtx"/>
+  <fileextension name="ss"/>
+  <fileextension name="ss2"/>
+  <fileextension name="horiz"/>
   </mimetype> 
   </extension> 
 </plugin>
