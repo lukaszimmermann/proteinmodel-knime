@@ -26,7 +26,6 @@
 <node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.pdbdirectoryreader.PDBDirectoryReaderNodeFactory" id="org.proteinevolution.pdbdirreader.PDBDirReaderNodeFactory"/>
 <node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.crosslinkpredictor.CrossLinkPredictorNodeFactory" id="org.proteinevolution.nodes.crosslinkpredictor.CrossLinkPredictorNodeFactory"/>
 <node category-path="/community/ProteinModel/external/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhblits.HHblitsNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhblits.HHblitsNodeFactory"/>
-<node category-path="/community/ProteinModel/input" factory-class="org.proteinevolution.knime.nodes.input.alignmentreader.AlignmentReaderNodeFactory" id="org.proteinevolution.nodes.input.alignmentreader.AlignmentReaderNodeFactory"/>
 <node category-path="/community/ProteinModel/analysis" factory-class="org.proteinevolution.knime.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory" id="org.proteinevolution.nodes.analysis.alignmentinfo.AlignmentInfoNodeFactory"/>
 <node category-path="/community/ProteinModel/output" factory-class="org.proteinevolution.knime.nodes.output.alignmentwriter.AlignmentWriterNodeFactory" id="org.proteinevolution.nodes.output.alignmentwriter.AlignmentWriterNodeFactory"/>
 <node category-path="/community/ProteinModel/external/hhsuite" factory-class="org.proteinevolution.knime.nodes.hhsuite.hhsearch.HHsearchNodeFactory" id="org.proteinevolution.nodes.hhsuite.hhsearch.HHsearchNodeFactory"/>
@@ -46,7 +45,7 @@
 <node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory" id="org.proteinevolution.knime.nodes.transformation.pdbtotable.PDBToTableNodeFactory"/>
 <node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory" id="org.proteinevolution.knime.nodes.transformation.tabletopdb.TableToPDBNodeFactory"/>
 <node category-path="/community/ProteinModel/external/clustalo" factory-class="org.proteinevolution.knime.nodes.clustalomega.ClustalOmegaNodeFactory" id="org.proteinevolution.knime.nodes.clustalomega.ClustalOmegaNodeFactory"/>
-<node category-path="/" factory-class="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory"/>
+<node category-path="/community/ProteinModel/transformation" factory-class="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory" id="org.proteinevolution.knime.nodes.transformation.filetoalignment.FileToAlignmentNodeFactory"/>
 </extension>
    
    
